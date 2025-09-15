@@ -2,6 +2,9 @@
 import dataService from './dataService';
 import imageStorage from './imageStorage';
 
+// API Base URL from environment variable
+const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+
 // Employee API endpoints
 export const employeeAPI = {
   // Get all employees with optional search and filters
