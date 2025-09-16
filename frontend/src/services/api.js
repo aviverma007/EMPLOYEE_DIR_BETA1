@@ -371,22 +371,81 @@ export const taskAPI = {
   }
 };
 
-// Knowledge API endpoints
+// Knowledge API endpoints - Backend persistent
 export const knowledgeAPI = {
   getAll: async () => {
-    return await dataService.getKnowledge();
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/knowledge`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch knowledge');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching knowledge:', error);
+      throw error;
+    }
   },
 
   create: async (knowledgeData) => {
-    return await dataService.createKnowledge(knowledgeData);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/knowledge`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(knowledgeData),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to create knowledge');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating knowledge:', error);
+      throw error;
+    }
   },
 
   update: async (id, knowledgeData) => {
-    return await dataService.updateKnowledge(id, knowledgeData);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/knowledge/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(knowledgeData),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to update knowledge');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating knowledge:', error);
+      throw error;
+    }
   },
 
   delete: async (id) => {
-    return await dataService.deleteKnowledge(id);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/knowledge/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to delete knowledge');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error deleting knowledge:', error);
+      throw error;
+    }
   }
 };
 
