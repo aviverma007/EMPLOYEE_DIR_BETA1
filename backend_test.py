@@ -811,8 +811,8 @@ class BackendPersistentTester:
                 booking_data_2 = {
                     "employee_name": test_employee_2.get('name'),
                     "employee_id": test_employee_2.get('id'),
-                    "start_time": tomorrow.replace(hour=14, minute=0).isoformat() + "Z",
-                    "end_time": tomorrow.replace(hour=15, minute=0).isoformat() + "Z",
+                    "start_time": future_date.replace(hour=14, minute=0, second=0, microsecond=0).isoformat() + "Z",
+                    "end_time": future_date.replace(hour=15, minute=0, second=0, microsecond=0).isoformat() + "Z",
                     "purpose": "Cross-System Sync Test - System 2"
                 }
                 
