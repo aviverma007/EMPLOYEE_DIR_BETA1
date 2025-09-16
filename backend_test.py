@@ -719,8 +719,13 @@ class BackendPersistentTester:
                                               json=booking_data_1)
             
             if book_response_1.status_code != 200:
+                try:
+                    error_detail = book_response_1.json().get('detail', 'Unknown error')
+                except:
+                    error_detail = book_response_1.text
                 self.log_test("Cross-System Sync - BOOKING 1", False, 
-                            f"Failed to create booking from System 1: {book_response_1.status_code}")
+                            f"Failed to create booking from System 1: {book_response_1.status_code}", 
+                            f"Error: {error_detail}")
                 return
             
             booking_1 = book_response_1.json()
