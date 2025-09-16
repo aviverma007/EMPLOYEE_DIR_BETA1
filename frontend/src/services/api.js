@@ -736,24 +736,66 @@ export const alertAPI = {
   }
 };
 
-// Attendance API endpoints
+// Attendance API endpoints - Backend persistent
 export const attendanceAPI = {
   getAll: async (searchParams = {}) => {
-    return await dataService.getAttendance(searchParams);
+    try {
+      const url = new URL(`${API_BASE_URL}/api/attendance`);
+      if (searchParams.search) url.searchParams.append('search', searchParams.search);
+      
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Failed to fetch attendance');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching attendance:', error);
+      throw error;
+    }
   },
 
   create: async (attendanceData) => {
-    return await dataService.createAttendance(attendanceData);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/attendance`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(attendanceData),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to create attendance');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating attendance:', error);
+      throw error;
+    }
   },
 
   update: async (id, attendanceData) => {
-    // For frontend-only, we'll just update the existing record
-    const attendance = dataService.attendance.find(a => a.id === id);
-    if (attendance) {
-      Object.assign(attendance, attendanceData, { updated_at: new Date().toISOString() });
-      return attendance;
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/attendance/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(attendanceData),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to update attendance');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating attendance:', error);
+      throw error;
     }
-    throw new Error('Attendance record not found');
   }
 };
 
