@@ -217,18 +217,15 @@ const AppContent = () => {
                       )}
                     </TabsContent>
                     
-                    {/* Admin-only content */}
-                    {isAdmin() && (
-                      <TabsContent value="work" className="mt-0 h-full">
-                        <Work />
-                      </TabsContent>
-                    )}
+                    {/* Both Admin and User can access Work */}
+                    <TabsContent value="work" className="mt-0 h-full">
+                      <Work />
+                    </TabsContent>
                     
-                    {isAdmin() && (
-                      <TabsContent value="knowledge" className="mt-0 h-full">
-                        <Knowledge />
-                      </TabsContent>
-                    )}
+                    {/* Both Admin and User can access Knowledge */}
+                    <TabsContent value="knowledge" className="mt-0 h-full">
+                      <Knowledge />
+                    </TabsContent>
                     
                     {/* Both Admin and User can access Policies */}
                     <TabsContent value="policies" className="mt-0 h-full">
