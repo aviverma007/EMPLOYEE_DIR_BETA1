@@ -165,15 +165,7 @@ const AppContent = () => {
                         Holiday Calendar
                       </TabsTrigger>
                       
-                      {/* User-only Dashboard tab */}
-                      {!isAdmin() && (
-                        <TabsTrigger 
-                          value="dashboard" 
-                          className="text-xs sm:text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700 rounded-md px-2 sm:px-4 py-2 whitespace-nowrap"
-                        >
-                          Dashboard
-                        </TabsTrigger>
-                      )}
+                      {/* Dashboard tab removed from User profile */}
                       
                       {/* Admin-only tab */}
                       {isAdmin() && (
