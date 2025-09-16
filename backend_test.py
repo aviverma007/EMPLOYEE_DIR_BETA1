@@ -704,12 +704,13 @@ class BackendPersistentTester:
             test_employee = employees[0]
             
             # Test 2: Create booking from "System 1" (simulate first user/system)
-            tomorrow = datetime.now() + timedelta(days=1)
+            # Use a future date that's definitely in the future
+            future_date = datetime.now() + timedelta(days=2)  # 2 days from now
             booking_data_1 = {
                 "employee_name": test_employee.get('name'),
                 "employee_id": test_employee.get('id'),
-                "start_time": tomorrow.replace(hour=10, minute=0).isoformat() + "Z",
-                "end_time": tomorrow.replace(hour=11, minute=0).isoformat() + "Z",
+                "start_time": future_date.replace(hour=10, minute=0, second=0, microsecond=0).isoformat() + "Z",
+                "end_time": future_date.replace(hour=11, minute=0, second=0, microsecond=0).isoformat() + "Z",
                 "purpose": "Cross-System Sync Test - System 1"
             }
             
