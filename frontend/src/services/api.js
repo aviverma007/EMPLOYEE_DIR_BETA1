@@ -5,50 +5,72 @@ import imageStorage from './imageStorage';
 // API Base URL from environment variable
 const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
-// Employee API endpoints
+// Employee API endpoints - Backend persistent
 export const employeeAPI = {
   // Get all employees with optional search and filters
   getAll: async (searchParams = {}) => {
-    const employees = await dataService.getEmployees(searchParams);
-    
-    // Load stored images for all employees
-    const allImages = await imageStorage.getAllImages();
-    
-    // Add stored images to employee data
-    return employees.map(emp => ({
-      ...emp,
-      profileImage: allImages[emp.id] || emp.profileImage
-    }));
+    try {
+      const url = new URL(`${API_BASE_URL}/api/employees`);
+      
+      // Add search parameters to URL
+      if (searchParams.search) url.searchParams.append('search', searchParams.search);
+      if (searchParams.department) url.searchParams.append('department', searchParams.department);
+      if (searchParams.location) url.searchParams.append('location', searchParams.location);
+      
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Failed to fetch employees');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching employees:', error);
+      throw error;
+    }
   },
 
   // Update employee profile image
   updateImage: async (employeeId, imageData) => {
-    // If it's base64 data, save to storage
-    if (typeof imageData === 'string' && imageData.startsWith('data:image/')) {
-      // Create a mock file object from base64 for storage
-      const response = await fetch(imageData);
-      const blob = await response.blob();
-      const file = new File([blob], `profile_${employeeId}.jpg`, { type: blob.type });
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/employees/${employeeId}/image`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ imageUrl: imageData }),
+      });
       
-      const savedUrl = await imageStorage.saveImage(employeeId, file);
+      if (!response.ok) {
+        throw new Error('Failed to update employee image');
+      }
       
-      // Update in dataService as well
-      const updatedEmployee = await dataService.updateEmployeeImage(employeeId, savedUrl);
-      return { ...updatedEmployee, profileImage: savedUrl };
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating employee image:', error);
+      throw error;
     }
-    
-    return await dataService.updateEmployeeImage(employeeId, imageData);
   },
 
-  // Upload employee profile image file (original images)
+  // Upload employee profile image file
   uploadImage: async (employeeId, imageFile) => {
-    // Save the actual file to local storage
-    const savedUrl = await imageStorage.saveImage(employeeId, imageFile);
-    
-    // Also update in dataService
-    const updatedEmployee = await dataService.updateEmployeeImage(employeeId, savedUrl);
-    
-    return { ...updatedEmployee, profileImage: savedUrl };
+    try {
+      const formData = new FormData();
+      formData.append('file', imageFile);
+      
+      const response = await fetch(`${API_BASE_URL}/api/employees/${employeeId}/upload-image`, {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to upload employee image');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error uploading employee image:', error);
+      throw error;
+    }
   }
 };
 
