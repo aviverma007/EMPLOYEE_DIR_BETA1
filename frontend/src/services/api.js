@@ -74,26 +74,81 @@ export const employeeAPI = {
   }
 };
 
-// Hierarchy API endpoints
+// Hierarchy API endpoints - Backend persistent
 export const hierarchyAPI = {
   // Get all hierarchy relationships
   getAll: async () => {
-    return await dataService.getHierarchy();
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/hierarchy`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch hierarchy');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching hierarchy:', error);
+      throw error;
+    }
   },
 
   // Add new hierarchy relationship
   create: async (relationshipData) => {
-    return await dataService.createHierarchy(relationshipData);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/hierarchy`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(relationshipData),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to create hierarchy relationship');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating hierarchy:', error);
+      throw error;
+    }
   },
 
   // Remove hierarchy relationship
   remove: async (employeeId) => {
-    return await dataService.deleteHierarchy(employeeId);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/hierarchy/${employeeId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to delete hierarchy relationship');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error deleting hierarchy:', error);
+      throw error;
+    }
   },
 
   // Clear all hierarchy relationships
   clearAll: async () => {
-    return await dataService.clearAllHierarchy();
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/hierarchy/clear`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to clear hierarchy');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error clearing hierarchy:', error);
+      throw error;
+    }
   }
 };
 
