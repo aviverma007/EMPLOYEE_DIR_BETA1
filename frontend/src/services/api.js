@@ -877,27 +877,63 @@ export const policyAPI = {
   }
 };
 
-// Workflows API endpoints
+// Workflows API endpoints - Backend persistent
 export const workflowAPI = {
   getAll: async () => {
-    return await dataService.getWorkflows();
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/workflows`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch workflows');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching workflows:', error);
+      throw error;
+    }
   },
 
   create: async (workflowData) => {
-    return await dataService.createWorkflow(workflowData);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/workflows`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(workflowData),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to create workflow');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating workflow:', error);
+      throw error;
+    }
   },
 
   update: async (id, workflowData) => {
-    const index = dataService.workflows.findIndex(w => w.id === id);
-    if (index > -1) {
-      dataService.workflows[index] = {
-        ...dataService.workflows[index],
-        ...workflowData,
-        updated_at: new Date().toISOString()
-      };
-      return dataService.workflows[index];
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/workflows/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(workflowData),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to update workflow');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating workflow:', error);
+      throw error;
     }
-    throw new Error('Workflow not found');
   }
 };
 
