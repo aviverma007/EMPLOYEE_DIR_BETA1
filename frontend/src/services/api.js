@@ -937,23 +937,23 @@ export const workflowAPI = {
   }
 };
 
-// Chat API endpoints (simplified for frontend-only)
+// Chat API endpoints (simplified for backend mode)
 export const chatAPI = {
   getHistory: async (sessionId) => {
-    // Return empty history for frontend-only mode
+    // Return empty history for backend mode
     return [];
   },
 
   send: async (message, sessionId) => {
-    // Return a mock response for frontend-only mode
+    // Return a mock response for backend mode
     return {
-      response: "I'm sorry, the AI chat feature is currently unavailable in offline mode. Please use other features of the application.",
+      response: "I'm sorry, the AI chat feature is currently unavailable. Please use other features of the application.",
       sessionId: sessionId
     };
   },
 
   clearHistory: async (sessionId) => {
-    // No-op for frontend-only mode
+    // No-op for backend mode
     return { message: 'Chat history cleared' };
   }
 };
