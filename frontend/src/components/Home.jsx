@@ -163,12 +163,15 @@ const Home = () => {
         oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
         
         const recentJoinees = data.filter(emp => {
-          if (!emp.dateOfJoining) return false;
-          const joinDate = new Date(emp.dateOfJoining);
+          if (!emp.date_of_joining && !emp.dateOfJoining) return false;
+          const joinDate = new Date(emp.date_of_joining || emp.dateOfJoining);
           return joinDate >= oneMonthAgo;
-        }).sort((a, b) => new Date(b.dateOfJoining) - new Date(a.dateOfJoining));
+        }).sort((a, b) => new Date(b.date_of_joining || b.dateOfJoining) - new Date(a.date_of_joining || a.dateOfJoining));
         
-        setEmployees(recentJoinees.slice(0, 15)); // Show latest 15 employees
+        // If no recent joinees, show latest 10 employees as fallback
+        const employeesToShow = recentJoinees.length > 0 ? recentJoinees : data.slice(0, 10);
+        
+        setEmployees(employeesToShow.slice(0, 15)); // Show latest 15 employees
       } catch (error) {
         console.error('Error fetching employees:', error);
         // Fallback data for demonstration
