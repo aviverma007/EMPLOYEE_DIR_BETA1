@@ -1062,7 +1062,13 @@ class BackendPersistentTester:
         
         # Meeting rooms and alerts
         self.test_meeting_rooms_api()
-        self.test_alerts_api()
+        
+        # COMPREHENSIVE TESTING FOR REVIEW REQUEST
+        print("\n🔍 COMPREHENSIVE TESTING FOR REVIEW REQUEST")
+        print("-" * 50)
+        self.test_alerts_system_comprehensive()
+        self.test_meeting_room_cross_system_sync()
+        self.test_user_profile_functionality()
         
         # Clean up test data
         self.cleanup_test_data()
