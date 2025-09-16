@@ -215,22 +215,81 @@ export const utilityAPI = {
   }
 };
 
-// News API endpoints
+// News API endpoints - Backend persistent
 export const newsAPI = {
   getAll: async () => {
-    return await dataService.getNews();
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/news`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch news');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching news:', error);
+      throw error;
+    }
   },
 
   create: async (newsData) => {
-    return await dataService.createNews(newsData);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/news`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newsData),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to create news');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating news:', error);
+      throw error;
+    }
   },
 
   update: async (id, newsData) => {
-    return await dataService.updateNews(id, newsData);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/news/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newsData),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to update news');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating news:', error);
+      throw error;
+    }
   },
 
   delete: async (id) => {
-    return await dataService.deleteNews(id);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/news/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to delete news');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error deleting news:', error);
+      throw error;
+    }
   }
 };
 
