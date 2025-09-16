@@ -677,6 +677,11 @@ class BackendPersistentTester:
     def test_meeting_room_cross_system_sync(self):
         """Test 14: Meeting Room Booking Cross-System Synchronization"""
         try:
+            # Clear all existing bookings first to avoid conflicts
+            clear_response = self.session.delete(f"{self.backend_url}/api/meeting-rooms/clear-all-bookings")
+            if clear_response.status_code == 200:
+                self.log_test("Cross-System Sync - CLEANUP", True, "Cleared all existing bookings for clean test")
+            
             # Test 1: Get available meeting rooms
             rooms_response = self.session.get(f"{self.backend_url}/api/meeting-rooms")
             if rooms_response.status_code != 200:
