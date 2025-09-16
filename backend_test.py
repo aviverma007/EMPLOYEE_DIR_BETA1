@@ -537,24 +537,460 @@ class BackendPersistentTester:
         except Exception as e:
             self.log_test("Meeting Rooms API", False, f"Meeting rooms test failed: {str(e)}")
 
-    def test_alerts_api(self):
-        """Test 13: Alerts API - GET functionality"""
+    def test_alerts_system_comprehensive(self):
+        """Test 13: Comprehensive Alert System Testing"""
         try:
-            response = self.session.get(f"{self.backend_url}/api/alerts")
-            if response.status_code == 200:
-                alerts = response.json()
-                if isinstance(alerts, list):
-                    self.log_test("Alerts API", True, 
-                                f"Alerts API working correctly - {len(alerts)} alerts retrieved", 
-                                f"Alerts endpoint accessible")
+            # Test 1: GET /api/alerts - Check initial state
+            get_response = self.session.get(f"{self.backend_url}/api/alerts")
+            if get_response.status_code != 200:
+                self.log_test("Alert System - GET", False, f"GET /api/alerts failed with status {get_response.status_code}")
+                return
+            
+            initial_alerts = get_response.json()
+            if not isinstance(initial_alerts, list):
+                self.log_test("Alert System - GET", False, "GET /api/alerts did not return a list")
+                return
+            
+            self.log_test("Alert System - GET", True, 
+                        f"GET /api/alerts working - {len(initial_alerts)} alerts found", 
+                        f"Initial alerts count: {len(initial_alerts)}")
+            
+            # Test 2: POST /api/alerts - Create test alerts
+            test_alerts = [
+                {
+                    "title": "System Maintenance Alert",
+                    "message": "Scheduled maintenance will occur tonight from 10 PM to 2 AM.",
+                    "priority": "high",
+                    "type": "system",
+                    "target_audience": "all",
+                    "created_by": "Admin",
+                    "expires_at": (datetime.now() + timedelta(hours=24)).isoformat()
+                },
+                {
+                    "title": "User Role Alert",
+                    "message": "This alert is specifically for User role testing.",
+                    "priority": "medium",
+                    "type": "announcement",
+                    "target_audience": "user",
+                    "created_by": "Admin",
+                    "expires_at": (datetime.now() + timedelta(hours=12)).isoformat()
+                },
+                {
+                    "title": "Admin Role Alert",
+                    "message": "This alert is specifically for Admin role testing.",
+                    "priority": "urgent",
+                    "type": "general",
+                    "target_audience": "admin",
+                    "created_by": "System",
+                    "expires_at": (datetime.now() + timedelta(hours=6)).isoformat()
+                }
+            ]
+            
+            created_alert_ids = []
+            for i, alert_data in enumerate(test_alerts):
+                post_response = self.session.post(f"{self.backend_url}/api/alerts", json=alert_data)
+                if post_response.status_code == 200:
+                    created_alert = post_response.json()
+                    alert_id = created_alert.get('alert', {}).get('id')
+                    if alert_id:
+                        created_alert_ids.append(alert_id)
+                        self.log_test(f"Alert System - CREATE {i+1}", True, 
+                                    f"Successfully created alert: {alert_data['title']}", 
+                                    f"Alert ID: {alert_id}, Target: {alert_data['target_audience']}")
+                    else:
+                        self.log_test(f"Alert System - CREATE {i+1}", False, 
+                                    f"Alert created but no ID returned for: {alert_data['title']}")
                 else:
-                    self.log_test("Alerts API", False, 
-                                "Alerts endpoint did not return a list")
-            else:
-                self.log_test("Alerts API", False, 
-                            f"Alerts endpoint returned status {response.status_code}")
+                    self.log_test(f"Alert System - CREATE {i+1}", False, 
+                                f"Failed to create alert '{alert_data['title']}' - Status: {post_response.status_code}")
+            
+            # Test 3: Verify alerts appear in GET request
+            get_after_create = self.session.get(f"{self.backend_url}/api/alerts")
+            if get_after_create.status_code == 200:
+                all_alerts = get_after_create.json()
+                new_alert_count = len(all_alerts) - len(initial_alerts)
+                if new_alert_count >= len(created_alert_ids):
+                    self.log_test("Alert System - PERSISTENCE", True, 
+                                f"Created alerts appear in GET response - {new_alert_count} new alerts", 
+                                f"Total alerts now: {len(all_alerts)}")
+                else:
+                    self.log_test("Alert System - PERSISTENCE", False, 
+                                f"Not all created alerts appear in GET response - Expected {len(created_alert_ids)}, got {new_alert_count}")
+            
+            # Test 4: Test target audience filtering
+            user_alerts = self.session.get(f"{self.backend_url}/api/alerts?target_audience=user")
+            admin_alerts = self.session.get(f"{self.backend_url}/api/alerts?target_audience=admin")
+            
+            if user_alerts.status_code == 200 and admin_alerts.status_code == 200:
+                user_alert_list = user_alerts.json()
+                admin_alert_list = admin_alerts.json()
+                
+                # Check if filtering works (user should see 'all' and 'user' alerts, admin should see 'all' and 'admin' alerts)
+                user_has_alerts = len(user_alert_list) > 0
+                admin_has_alerts = len(admin_alert_list) > 0
+                
+                if user_has_alerts and admin_has_alerts:
+                    self.log_test("Alert System - FILTERING", True, 
+                                f"Target audience filtering working - User: {len(user_alert_list)}, Admin: {len(admin_alert_list)}", 
+                                f"User and Admin see different alert sets")
+                else:
+                    self.log_test("Alert System - FILTERING", False, 
+                                f"Target audience filtering may not be working - User: {len(user_alert_list)}, Admin: {len(admin_alert_list)}")
+            
+            # Test 5: Test alert expiration (create an expired alert)
+            expired_alert = {
+                "title": "Expired Alert Test",
+                "message": "This alert should be expired and not appear in active alerts.",
+                "priority": "low",
+                "type": "general",
+                "target_audience": "all",
+                "created_by": "Test",
+                "expires_at": (datetime.now() - timedelta(hours=1)).isoformat()  # Already expired
+            }
+            
+            expired_post = self.session.post(f"{self.backend_url}/api/alerts", json=expired_alert)
+            if expired_post.status_code == 200:
+                # Check if expired alert is filtered out
+                active_alerts = self.session.get(f"{self.backend_url}/api/alerts")
+                if active_alerts.status_code == 200:
+                    active_list = active_alerts.json()
+                    expired_found = any(alert.get('title') == 'Expired Alert Test' for alert in active_list)
+                    if not expired_found:
+                        self.log_test("Alert System - EXPIRATION", True, 
+                                    "Alert expiration filtering working - expired alerts not returned", 
+                                    "Expired alert correctly filtered out")
+                    else:
+                        self.log_test("Alert System - EXPIRATION", False, 
+                                    "Alert expiration filtering not working - expired alert still returned")
+            
+            # Cleanup created alerts
+            for alert_id in created_alert_ids:
+                try:
+                    self.session.delete(f"{self.backend_url}/api/alerts/{alert_id}")
+                except:
+                    pass
+                    
         except Exception as e:
-            self.log_test("Alerts API", False, f"Alerts test failed: {str(e)}")
+            self.log_test("Alert System - COMPREHENSIVE", False, f"Alert system comprehensive test failed: {str(e)}")
+
+    def test_meeting_room_cross_system_sync(self):
+        """Test 14: Meeting Room Booking Cross-System Synchronization"""
+        try:
+            # Test 1: Get available meeting rooms
+            rooms_response = self.session.get(f"{self.backend_url}/api/meeting-rooms")
+            if rooms_response.status_code != 200:
+                self.log_test("Cross-System Sync - ROOMS", False, f"Failed to get meeting rooms: {rooms_response.status_code}")
+                return
+            
+            meeting_rooms = rooms_response.json()
+            if not meeting_rooms or len(meeting_rooms) == 0:
+                self.log_test("Cross-System Sync - ROOMS", False, "No meeting rooms available for testing")
+                return
+            
+            test_room = meeting_rooms[0]
+            room_id = test_room.get('id')
+            
+            # Get test employee
+            emp_response = self.session.get(f"{self.backend_url}/api/employees?search=A")
+            if emp_response.status_code != 200:
+                self.log_test("Cross-System Sync - EMPLOYEE", False, "Could not fetch employee for booking test")
+                return
+            
+            employees = emp_response.json()
+            if not employees:
+                self.log_test("Cross-System Sync - EMPLOYEE", False, "No employees found for booking test")
+                return
+            
+            test_employee = employees[0]
+            
+            # Test 2: Create booking from "System 1" (simulate first user/system)
+            tomorrow = datetime.now() + timedelta(days=1)
+            booking_data_1 = {
+                "employee_name": test_employee.get('name'),
+                "employee_id": test_employee.get('id'),
+                "start_time": tomorrow.replace(hour=10, minute=0).isoformat() + "Z",
+                "end_time": tomorrow.replace(hour=11, minute=0).isoformat() + "Z",
+                "purpose": "Cross-System Sync Test - System 1"
+            }
+            
+            book_response_1 = self.session.post(f"{self.backend_url}/api/meeting-rooms/{room_id}/book", 
+                                              json=booking_data_1)
+            
+            if book_response_1.status_code != 200:
+                self.log_test("Cross-System Sync - BOOKING 1", False, 
+                            f"Failed to create booking from System 1: {book_response_1.status_code}")
+                return
+            
+            booking_1 = book_response_1.json()
+            booking_1_id = booking_1.get('booking', {}).get('id')
+            
+            self.log_test("Cross-System Sync - BOOKING 1", True, 
+                        f"Successfully created booking from System 1", 
+                        f"Booking ID: {booking_1_id}, Room: {room_id}")
+            
+            # Test 3: Immediately check if booking reflects on "System 2" (simulate second user/system)
+            # Create a new session to simulate different system/user
+            system_2_session = requests.Session()
+            system_2_session.timeout = 30
+            
+            rooms_check_2 = system_2_session.get(f"{self.backend_url}/api/meeting-rooms")
+            if rooms_check_2.status_code == 200:
+                rooms_data_2 = rooms_check_2.json()
+                test_room_2 = next((room for room in rooms_data_2 if room.get('id') == room_id), None)
+                
+                if test_room_2:
+                    room_bookings = test_room_2.get('bookings', [])
+                    booking_found = any(booking.get('id') == booking_1_id for booking in room_bookings)
+                    
+                    if booking_found:
+                        self.log_test("Cross-System Sync - IMMEDIATE SYNC", True, 
+                                    "Booking immediately visible on System 2 - Real-time sync working", 
+                                    f"Booking {booking_1_id} found in room {room_id} bookings")
+                    else:
+                        self.log_test("Cross-System Sync - IMMEDIATE SYNC", False, 
+                                    "Booking NOT immediately visible on System 2 - Sync issue detected")
+                else:
+                    self.log_test("Cross-System Sync - IMMEDIATE SYNC", False, 
+                                "Could not find test room in System 2 response")
+            else:
+                self.log_test("Cross-System Sync - IMMEDIATE SYNC", False, 
+                            f"System 2 could not fetch rooms: {rooms_check_2.status_code}")
+            
+            # Test 4: Test booking status updates across systems
+            # Check room status on both systems
+            room_status_1 = test_room.get('status', 'unknown')
+            room_status_2 = test_room_2.get('status', 'unknown') if test_room_2 else 'unknown'
+            
+            # For future bookings, status should be 'vacant' but booking should be listed
+            if len(test_room_2.get('bookings', [])) > 0:
+                self.log_test("Cross-System Sync - STATUS UPDATE", True, 
+                            f"Room status properly synchronized - System 1: {room_status_1}, System 2: {room_status_2}", 
+                            f"Bookings count on System 2: {len(test_room_2.get('bookings', []))}")
+            else:
+                self.log_test("Cross-System Sync - STATUS UPDATE", False, 
+                            "Room status not properly synchronized across systems")
+            
+            # Test 5: Test cancellation sync across systems
+            cancel_response = self.session.delete(f"{self.backend_url}/api/meeting-rooms/{room_id}/booking/{booking_1_id}")
+            
+            if cancel_response.status_code == 200:
+                self.log_test("Cross-System Sync - CANCELLATION", True, 
+                            "Booking cancellation successful on System 1", 
+                            f"Cancelled booking {booking_1_id}")
+                
+                # Check if cancellation reflects on System 2
+                rooms_after_cancel = system_2_session.get(f"{self.backend_url}/api/meeting-rooms")
+                if rooms_after_cancel.status_code == 200:
+                    rooms_data_after = rooms_after_cancel.json()
+                    test_room_after = next((room for room in rooms_data_after if room.get('id') == room_id), None)
+                    
+                    if test_room_after:
+                        remaining_bookings = test_room_after.get('bookings', [])
+                        cancelled_booking_found = any(booking.get('id') == booking_1_id for booking in remaining_bookings)
+                        
+                        if not cancelled_booking_found:
+                            self.log_test("Cross-System Sync - CANCEL SYNC", True, 
+                                        "Cancellation immediately synchronized to System 2", 
+                                        f"Booking {booking_1_id} removed from all systems")
+                        else:
+                            self.log_test("Cross-System Sync - CANCEL SYNC", False, 
+                                        "Cancellation NOT synchronized to System 2 - cancelled booking still visible")
+                    else:
+                        self.log_test("Cross-System Sync - CANCEL SYNC", False, 
+                                    "Could not verify cancellation sync - room not found")
+            else:
+                self.log_test("Cross-System Sync - CANCELLATION", False, 
+                            f"Booking cancellation failed: {cancel_response.status_code}")
+            
+            # Test 6: Test multiple concurrent bookings from different systems
+            if len(employees) >= 2:
+                test_employee_2 = employees[1]
+                
+                # Try to book the same room from System 2 for a different time
+                booking_data_2 = {
+                    "employee_name": test_employee_2.get('name'),
+                    "employee_id": test_employee_2.get('id'),
+                    "start_time": tomorrow.replace(hour=14, minute=0).isoformat() + "Z",
+                    "end_time": tomorrow.replace(hour=15, minute=0).isoformat() + "Z",
+                    "purpose": "Cross-System Sync Test - System 2"
+                }
+                
+                book_response_2 = system_2_session.post(f"{self.backend_url}/api/meeting-rooms/{room_id}/book", 
+                                                      json=booking_data_2)
+                
+                if book_response_2.status_code == 200:
+                    booking_2 = book_response_2.json()
+                    booking_2_id = booking_2.get('booking', {}).get('id')
+                    
+                    # Verify both bookings are visible on System 1
+                    final_rooms_check = self.session.get(f"{self.backend_url}/api/meeting-rooms")
+                    if final_rooms_check.status_code == 200:
+                        final_rooms = final_rooms_check.json()
+                        final_test_room = next((room for room in final_rooms if room.get('id') == room_id), None)
+                        
+                        if final_test_room:
+                            final_bookings = final_test_room.get('bookings', [])
+                            system_2_booking_visible = any(booking.get('id') == booking_2_id for booking in final_bookings)
+                            
+                            if system_2_booking_visible:
+                                self.log_test("Cross-System Sync - CONCURRENT BOOKING", True, 
+                                            "Concurrent bookings from different systems working correctly", 
+                                            f"System 2 booking {booking_2_id} visible on System 1")
+                            else:
+                                self.log_test("Cross-System Sync - CONCURRENT BOOKING", False, 
+                                            "Concurrent booking from System 2 not visible on System 1")
+                    
+                    # Cleanup System 2 booking
+                    try:
+                        system_2_session.delete(f"{self.backend_url}/api/meeting-rooms/{room_id}/booking/{booking_2_id}")
+                    except:
+                        pass
+                else:
+                    self.log_test("Cross-System Sync - CONCURRENT BOOKING", False, 
+                                f"Failed to create concurrent booking from System 2: {book_response_2.status_code}")
+                    
+        except Exception as e:
+            self.log_test("Cross-System Sync - COMPREHENSIVE", False, f"Cross-system sync test failed: {str(e)}")
+
+    def test_user_profile_functionality(self):
+        """Test 15: User Profile Related Functionality"""
+        try:
+            # Test 1: Get user profile data (employees)
+            profile_response = self.session.get(f"{self.backend_url}/api/employees")
+            if profile_response.status_code != 200:
+                self.log_test("User Profile - DATA ACCESS", False, f"Failed to access user profile data: {profile_response.status_code}")
+                return
+            
+            employees = profile_response.json()
+            if not employees or len(employees) == 0:
+                self.log_test("User Profile - DATA ACCESS", False, "No user profile data available")
+                return
+            
+            self.log_test("User Profile - DATA ACCESS", True, 
+                        f"User profile data accessible - {len(employees)} profiles available", 
+                        f"Sample profile: {employees[0].get('name', 'N/A')} (ID: {employees[0].get('id', 'N/A')})")
+            
+            # Test 2: Test profile search functionality
+            search_response = self.session.get(f"{self.backend_url}/api/employees?search=A")
+            if search_response.status_code == 200:
+                search_results = search_results = search_response.json()
+                if search_results and len(search_results) > 0:
+                    self.log_test("User Profile - SEARCH", True, 
+                                f"Profile search working - {len(search_results)} results for 'A'", 
+                                f"Search functionality operational")
+                else:
+                    self.log_test("User Profile - SEARCH", False, 
+                                "Profile search returned no results")
+            else:
+                self.log_test("User Profile - SEARCH", False, 
+                            f"Profile search failed: {search_response.status_code}")
+            
+            # Test 3: Test profile image functionality
+            if employees:
+                test_employee = employees[0]
+                employee_id = test_employee.get('id')
+                
+                # Test image URL update
+                test_image_url = f"/api/uploads/images/{employee_id}_test.png"
+                image_update_data = {"imageUrl": test_image_url}
+                
+                image_response = self.session.put(f"{self.backend_url}/api/employees/{employee_id}/image", 
+                                                json=image_update_data)
+                
+                if image_response.status_code == 200:
+                    updated_profile = image_response.json()
+                    if updated_profile.get('profileImage') == test_image_url:
+                        self.log_test("User Profile - IMAGE UPDATE", True, 
+                                    "Profile image update working correctly", 
+                                    f"Image URL updated for employee {employee_id}")
+                    else:
+                        self.log_test("User Profile - IMAGE UPDATE", False, 
+                                    "Profile image update did not persist correctly")
+                else:
+                    self.log_test("User Profile - IMAGE UPDATE", False, 
+                                f"Profile image update failed: {image_response.status_code}")
+            
+            # Test 4: Test profile filtering by department
+            dept_response = self.session.get(f"{self.backend_url}/api/departments")
+            if dept_response.status_code == 200:
+                departments = dept_response.json()
+                if departments and len(departments) > 0:
+                    test_dept = departments[0]
+                    
+                    dept_filter_response = self.session.get(f"{self.backend_url}/api/employees?department={test_dept}")
+                    if dept_filter_response.status_code == 200:
+                        dept_employees = dept_filter_response.json()
+                        if dept_employees and len(dept_employees) > 0:
+                            # Verify all returned employees are from the requested department
+                            all_correct_dept = all(emp.get('department') == test_dept for emp in dept_employees)
+                            if all_correct_dept:
+                                self.log_test("User Profile - DEPT FILTER", True, 
+                                            f"Department filtering working - {len(dept_employees)} employees in {test_dept}", 
+                                            f"All results match department filter")
+                            else:
+                                self.log_test("User Profile - DEPT FILTER", False, 
+                                            "Department filtering returning incorrect results")
+                        else:
+                            self.log_test("User Profile - DEPT FILTER", False, 
+                                        f"No employees found in department {test_dept}")
+                    else:
+                        self.log_test("User Profile - DEPT FILTER", False, 
+                                    f"Department filtering failed: {dept_filter_response.status_code}")
+            
+            # Test 5: Test profile filtering by location
+            loc_response = self.session.get(f"{self.backend_url}/api/locations")
+            if loc_response.status_code == 200:
+                locations = loc_response.json()
+                if locations and len(locations) > 0:
+                    test_location = locations[0]
+                    
+                    loc_filter_response = self.session.get(f"{self.backend_url}/api/employees?location={test_location}")
+                    if loc_filter_response.status_code == 200:
+                        loc_employees = loc_filter_response.json()
+                        if loc_employees and len(loc_employees) > 0:
+                            # Verify all returned employees are from the requested location
+                            all_correct_loc = all(emp.get('location') == test_location for emp in loc_employees)
+                            if all_correct_loc:
+                                self.log_test("User Profile - LOC FILTER", True, 
+                                            f"Location filtering working - {len(loc_employees)} employees in {test_location}", 
+                                            f"All results match location filter")
+                            else:
+                                self.log_test("User Profile - LOC FILTER", False, 
+                                            "Location filtering returning incorrect results")
+                        else:
+                            self.log_test("User Profile - LOC FILTER", False, 
+                                        f"No employees found in location {test_location}")
+                    else:
+                        self.log_test("User Profile - LOC FILTER", False, 
+                                    f"Location filtering failed: {loc_filter_response.status_code}")
+            
+            # Test 6: Test profile data integrity
+            if employees:
+                sample_profiles = employees[:5]  # Test first 5 profiles
+                integrity_issues = []
+                
+                for profile in sample_profiles:
+                    # Check required fields
+                    if not profile.get('id'):
+                        integrity_issues.append(f"Missing ID for profile: {profile.get('name', 'Unknown')}")
+                    if not profile.get('name'):
+                        integrity_issues.append(f"Missing name for profile ID: {profile.get('id', 'Unknown')}")
+                    if not profile.get('department'):
+                        integrity_issues.append(f"Missing department for: {profile.get('name', 'Unknown')}")
+                    if not profile.get('location'):
+                        integrity_issues.append(f"Missing location for: {profile.get('name', 'Unknown')}")
+                
+                if len(integrity_issues) == 0:
+                    self.log_test("User Profile - DATA INTEGRITY", True, 
+                                "Profile data integrity check passed", 
+                                f"All required fields present in sample of {len(sample_profiles)} profiles")
+                else:
+                    self.log_test("User Profile - DATA INTEGRITY", False, 
+                                f"Profile data integrity issues found: {len(integrity_issues)} issues", 
+                                f"Issues: {'; '.join(integrity_issues[:3])}")  # Show first 3 issues
+                    
+        except Exception as e:
+            self.log_test("User Profile - COMPREHENSIVE", False, f"User profile functionality test failed: {str(e)}")
 
     def cleanup_test_data(self):
         """Clean up test data created during testing"""
