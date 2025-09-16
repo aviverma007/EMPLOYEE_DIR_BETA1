@@ -499,7 +499,7 @@ class BackendPersistentTester:
                             test_employee = employees[0]
                             
                             # Test POST /api/meeting-rooms/{id}/book
-                            future_date = datetime.now() + timedelta(days=2)  # 2 days from now
+                            future_date = datetime.now() + timedelta(days=7)  # 1 week from now
                             booking_data = {
                                 "employee_name": test_employee.get('name'),
                                 "employee_id": test_employee.get('id'),
