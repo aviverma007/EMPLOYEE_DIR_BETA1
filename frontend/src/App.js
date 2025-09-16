@@ -112,21 +112,24 @@ const AppContent = () => {
                         </TabsTrigger>
                       )}
                       
-                      {/* Both Admin and User get Work */}
-                      <TabsTrigger 
-                        value="work" 
-                        className="text-xs sm:text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700 rounded-md px-2 sm:px-4 py-2 whitespace-nowrap"
-                      >
-                        Work
-                      </TabsTrigger>
+                      {/* Admin-only tabs */}
+                      {isAdmin() && (
+                        <TabsTrigger 
+                          value="work" 
+                          className="text-xs sm:text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700 rounded-md px-2 sm:px-4 py-2 whitespace-nowrap"
+                        >
+                          Work
+                        </TabsTrigger>
+                      )}
                       
-                      {/* Both Admin and User get Knowledge */}
-                      <TabsTrigger 
-                        value="knowledge" 
-                        className="text-xs sm:text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700 rounded-md px-2 sm:px-4 py-2 whitespace-nowrap"
-                      >
-                        Knowledge
-                      </TabsTrigger>
+                      {isAdmin() && (
+                        <TabsTrigger 
+                          value="knowledge" 
+                          className="text-xs sm:text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700 rounded-md px-2 sm:px-4 py-2 whitespace-nowrap"
+                        >
+                          Knowledge
+                        </TabsTrigger>
+                      )}
                       
                       {/* Both Admin and User get Policies */}
                       <TabsTrigger 
