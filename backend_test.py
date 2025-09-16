@@ -705,8 +705,8 @@ class BackendPersistentTester:
             test_employee = employees[0]
             
             # Test 2: Create booking from "System 1" (simulate first user/system)
-            # Use a future date that's definitely in the future
-            future_date = datetime.now() + timedelta(days=2)  # 2 days from now
+            # Use a future date that's definitely in the future (add more days to be safe)
+            future_date = datetime.now() + timedelta(days=7)  # 1 week from now
             booking_data_1 = {
                 "employee_name": test_employee.get('name'),
                 "employee_id": test_employee.get('id'),
