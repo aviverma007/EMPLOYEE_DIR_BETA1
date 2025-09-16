@@ -269,10 +269,12 @@ const AppContent = () => {
                       </TabsContent>
                     )}
                     
-                    {/* Both Admin and User can access Help */}
-                    <TabsContent value="help" className="mt-0 h-full">
-                      <Help />
-                    </TabsContent>
+                    {/* Admin-only Help */}
+                    {isAdmin() && (
+                      <TabsContent value="help" className="mt-0 h-full">
+                        <Help />
+                      </TabsContent>
+                    )}
                     
                     {/* Admin-only Alerts Management */}
                     {isAdmin() && (
