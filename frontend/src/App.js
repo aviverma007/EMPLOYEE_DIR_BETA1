@@ -247,12 +247,7 @@ const AppContent = () => {
                       <HolidayCalendar />
                     </TabsContent>
                     
-                    {/* User-only Dashboard */}
-                    {!isAdmin() && (
-                      <TabsContent value="dashboard" className="mt-0 h-full">
-                        <Dashboard />
-                      </TabsContent>
-                    )}
+                    {/* Dashboard content removed from User profile */}
                     
                     {/* Admin-only content */}
                     {isAdmin() && (
