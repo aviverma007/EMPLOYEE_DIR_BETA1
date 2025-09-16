@@ -42,6 +42,15 @@ except Exception as e:
 meeting_rooms_collection = db.meeting_rooms if db is not None else None
 bookings_collection = db.bookings if db is not None else None
 alerts_collection = db.alerts if db is not None else None
+employees_collection = db.employees if db is not None else None
+news_collection = db.news if db is not None else None
+tasks_collection = db.tasks if db is not None else None
+knowledge_collection = db.knowledge if db is not None else None
+help_collection = db.help if db is not None else None
+attendance_collection = db.attendance if db is not None else None
+policies_collection = db.policies if db is not None else None
+workflows_collection = db.workflows if db is not None else None
+hierarchy_collection = db.hierarchy if db is not None else None
 
 # Data Models
 class MeetingRoomBooking(BaseModel):
