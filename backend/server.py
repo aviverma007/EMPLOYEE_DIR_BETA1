@@ -77,6 +77,135 @@ class AlertUpdate(BaseModel):
     target_audience: Optional[str] = None
     expires_at: Optional[str] = None
 
+# Additional Data Models for Complete Backend Implementation
+class Employee(BaseModel):
+    id: str
+    name: str
+    department: str
+    location: str
+    grade: Optional[str] = None
+    mobile: Optional[str] = None
+    email: Optional[str] = None
+    profileImage: Optional[str] = None
+
+class EmployeeUpdate(BaseModel):
+    name: Optional[str] = None
+    department: Optional[str] = None
+    location: Optional[str] = None
+    grade: Optional[str] = None
+    mobile: Optional[str] = None
+    email: Optional[str] = None
+    profileImage: Optional[str] = None
+
+class News(BaseModel):
+    title: str
+    content: str
+    priority: str = "normal"  # normal, medium, high
+    author: str
+
+class NewsUpdate(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+    priority: Optional[str] = None
+    author: Optional[str] = None
+
+class Task(BaseModel):
+    title: str
+    description: str
+    assigned_to: str  # employee ID
+    priority: str = "medium"  # low, medium, high
+    status: str = "pending"  # pending, in_progress, completed
+    due_date: Optional[str] = None
+
+class TaskUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    assigned_to: Optional[str] = None
+    priority: Optional[str] = None
+    status: Optional[str] = None
+    due_date: Optional[str] = None
+
+class Knowledge(BaseModel):
+    title: str
+    content: str
+    category: str = "other"  # policy, process, training, announcement, guideline, other
+    tags: List[str] = []
+    author: str
+
+class KnowledgeUpdate(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+    category: Optional[str] = None
+    tags: Optional[List[str]] = None
+    author: Optional[str] = None
+
+class Help(BaseModel):
+    title: str
+    message: str
+    priority: str = "medium"  # low, medium, high
+    status: str = "open"  # open, in_progress, resolved
+    author: str
+
+class HelpUpdate(BaseModel):
+    title: Optional[str] = None
+    message: Optional[str] = None
+    priority: Optional[str] = None
+    status: Optional[str] = None
+
+class HelpReply(BaseModel):
+    message: str
+    author: str
+
+class Attendance(BaseModel):
+    employee_id: str
+    employee_name: str
+    date: str
+    punch_in: Optional[str] = None
+    punch_out: Optional[str] = None
+    status: str = "present"  # present, absent, half_day, late
+    location: str = "office"  # office, remote, field
+    total_hours: Optional[float] = None
+
+class AttendanceUpdate(BaseModel):
+    punch_out: Optional[str] = None
+    status: Optional[str] = None
+    total_hours: Optional[float] = None
+
+class Policy(BaseModel):
+    title: str
+    content: str
+    category: str = "other"  # hr, it, admin, other
+    version: str = "1.0"
+    effective_date: str
+    author: str
+
+class PolicyUpdate(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+    category: Optional[str] = None
+    version: Optional[str] = None
+    effective_date: Optional[str] = None
+
+class Workflow(BaseModel):
+    title: str
+    description: str
+    steps: List[Dict[str, Any]] = []
+    status: str = "active"  # active, inactive, completed
+    category: str = "general"
+    assigned_employees: List[str] = []
+
+class WorkflowUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    steps: Optional[List[Dict[str, Any]]] = None
+    status: Optional[str] = None
+    category: Optional[str] = None
+    assigned_employees: Optional[List[str]] = None
+
+class Hierarchy(BaseModel):
+    employee_id: str
+    reports_to: str  # manager's employee_id
+
 # ============================================================================
 # HEALTH AND STATUS ENDPOINTS
 # ============================================================================
