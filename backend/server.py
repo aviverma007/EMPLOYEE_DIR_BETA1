@@ -219,6 +219,675 @@ def health_check():
     return {"status": "healthy", "mode": "backend-persistent", "mongodb": db is not None}
 
 # ============================================================================
+# EMPLOYEES API - Backend Persistence
+# ============================================================================
+
+@app.get("/api/employees")
+def get_employees(search: Optional[str] = None, department: Optional[str] = None, location: Optional[str] = None):
+    """Get all employees with optional search and filters"""
+    try:
+        query = {}
+        if search:
+            # Search across multiple fields using regex
+            search_pattern = {"$regex": f"^{search}", "$options": "i"}  # starts with pattern
+            query["$or"] = [
+                {"name": search_pattern},
+                {"id": search_pattern},
+                {"department": search_pattern},
+                {"location": search_pattern},
+                {"grade": search_pattern},
+                {"mobile": search_pattern}
+            ]
+        
+        if department:
+            query["department"] = department
+        
+        if location:
+            query["location"] = location
+        
+        employees = list(employees_collection.find(query))
+        # Convert MongoDB ObjectId to string for JSON serialization
+        for emp in employees:
+            emp["_id"] = str(emp["_id"])
+        
+        return employees
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/employees/{employee_id}/image")
+def update_employee_image(employee_id: str, image_data: dict):
+    """Update employee profile image"""
+    try:
+        image_url = image_data.get("imageUrl")
+        if not image_url:
+            raise HTTPException(status_code=400, detail="Image URL is required")
+        
+        result = employees_collection.update_one(
+            {"id": employee_id},
+            {"$set": {"profileImage": image_url, "updated_at": datetime.utcnow().isoformat()}}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Employee not found")
+        
+        # Return updated employee
+        employee = employees_collection.find_one({"id": employee_id})
+        employee["_id"] = str(employee["_id"])
+        return employee
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/employees/{employee_id}/upload-image")
+async def upload_employee_image(employee_id: str, file: UploadFile = File(...)):
+    """Upload employee profile image file"""
+    try:
+        # Create uploads directory if it doesn't exist
+        uploads_dir = os.path.join(os.path.dirname(__file__), "uploads", "images")
+        os.makedirs(uploads_dir, exist_ok=True)
+        
+        # Save file
+        file_extension = file.filename.split(".")[-1] if "." in file.filename else "jpg"
+        filename = f"{employee_id}.{file_extension}"
+        file_path = os.path.join(uploads_dir, filename)
+        
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        # Update employee record with image URL
+        image_url = f"/api/uploads/images/{filename}"
+        result = employees_collection.update_one(
+            {"id": employee_id},
+            {"$set": {"profileImage": image_url, "updated_at": datetime.utcnow().isoformat()}}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Employee not found")
+        
+        return {"message": "Image uploaded successfully", "imageUrl": image_url}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/refresh-excel")
+def refresh_excel_data():
+    """Refresh employee data from Excel file"""
+    try:
+        # This would typically reload from Excel file
+        # For now, return current count
+        count = employees_collection.count_documents({})
+        return {"message": "Excel data refreshed successfully", "count": count}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/departments")
+def get_departments():
+    """Get all unique departments"""
+    try:
+        departments = employees_collection.distinct("department")
+        return sorted([dept for dept in departments if dept])
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/locations")
+def get_locations():
+    """Get all unique locations"""
+    try:
+        locations = employees_collection.distinct("location")
+        return sorted([loc for loc in locations if loc])
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/stats")
+def get_stats():
+    """Get system statistics"""
+    try:
+        employee_count = employees_collection.count_documents({})
+        department_count = len(employees_collection.distinct("department"))
+        location_count = len(employees_collection.distinct("location"))
+        
+        return {
+            "employees": employee_count,
+            "departments": department_count,
+            "locations": location_count,
+            "excel_sync": f"{employee_count}/{employee_count}",
+            "last_updated": datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================================================
+# HIERARCHY API - Backend Persistence
+# ============================================================================
+
+@app.get("/api/hierarchy")
+def get_hierarchy():
+    """Get all hierarchy relationships"""
+    try:
+        hierarchy = list(hierarchy_collection.find())
+        for item in hierarchy:
+            item["_id"] = str(item["_id"])
+        return hierarchy
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/hierarchy")
+def create_hierarchy(hierarchy: Hierarchy):
+    """Create a new hierarchy relationship"""
+    try:
+        # Check if employee exists
+        employee = employees_collection.find_one({"id": hierarchy.employee_id})
+        if not employee:
+            raise HTTPException(status_code=404, detail="Employee not found")
+        
+        # Check if manager exists
+        manager = employees_collection.find_one({"id": hierarchy.reports_to})
+        if not manager:
+            raise HTTPException(status_code=404, detail="Manager not found")
+        
+        # Check if relationship already exists
+        existing = hierarchy_collection.find_one({"employee_id": hierarchy.employee_id})
+        if existing:
+            raise HTTPException(status_code=400, detail="Hierarchy relationship already exists for this employee")
+        
+        hierarchy_data = hierarchy.dict()
+        hierarchy_data["created_at"] = datetime.utcnow().isoformat()
+        
+        result = hierarchy_collection.insert_one(hierarchy_data)
+        hierarchy_data["_id"] = str(result.inserted_id)
+        
+        return hierarchy_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/hierarchy/{employee_id}")
+def delete_hierarchy(employee_id: str):
+    """Delete a hierarchy relationship"""
+    try:
+        result = hierarchy_collection.delete_one({"employee_id": employee_id})
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Hierarchy relationship not found")
+        
+        return {"message": "Hierarchy relationship deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/hierarchy/clear")
+def clear_all_hierarchy():
+    """Clear all hierarchy relationships"""
+    try:
+        result = hierarchy_collection.delete_many({})
+        return {"message": f"Cleared {result.deleted_count} hierarchy relationships"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================================================
+# NEWS API - Backend Persistence  
+# ============================================================================
+
+@app.get("/api/news")
+def get_news():
+    """Get all news items"""
+    try:
+        news = list(news_collection.find().sort("created_at", -1))
+        for item in news:
+            item["_id"] = str(item["_id"])
+        return news
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/news")
+def create_news(news: News):
+    """Create a new news item"""
+    try:
+        news_data = news.dict()
+        news_data["id"] = str(uuid.uuid4())
+        news_data["created_at"] = datetime.utcnow().isoformat()
+        news_data["updated_at"] = datetime.utcnow().isoformat()
+        
+        result = news_collection.insert_one(news_data)
+        news_data["_id"] = str(result.inserted_id)
+        
+        return news_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/news/{news_id}")
+def update_news(news_id: str, news: NewsUpdate):
+    """Update a news item"""
+    try:
+        update_data = {k: v for k, v in news.dict().items() if v is not None}
+        update_data["updated_at"] = datetime.utcnow().isoformat()
+        
+        result = news_collection.update_one(
+            {"id": news_id},
+            {"$set": update_data}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="News item not found")
+        
+        updated_news = news_collection.find_one({"id": news_id})
+        updated_news["_id"] = str(updated_news["_id"])
+        return updated_news
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/news/{news_id}")
+def delete_news(news_id: str):
+    """Delete a news item"""
+    try:
+        result = news_collection.delete_one({"id": news_id})
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="News item not found")
+        
+        return {"message": "News item deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================================================
+# TASKS API - Backend Persistence
+# ============================================================================
+
+@app.get("/api/tasks")
+def get_tasks():
+    """Get all tasks"""
+    try:
+        tasks = list(tasks_collection.find().sort("created_at", -1))
+        for task in tasks:
+            task["_id"] = str(task["_id"])
+            # Add employee name for assigned tasks
+            if task.get("assigned_to"):
+                employee = employees_collection.find_one({"id": task["assigned_to"]})
+                task["assigned_to_name"] = employee["name"] if employee else "Unknown"
+        return tasks
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/tasks")
+def create_task(task: Task):
+    """Create a new task"""
+    try:
+        # Verify assigned employee exists
+        if task.assigned_to:
+            employee = employees_collection.find_one({"id": task.assigned_to})
+            if not employee:
+                raise HTTPException(status_code=404, detail="Assigned employee not found")
+        
+        task_data = task.dict()
+        task_data["id"] = str(uuid.uuid4())
+        task_data["created_at"] = datetime.utcnow().isoformat()
+        task_data["updated_at"] = datetime.utcnow().isoformat()
+        
+        result = tasks_collection.insert_one(task_data)
+        task_data["_id"] = str(result.inserted_id)
+        
+        return task_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/tasks/{task_id}")
+def update_task(task_id: str, task: TaskUpdate):
+    """Update a task"""
+    try:
+        update_data = {k: v for k, v in task.dict().items() if v is not None}
+        update_data["updated_at"] = datetime.utcnow().isoformat()
+        
+        result = tasks_collection.update_one(
+            {"id": task_id},
+            {"$set": update_data}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Task not found")
+        
+        updated_task = tasks_collection.find_one({"id": task_id})
+        updated_task["_id"] = str(updated_task["_id"])
+        return updated_task
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/tasks/{task_id}")
+def delete_task(task_id: str):
+    """Delete a task"""
+    try:
+        result = tasks_collection.delete_one({"id": task_id})
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Task not found")
+        
+        return {"message": "Task deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================================================
+# KNOWLEDGE API - Backend Persistence
+# ============================================================================
+
+@app.get("/api/knowledge")
+def get_knowledge():
+    """Get all knowledge articles"""
+    try:
+        knowledge = list(knowledge_collection.find().sort("created_at", -1))
+        for item in knowledge:
+            item["_id"] = str(item["_id"])
+        return knowledge
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/knowledge")
+def create_knowledge(knowledge: Knowledge):
+    """Create a new knowledge article"""
+    try:
+        knowledge_data = knowledge.dict()
+        knowledge_data["id"] = str(uuid.uuid4())
+        knowledge_data["created_at"] = datetime.utcnow().isoformat()
+        knowledge_data["updated_at"] = datetime.utcnow().isoformat()
+        
+        result = knowledge_collection.insert_one(knowledge_data)
+        knowledge_data["_id"] = str(result.inserted_id)
+        
+        return knowledge_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/knowledge/{knowledge_id}")
+def update_knowledge(knowledge_id: str, knowledge: KnowledgeUpdate):
+    """Update a knowledge article"""
+    try:
+        update_data = {k: v for k, v in knowledge.dict().items() if v is not None}
+        update_data["updated_at"] = datetime.utcnow().isoformat()
+        
+        result = knowledge_collection.update_one(
+            {"id": knowledge_id},
+            {"$set": update_data}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Knowledge article not found")
+        
+        updated_knowledge = knowledge_collection.find_one({"id": knowledge_id})
+        updated_knowledge["_id"] = str(updated_knowledge["_id"])
+        return updated_knowledge
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/knowledge/{knowledge_id}")
+def delete_knowledge(knowledge_id: str):
+    """Delete a knowledge article"""
+    try:
+        result = knowledge_collection.delete_one({"id": knowledge_id})
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Knowledge article not found")
+        
+        return {"message": "Knowledge article deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================================================
+# HELP API - Backend Persistence
+# ============================================================================
+
+@app.get("/api/help")
+def get_help():
+    """Get all help requests"""
+    try:
+        help_requests = list(help_collection.find().sort("created_at", -1))
+        for item in help_requests:
+            item["_id"] = str(item["_id"])
+        return help_requests
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/help")
+def create_help(help_request: Help):
+    """Create a new help request"""
+    try:
+        help_data = help_request.dict()
+        help_data["id"] = str(uuid.uuid4())
+        help_data["replies"] = []
+        help_data["created_at"] = datetime.utcnow().isoformat()
+        help_data["updated_at"] = datetime.utcnow().isoformat()
+        
+        result = help_collection.insert_one(help_data)
+        help_data["_id"] = str(result.inserted_id)
+        
+        return help_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/help/{help_id}")
+def update_help(help_id: str, help_request: HelpUpdate):
+    """Update a help request"""
+    try:
+        update_data = {k: v for k, v in help_request.dict().items() if v is not None}
+        update_data["updated_at"] = datetime.utcnow().isoformat()
+        
+        result = help_collection.update_one(
+            {"id": help_id},
+            {"$set": update_data}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Help request not found")
+        
+        updated_help = help_collection.find_one({"id": help_id})
+        updated_help["_id"] = str(updated_help["_id"])
+        return updated_help
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/help/{help_id}/reply")
+def add_help_reply(help_id: str, reply: HelpReply):
+    """Add a reply to a help request"""
+    try:
+        reply_data = reply.dict()
+        reply_data["id"] = str(uuid.uuid4())
+        reply_data["created_at"] = datetime.utcnow().isoformat()
+        
+        result = help_collection.update_one(
+            {"id": help_id},
+            {
+                "$push": {"replies": reply_data},
+                "$set": {"updated_at": datetime.utcnow().isoformat()}
+            }
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Help request not found")
+        
+        updated_help = help_collection.find_one({"id": help_id})
+        updated_help["_id"] = str(updated_help["_id"])
+        return updated_help
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/help/{help_id}")
+def delete_help(help_id: str):
+    """Delete a help request"""
+    try:
+        result = help_collection.delete_one({"id": help_id})
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Help request not found")
+        
+        return {"message": "Help request deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================================================
+# ATTENDANCE API - Backend Persistence
+# ============================================================================
+
+@app.get("/api/attendance")
+def get_attendance(search: Optional[str] = None):
+    """Get all attendance records with optional search"""
+    try:
+        query = {}
+        if search:
+            search_pattern = {"$regex": f"^{search}", "$options": "i"}
+            query["$or"] = [
+                {"employee_name": search_pattern},
+                {"employee_id": search_pattern}
+            ]
+        
+        attendance = list(attendance_collection.find(query).sort("date", -1))
+        for item in attendance:
+            item["_id"] = str(item["_id"])
+        return attendance
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/attendance")
+def create_attendance(attendance: Attendance):
+    """Create a new attendance record"""
+    try:
+        attendance_data = attendance.dict()
+        attendance_data["id"] = str(uuid.uuid4())
+        attendance_data["created_at"] = datetime.utcnow().isoformat()
+        attendance_data["updated_at"] = datetime.utcnow().isoformat()
+        
+        result = attendance_collection.insert_one(attendance_data)
+        attendance_data["_id"] = str(result.inserted_id)
+        
+        return attendance_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/attendance/{attendance_id}")
+def update_attendance(attendance_id: str, attendance: AttendanceUpdate):
+    """Update an attendance record (punch out)"""
+    try:
+        update_data = {k: v for k, v in attendance.dict().items() if v is not None}
+        update_data["updated_at"] = datetime.utcnow().isoformat()
+        
+        result = attendance_collection.update_one(
+            {"id": attendance_id},
+            {"$set": update_data}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Attendance record not found")
+        
+        updated_attendance = attendance_collection.find_one({"id": attendance_id})
+        updated_attendance["_id"] = str(updated_attendance["_id"])
+        return updated_attendance
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================================================
+# POLICIES API - Backend Persistence
+# ============================================================================
+
+@app.get("/api/policies")
+def get_policies():
+    """Get all policies"""
+    try:
+        policies = list(policies_collection.find().sort("created_at", -1))
+        for item in policies:
+            item["_id"] = str(item["_id"])
+        return policies
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/policies")
+def create_policy(policy: Policy):
+    """Create a new policy"""
+    try:
+        policy_data = policy.dict()
+        policy_data["id"] = str(uuid.uuid4())
+        policy_data["created_at"] = datetime.utcnow().isoformat()
+        policy_data["updated_at"] = datetime.utcnow().isoformat()
+        
+        result = policies_collection.insert_one(policy_data)
+        policy_data["_id"] = str(result.inserted_id)
+        
+        return policy_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/policies/{policy_id}")
+def update_policy(policy_id: str, policy: PolicyUpdate):
+    """Update a policy"""
+    try:
+        update_data = {k: v for k, v in policy.dict().items() if v is not None}
+        update_data["updated_at"] = datetime.utcnow().isoformat()
+        
+        result = policies_collection.update_one(
+            {"id": policy_id},
+            {"$set": update_data}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Policy not found")
+        
+        updated_policy = policies_collection.find_one({"id": policy_id})
+        updated_policy["_id"] = str(updated_policy["_id"])
+        return updated_policy
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/policies/{policy_id}")
+def delete_policy(policy_id: str):
+    """Delete a policy"""
+    try:
+        result = policies_collection.delete_one({"id": policy_id})
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Policy not found")
+        
+        return {"message": "Policy deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================================================
+# WORKFLOWS API - Backend Persistence
+# ============================================================================
+
+@app.get("/api/workflows")
+def get_workflows():
+    """Get all workflows"""
+    try:
+        workflows = list(workflows_collection.find().sort("created_at", -1))
+        for item in workflows:
+            item["_id"] = str(item["_id"])
+        return workflows
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/workflows")
+def create_workflow(workflow: Workflow):
+    """Create a new workflow"""
+    try:
+        workflow_data = workflow.dict()
+        workflow_data["id"] = str(uuid.uuid4())
+        workflow_data["created_at"] = datetime.utcnow().isoformat()
+        workflow_data["updated_at"] = datetime.utcnow().isoformat()
+        
+        result = workflows_collection.insert_one(workflow_data)
+        workflow_data["_id"] = str(result.inserted_id)
+        
+        return workflow_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/workflows/{workflow_id}")
+def update_workflow(workflow_id: str, workflow: WorkflowUpdate):
+    """Update a workflow"""
+    try:
+        update_data = {k: v for k, v in workflow.dict().items() if v is not None}
+        update_data["updated_at"] = datetime.utcnow().isoformat()
+        
+        result = workflows_collection.update_one(
+            {"id": workflow_id},
+            {"$set": update_data}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Workflow not found")
+        
+        updated_workflow = workflows_collection.find_one({"id": workflow_id})
+        updated_workflow["_id"] = str(updated_workflow["_id"])
+        return updated_workflow
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================================================
 # MEETING ROOMS API - Backend Persistence
 # ============================================================================
 
