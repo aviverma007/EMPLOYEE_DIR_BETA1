@@ -1182,6 +1182,99 @@ def initialize_meeting_rooms():
     meeting_rooms_collection.insert_many(meeting_rooms_data)
     print(f"Initialized {len(meeting_rooms_data)} meeting rooms")
 
+def load_excel_data():
+    """Load employee data from Excel file into MongoDB"""
+    try:
+        import openpyxl
+        
+        # Try multiple Excel file locations
+        excel_paths = [
+            "/app/frontend/public/employee_directory.xlsx",
+            "/app/employee_directory.xlsx",
+            "/app/Employee_latest_data.xlsx",
+            "/app/backend/build/employee_directory.xlsx"
+        ]
+        
+        excel_path = None
+        for path in excel_paths:
+            if os.path.exists(path):
+                excel_path = path
+                break
+        
+        if not excel_path:
+            print("WARNING: No Excel file found, skipping employee data loading")
+            return
+        
+        print(f"Loading employee data from: {excel_path}")
+        workbook = openpyxl.load_workbook(excel_path)
+        sheet = workbook.active
+        
+        employees = []
+        headers = []
+        
+        # Get headers from first row
+        for cell in sheet[1]:
+            headers.append(cell.value.lower().replace(" ", "_") if cell.value else "")
+        
+        # Process data rows
+        for row_idx, row in enumerate(sheet.iter_rows(min_row=2, values_only=True), 2):
+            if not any(row):  # Skip empty rows
+                continue
+                
+            employee = {}
+            for col_idx, value in enumerate(row):
+                if col_idx < len(headers) and headers[col_idx]:
+                    # Map common field names
+                    field_name = headers[col_idx]
+                    if field_name in ['emp_id', 'employee_id', 'empid']:
+                        field_name = 'id'
+                    elif field_name in ['emp_name', 'employee_name', 'empname']:
+                        field_name = 'name'
+                    elif field_name in ['dept', 'department_name']:
+                        field_name = 'department'
+                    elif field_name in ['loc', 'office_location']:
+                        field_name = 'location'
+                    elif field_name in ['phone', 'mobile_no', 'contact']:
+                        field_name = 'mobile'
+                    elif field_name in ['email_id', 'email_address']:
+                        field_name = 'email'
+                    elif field_name in ['profile_image', 'image', 'photo']:
+                        field_name = 'profileImage'
+                    
+                    employee[field_name] = str(value) if value is not None else ""
+            
+            if employee.get('id') and employee.get('name'):  # Only add if has required fields
+                employees.append(employee)
+        
+        if employees:
+            # Clear existing employees and insert new ones
+            employees_collection.delete_many({})
+            employees_collection.insert_many(employees)
+            print(f"Successfully loaded {len(employees)} employees from Excel")
+        else:
+            print("WARNING: No valid employee data found in Excel file")
+            
+    except Exception as e:
+        print(f"Error loading Excel data: {e}")
+
+def initialize_data():
+    """Initialize all data collections"""
+    if db is None:
+        print("MongoDB not connected, skipping data initialization")
+        return
+    
+    # Initialize meeting rooms if empty
+    if meeting_rooms_collection.count_documents({}) == 0:
+        initialize_meeting_rooms()
+    
+    # Load employee data from Excel
+    load_excel_data()
+    
+    print("Data initialization completed")
+
+# Initialize data on startup
+initialize_data()
+
 
 # ============================================================================
 # STATIC FILE SERVING
