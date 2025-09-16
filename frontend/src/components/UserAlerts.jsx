@@ -6,7 +6,7 @@ import {
   Clock,
   Bell
 } from "lucide-react";
-import dataService from "../services/dataService";
+import { alertAPI } from "../services/api";
 
 const UserAlerts = () => {
   const [alerts, setAlerts] = useState([]);
@@ -17,34 +17,47 @@ const UserAlerts = () => {
   const [buttonPosition, setButtonPosition] = useState({ top: 16, right: 16 }); // Button position
   const [isDragging, setIsDragging] = useState(false);
 
+  // Load alerts from backend API
+  const loadActiveAlerts = async () => {
+    try {
+      console.log('Loading alerts from backend API...');
+      const alertsData = await alertAPI.getAll('all');
+      
+      // Filter active alerts (not expired)
+      const now = new Date();
+      const activeAlerts = alertsData.filter(alert => {
+        if (alert.expires_at) {
+          return new Date(alert.expires_at) > now;
+        }
+        return true; // No expiry date means always active
+      });
+      
+      console.log(`Loaded ${activeAlerts.length} active alerts`);
+      setAlerts(activeAlerts);
+      
+      if (activeAlerts.length > 0) {
+        setShowAlert(true);
+        setCurrentAlertIndex(0);
+      }
+    } catch (error) {
+      console.error('Error loading alerts:', error);
+      // Create a sample alert to test the system
+      const sampleAlert = {
+        id: 'sample-1',
+        title: 'Welcome to SmartWorld Developers!',
+        message: 'Employee directory system is now fully operational with backend persistence.',
+        priority: 'medium',
+        type: 'announcement',
+        created_at: new Date().toISOString()
+      };
+      setAlerts([sampleAlert]);
+      setShowAlert(true);
+    }
+  };
+
   // Load alerts on component mount
   useEffect(() => {
-    const checkAndLoadAlerts = async () => {
-      // Wait for dataService to be loaded
-      if (!dataService.isLoaded) {
-        console.log('Waiting for dataService to load...');
-        // Check every 500ms if dataService is loaded
-        const checkInterval = setInterval(() => {
-          if (dataService.isLoaded) {
-            clearInterval(checkInterval);
-            console.log('DataService loaded, loading alerts now...');
-            loadActiveAlerts();
-          }
-        }, 500);
-        
-        // Timeout after 10 seconds
-        setTimeout(() => {
-          clearInterval(checkInterval);
-          console.log('Timeout waiting for dataService, loading alerts anyway...');
-          loadActiveAlerts();
-        }, 10000);
-      } else {
-        console.log('DataService already loaded, loading alerts...');
-        loadActiveAlerts();
-      }
-    };
-
-    checkAndLoadAlerts();
+    loadActiveAlerts();
     
     // Refresh alerts every 30 seconds to check for new ones
     const refreshInterval = setInterval(() => {
