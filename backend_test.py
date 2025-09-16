@@ -498,12 +498,12 @@ class BackendPersistentTester:
                             test_employee = employees[0]
                             
                             # Test POST /api/meeting-rooms/{id}/book
-                            tomorrow = datetime.now() + timedelta(days=1)
+                            future_date = datetime.now() + timedelta(days=2)  # 2 days from now
                             booking_data = {
                                 "employee_name": test_employee.get('name'),
                                 "employee_id": test_employee.get('id'),
-                                "start_time": tomorrow.replace(hour=10, minute=0).isoformat() + "Z",
-                                "end_time": tomorrow.replace(hour=11, minute=0).isoformat() + "Z",
+                                "start_time": future_date.replace(hour=10, minute=0, second=0, microsecond=0).isoformat() + "Z",
+                                "end_time": future_date.replace(hour=11, minute=0, second=0, microsecond=0).isoformat() + "Z",
                                 "purpose": "Test Meeting for Backend Persistence"
                             }
                             
