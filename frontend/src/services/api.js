@@ -449,26 +449,103 @@ export const knowledgeAPI = {
   }
 };
 
-// Help API endpoints
+// Help API endpoints - Backend persistent
 export const helpAPI = {
   getAll: async () => {
-    return await dataService.getHelp();
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/help`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch help requests');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching help requests:', error);
+      throw error;
+    }
   },
 
   create: async (helpData) => {
-    return await dataService.createHelp(helpData);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/help`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(helpData),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to create help request');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating help request:', error);
+      throw error;
+    }
   },
 
   update: async (id, helpData) => {
-    return await dataService.updateHelp(id, helpData);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/help/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(helpData),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to update help request');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating help request:', error);
+      throw error;
+    }
   },
 
   addReply: async (id, replyData) => {
-    return await dataService.addHelpReply(id, replyData);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/help/${id}/reply`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(replyData),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to add reply');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error adding reply:', error);
+      throw error;
+    }
   },
 
   delete: async (id) => {
-    return await dataService.deleteHelp(id);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/help/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to delete help request');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error deleting help request:', error);
+      throw error;
+    }
   }
 };
 
