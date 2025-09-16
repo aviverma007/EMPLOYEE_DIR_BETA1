@@ -293,22 +293,81 @@ export const newsAPI = {
   }
 };
 
-// Task API endpoints
+// Task API endpoints - Backend persistent
 export const taskAPI = {
   getAll: async () => {
-    return await dataService.getTasks();
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/tasks`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch tasks');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+      throw error;
+    }
   },
 
   create: async (taskData) => {
-    return await dataService.createTask(taskData);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/tasks`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(taskData),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to create task');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating task:', error);
+      throw error;
+    }
   },
 
   update: async (id, taskData) => {
-    return await dataService.updateTask(id, taskData);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/tasks/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(taskData),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to update task');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating task:', error);
+      throw error;
+    }
   },
 
   delete: async (id) => {
-    return await dataService.deleteTask(id);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/tasks/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to delete task');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      throw error;
+    }
   }
 };
 
