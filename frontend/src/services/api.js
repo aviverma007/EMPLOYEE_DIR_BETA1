@@ -799,36 +799,81 @@ export const attendanceAPI = {
   }
 };
 
-// Policies API endpoints
+// Policies API endpoints - Backend persistent
 export const policyAPI = {
   getAll: async () => {
-    return await dataService.getPolicies();
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/policies`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch policies');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching policies:', error);
+      throw error;
+    }
   },
 
   create: async (policyData) => {
-    return await dataService.createPolicy(policyData);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/policies`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(policyData),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to create policy');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating policy:', error);
+      throw error;
+    }
   },
 
   update: async (id, policyData) => {
-    const index = dataService.policies.findIndex(p => p.id === id);
-    if (index > -1) {
-      dataService.policies[index] = {
-        ...dataService.policies[index],
-        ...policyData,
-        updated_at: new Date().toISOString()
-      };
-      return dataService.policies[index];
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/policies/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(policyData),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to update policy');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating policy:', error);
+      throw error;
     }
-    throw new Error('Policy not found');
   },
 
   delete: async (id) => {
-    const index = dataService.policies.findIndex(p => p.id === id);
-    if (index > -1) {
-      dataService.policies.splice(index, 1);
-      return { message: 'Policy deleted' };
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/policies/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to delete policy');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error deleting policy:', error);
+      throw error;
     }
-    throw new Error('Policy not found');
   }
 };
 
