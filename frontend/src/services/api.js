@@ -152,30 +152,66 @@ export const hierarchyAPI = {
   }
 };
 
-// Utility API endpoints
+// Utility API endpoints - Backend persistent
 export const utilityAPI = {
-  // Refresh Excel data (now just reloads from frontend)
+  // Refresh Excel data
   refreshExcel: async () => {
-    const stats = await dataService.loadAllData();
-    return { 
-      message: 'Excel data refreshed successfully',
-      count: stats.employees
-    };
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/refresh-excel`, {
+        method: 'POST',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to refresh Excel data');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error refreshing Excel data:', error);
+      throw error;
+    }
   },
 
   // Get departments
   getDepartments: async () => {
-    return await dataService.getDepartments();
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/departments`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch departments');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching departments:', error);
+      throw error;
+    }
   },
 
   // Get locations  
   getLocations: async () => {
-    return await dataService.getLocations();
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/locations`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch locations');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching locations:', error);
+      throw error;
+    }
   },
 
   // Get system statistics
   getStats: async () => {
-    return await dataService.getStats();
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/stats`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch stats');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+      throw error;
+    }
   }
 };
 
