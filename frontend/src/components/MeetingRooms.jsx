@@ -343,11 +343,12 @@ const MeetingRooms = () => {
                   <strong>Amenities:</strong> {room.amenities || 'Basic facilities'}
                 </div>
 
+                {/* Show current/active booking if exists */}
                 {room.current_booking && (
-                  <div className="bg-blue-50 p-3 rounded-md">
-                    <div className="flex items-center text-sm text-blue-800 mb-2">
+                  <div className="bg-red-50 border border-red-200 p-3 rounded-md">
+                    <div className="flex items-center text-sm text-red-800 mb-2">
                       <Clock className="mr-1 h-4 w-4" />
-                      Current Booking
+                      🔴 Currently Occupied
                     </div>
                     <div className="text-sm">
                       <p><strong>Employee:</strong> {room.current_booking.employee_name}</p>
@@ -355,6 +356,33 @@ const MeetingRooms = () => {
                       {room.current_booking.purpose && (
                         <p><strong>Purpose:</strong> {room.current_booking.purpose}</p>
                       )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Show upcoming bookings */}
+                {room.bookings && room.bookings.length > 0 && !room.current_booking && (
+                  <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-md">
+                    <div className="flex items-center text-sm text-yellow-800 mb-2">
+                      <Clock className="mr-1 h-4 w-4" />
+                      📅 Upcoming Booking
+                    </div>
+                    <div className="text-sm">
+                      <p><strong>Employee:</strong> {room.bookings[0].employee_name}</p>
+                      <p><strong>Time:</strong> {new Date(room.bookings[0].start_time).toLocaleString()} - {new Date(room.bookings[0].end_time).toLocaleString()}</p>
+                      {room.bookings[0].purpose && (
+                        <p><strong>Purpose:</strong> {room.bookings[0].purpose}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Show truly vacant status */}
+                {room.status === 'vacant' && (!room.bookings || room.bookings.length === 0) && (
+                  <div className="bg-green-50 border border-green-200 p-3 rounded-md">
+                    <div className="flex items-center text-sm text-green-800">
+                      <CheckCircle className="mr-2 h-4 w-4" />
+                      ✅ Available - No bookings scheduled
                     </div>
                   </div>
                 )}
