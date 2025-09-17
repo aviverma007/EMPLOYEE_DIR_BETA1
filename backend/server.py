@@ -1172,8 +1172,7 @@ def delete_alert(alert_id: str):
 def initialize_meeting_rooms():
     """Initialize meeting rooms data if collection is empty"""
     meeting_rooms_data = [
-        {"id": "conf_11a", "name": "IFC Conference Room 11A", "location": "IFC", "floor": "11th Floor", "capacity": 8, "equipment": "Projector, Whiteboard"},
-        {"id": "conf_12a", "name": "IFC Conference Room 12A", "location": "IFC", "floor": "12th Floor", "capacity": 12, "equipment": "Video Conference, Projector"},
+        # IFC 14th Floor - Multiple rooms (as exception)
         {"id": "oval", "name": "OVAL MEETING ROOM", "location": "IFC", "floor": "14th Floor", "capacity": 10, "equipment": "Smart Board, Audio System"},
         {"id": "petronas", "name": "PETRONAS MEETING ROOM", "location": "IFC", "floor": "14th Floor", "capacity": 5, "equipment": "Projector"},
         {"id": "global_center", "name": "GLOBAL CENTER MEETING ROOM", "location": "IFC", "floor": "14th Floor", "capacity": 5, "equipment": "Whiteboard"},
@@ -1183,6 +1182,8 @@ def initialize_meeting_rooms():
         {"id": "marina_bay", "name": "MARINA BAY MEETING ROOM", "location": "IFC", "floor": "14th Floor", "capacity": 5, "equipment": "Projector"},
         {"id": "burj", "name": "BURJ MEETING ROOM", "location": "IFC", "floor": "14th Floor", "capacity": 5, "equipment": "Smart Board"},
         {"id": "board", "name": "BOARD ROOM", "location": "IFC", "floor": "14th Floor", "capacity": 20, "equipment": "Video Conference, Projector, Audio System"},
+        
+        # Other locations - 1 floor, 1 room each (as per user requirement)
         {"id": "central_75", "name": "Central Office 75 Meeting Room", "location": "Central Office 75", "floor": "1st Floor", "capacity": 6, "equipment": "Projector"},
         {"id": "office_75", "name": "Office 75 Meeting Room", "location": "Office 75", "floor": "1st Floor", "capacity": 8, "equipment": "Whiteboard"},
         {"id": "noida", "name": "Noida Meeting Room", "location": "Noida", "floor": "1st Floor", "capacity": 10, "equipment": "Video Conference"},
