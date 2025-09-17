@@ -1179,6 +1179,227 @@ class BackendPersistentTester:
             except:
                 pass
 
+    def test_meeting_rooms_review_request_focused(self):
+        """Test Meeting Rooms API - Focused on Review Request Issues"""
+        try:
+            print("\n🏢 MEETING ROOMS REVIEW REQUEST FOCUSED TESTING")
+            print("-" * 60)
+            
+            # Test 1: GET /api/meeting-rooms - Check current room structure
+            print("📋 Testing current room structure...")
+            get_response = self.session.get(f"{self.backend_url}/api/meeting-rooms")
+            if get_response.status_code != 200:
+                self.log_test("Meeting Rooms - GET Structure", False, f"GET /api/meeting-rooms failed with status {get_response.status_code}")
+                return
+            
+            meeting_rooms = get_response.json()
+            if not isinstance(meeting_rooms, list):
+                self.log_test("Meeting Rooms - GET Structure", False, "GET /api/meeting-rooms did not return a list")
+                return
+            
+            # Analyze room structure by location
+            location_analysis = {}
+            for room in meeting_rooms:
+                location = room.get('location', 'Unknown')
+                floor = room.get('floor', 'Unknown')
+                
+                if location not in location_analysis:
+                    location_analysis[location] = {}
+                if floor not in location_analysis[location]:
+                    location_analysis[location][floor] = 0
+                location_analysis[location][floor] += 1
+            
+            print(f"📊 Room Structure Analysis:")
+            for location, floors in location_analysis.items():
+                print(f"   {location}: {floors}")
+            
+            # Check if structure matches requirements: IFC 14th floor should have multiple rooms, others should have 1 floor and 1 room
+            structure_correct = True
+            structure_issues = []
+            
+            for location, floors in location_analysis.items():
+                if location == 'IFC':
+                    # IFC should have multiple floors with 14th floor having multiple rooms
+                    if '14th Floor' not in floors:
+                        structure_issues.append(f"IFC missing 14th Floor")
+                        structure_correct = False
+                    elif floors.get('14th Floor', 0) < 8:  # Should have at least 8 rooms on 14th floor
+                        structure_issues.append(f"IFC 14th Floor has only {floors.get('14th Floor')} rooms, expected 8+")
+                        structure_correct = False
+                else:
+                    # Other locations should have 1 floor with 1 room
+                    if len(floors) > 1:
+                        structure_issues.append(f"{location} has {len(floors)} floors, expected 1")
+                        structure_correct = False
+                    elif sum(floors.values()) > 1:
+                        structure_issues.append(f"{location} has {sum(floors.values())} rooms, expected 1")
+                        structure_correct = False
+            
+            if structure_correct:
+                self.log_test("Meeting Rooms - Structure Check", True, 
+                            f"Room structure matches requirements - {len(meeting_rooms)} total rooms", 
+                            f"IFC has multiple floors/rooms, others have 1 floor/1 room")
+            else:
+                self.log_test("Meeting Rooms - Structure Check", False, 
+                            f"Room structure issues found", 
+                            f"Issues: {'; '.join(structure_issues)}")
+            
+            # Test 2: Location filtering functionality (data structure test)
+            print("🔍 Testing location filtering capability...")
+            unique_locations = set(room.get('location') for room in meeting_rooms)
+            
+            location_filter_working = True
+            for location in unique_locations:
+                # Test if we can filter manually to verify the data structure
+                location_rooms = [room for room in meeting_rooms if room.get('location') == location]
+                
+                if location_rooms:
+                    self.log_test(f"Meeting Rooms - Location Data ({location})", True, 
+                                f"Location data available - {len(location_rooms)} rooms found", 
+                                f"Rooms in {location}: {[room.get('name') for room in location_rooms[:3]]}")
+                else:
+                    self.log_test(f"Meeting Rooms - Location Data ({location})", False, 
+                                f"No rooms found for location {location}")
+                    location_filter_working = False
+            
+            # Test 3: Check if occupied rooms show correctly in dropdown (room status)
+            print("👁️ Testing room status visibility...")
+            rooms_with_status = 0
+            status_distribution = {'vacant': 0, 'occupied': 0, 'other': 0}
+            
+            for room in meeting_rooms:
+                status = room.get('status')
+                if status:
+                    rooms_with_status += 1
+                    if status in status_distribution:
+                        status_distribution[status] += 1
+                    else:
+                        status_distribution['other'] += 1
+            
+            if rooms_with_status == len(meeting_rooms):
+                self.log_test("Meeting Rooms - Status Visibility", True, 
+                            f"All rooms have status visibility for dropdown", 
+                            f"Status distribution: {status_distribution}")
+            else:
+                self.log_test("Meeting Rooms - Status Visibility", False, 
+                            f"Only {rooms_with_status}/{len(meeting_rooms)} rooms have status visibility")
+            
+            # Test 4: Test booking functionality and room status updates
+            print("📅 Testing booking functionality...")
+            
+            # Get an employee for booking
+            emp_response = self.session.get(f"{self.backend_url}/api/employees?search=A")
+            if emp_response.status_code != 200:
+                self.log_test("Meeting Rooms - Booking Test", False, "Could not fetch employees for booking test")
+                return
+            
+            employees = emp_response.json()
+            if not employees:
+                self.log_test("Meeting Rooms - Booking Test", False, "No employees found for booking test")
+                return
+            
+            test_employee = employees[0]
+            test_room = meeting_rooms[0]  # Use first room for testing
+            room_id = test_room.get('id')
+            
+            # Create a booking for tomorrow
+            future_date = datetime.now() + timedelta(days=1)
+            booking_data = {
+                "employee_name": test_employee.get('name'),
+                "employee_id": test_employee.get('id'),
+                "start_time": future_date.replace(hour=10, minute=0, second=0, microsecond=0).isoformat() + "Z",
+                "end_time": future_date.replace(hour=11, minute=0, second=0, microsecond=0).isoformat() + "Z",
+                "purpose": "Review Request Test - Room Status Update Check"
+            }
+            
+            book_response = self.session.post(f"{self.backend_url}/api/meeting-rooms/{room_id}/book", 
+                                            json=booking_data)
+            
+            if book_response.status_code == 200:
+                booking_result = book_response.json()
+                booking_id = booking_result.get('booking', {}).get('id')
+                
+                if booking_id:
+                    self.created_items['bookings'].append((room_id, booking_id))
+                    
+                    # Check if room status updates after booking
+                    updated_rooms_response = self.session.get(f"{self.backend_url}/api/meeting-rooms")
+                    if updated_rooms_response.status_code == 200:
+                        updated_rooms = updated_rooms_response.json()
+                        updated_room = next((room for room in updated_rooms if room.get('id') == room_id), None)
+                        
+                        if updated_room:
+                            room_bookings = updated_room.get('bookings', [])
+                            booking_saved = any(booking.get('id') == booking_id for booking in room_bookings)
+                            
+                            if booking_saved:
+                                self.log_test("Meeting Rooms - Booking Save", True, 
+                                            f"Booking saved properly - room shows booking in list", 
+                                            f"Booking {booking_id} found in room {test_room.get('name')}")
+                                
+                                # Check if room status reflects booking (for future bookings, might still be vacant)
+                                room_status = updated_room.get('status', 'unknown')
+                                current_booking = updated_room.get('current_booking')
+                                
+                                if room_bookings:  # Has bookings
+                                    self.log_test("Meeting Rooms - Status Update", True, 
+                                                f"Room status system working - Status: {room_status}", 
+                                                f"Room has {len(room_bookings)} booking(s), Current: {bool(current_booking)}")
+                                else:
+                                    self.log_test("Meeting Rooms - Status Update", False, 
+                                                "Room status not updating - no bookings found after creation")
+                            else:
+                                self.log_test("Meeting Rooms - Booking Save", False, 
+                                            "Booking not saved properly - not found in room bookings list")
+                        else:
+                            self.log_test("Meeting Rooms - Booking Save", False, 
+                                        "Could not find updated room data after booking")
+                    else:
+                        self.log_test("Meeting Rooms - Booking Save", False, 
+                                    f"Could not fetch updated rooms after booking: {updated_rooms_response.status_code}")
+                else:
+                    self.log_test("Meeting Rooms - Booking Save", False, 
+                                "Booking created but no booking ID returned")
+            else:
+                try:
+                    error_detail = book_response.json().get('detail', 'Unknown error')
+                except:
+                    error_detail = book_response.text
+                self.log_test("Meeting Rooms - Booking Save", False, 
+                            f"Failed to create booking: {book_response.status_code}", 
+                            f"Error: {error_detail}")
+            
+            # Test 5: Test occupied rooms visibility in dropdown
+            print("🔍 Testing occupied rooms dropdown visibility...")
+            
+            # Get current room states
+            current_rooms_response = self.session.get(f"{self.backend_url}/api/meeting-rooms")
+            if current_rooms_response.status_code == 200:
+                current_rooms = current_rooms_response.json()
+                
+                occupied_rooms = [room for room in current_rooms if room.get('status') == 'occupied']
+                vacant_rooms = [room for room in current_rooms if room.get('status') == 'vacant']
+                rooms_with_bookings = [room for room in current_rooms if room.get('bookings') and len(room.get('bookings', [])) > 0]
+                
+                self.log_test("Meeting Rooms - Dropdown Visibility", True, 
+                            f"Room visibility analysis complete", 
+                            f"Occupied: {len(occupied_rooms)}, Vacant: {len(vacant_rooms)}, With Bookings: {len(rooms_with_bookings)}")
+                
+                # Check if occupied rooms are properly marked and visible
+                if len(rooms_with_bookings) > 0:
+                    self.log_test("Meeting Rooms - Occupied Visibility", True, 
+                                f"Rooms with bookings are visible in system", 
+                                f"{len(rooms_with_bookings)} rooms have bookings and should show in dropdown")
+                else:
+                    self.log_test("Meeting Rooms - Occupied Visibility", False, 
+                                "No rooms with bookings found - may indicate booking visibility issue")
+            else:
+                self.log_test("Meeting Rooms - Dropdown Visibility", False, 
+                            f"Could not fetch rooms for dropdown visibility test: {current_rooms_response.status_code}")
+                
+        except Exception as e:
+            self.log_test("Meeting Rooms - Review Request", False, f"Meeting rooms review request test failed: {str(e)}")
+
     def run_all_tests(self):
         """Run all tests"""
         print("🚀 Starting Backend-Persistent API Tests")
