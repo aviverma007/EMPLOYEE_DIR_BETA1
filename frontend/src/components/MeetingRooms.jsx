@@ -155,19 +155,12 @@ const MeetingRooms = () => {
   };
 
   const clearFilters = () => {
-    if (isAdmin()) {
-      setFilters({
-        location: '',
-        floor: '',
-        status: ''
-      });
-    } else {
-      setFilters({
-        location: 'IFC',
-        floor: '14th Floor',
-        status: ''
-      });
-    }
+    // Both admin and users can clear all filters
+    setFilters({
+      location: '',
+      floor: '',
+      status: ''
+    });
   };
 
   const getUniqueFloors = () => {
