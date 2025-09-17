@@ -147,19 +147,18 @@ const UserAlerts = () => {
     }
   };
 
-  // Mouse event handlers for dragging
+  // Mouse event handlers for dragging - VERTICAL ONLY
   const handleMouseDown = (e) => {
     setIsDragging(true);
-    const startX = e.clientX - buttonPosition.right;
     const startY = e.clientY - buttonPosition.top;
 
     const handleMouseMove = (e) => {
-      const newRight = Math.max(16, Math.min(window.innerWidth - 64, e.clientX - startX));
+      // Only allow vertical movement, keep horizontal position fixed
       const newTop = Math.max(16, Math.min(window.innerHeight - 64, e.clientY - startY));
       
       setButtonPosition({ 
         top: newTop, 
-        right: window.innerWidth - newRight - 48 
+        right: buttonPosition.right // Keep horizontal position unchanged
       });
     };
 
