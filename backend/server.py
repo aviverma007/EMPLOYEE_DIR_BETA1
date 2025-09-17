@@ -891,6 +891,27 @@ def update_workflow(workflow_id: str, workflow: WorkflowUpdate):
 # MEETING ROOMS API - Backend Persistence
 # ============================================================================
 
+@app.post("/api/meeting-rooms/reinitialize")
+def reinitialize_meeting_rooms():
+    """Reinitialize meeting rooms with correct structure"""
+    try:
+        if meeting_rooms_collection is None:
+            raise HTTPException(status_code=500, detail="Database connection not available")
+        
+        # Clear existing meeting rooms
+        meeting_rooms_collection.delete_many({})
+        
+        # Clear existing bookings
+        if bookings_collection is not None:
+            bookings_collection.delete_many({})
+        
+        # Reinitialize with correct structure
+        initialize_meeting_rooms()
+        
+        return {"message": "Meeting rooms reinitialized successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/api/meeting-rooms")
 def get_meeting_rooms():
     """Get all meeting rooms with their current booking status"""
