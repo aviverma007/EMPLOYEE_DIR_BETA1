@@ -144,6 +144,25 @@ const MeetingRooms = () => {
     }
   };
 
+  const handleClearRoomBookings = async (roomId) => {
+    const room = rooms.find(r => r.id === roomId);
+    const bookingCount = room?.bookings?.length || 0;
+    
+    if (window.confirm(`Are you sure you want to clear all ${bookingCount} booking(s) for this room?`)) {
+      try {
+        // Cancel each booking individually
+        for (const booking of room.bookings) {
+          await meetingRoomAPI.cancelSpecificBooking(roomId, booking.id);
+        }
+        toast.success(`All bookings cleared for ${room.name}`);
+        fetchRooms();
+      } catch (error) {
+        console.error('Error clearing room bookings:', error);
+        toast.error('Failed to clear room bookings');
+      }
+    }
+  };
+
   const handleEmployeeSelect = (employeeId) => {
     const employee = employees.find(emp => emp.id === employeeId);
     setBookingData({
