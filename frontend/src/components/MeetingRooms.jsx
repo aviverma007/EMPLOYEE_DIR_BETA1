@@ -119,10 +119,16 @@ const MeetingRooms = () => {
     }
   };
 
-  const handleCancelBooking = async (roomId) => {
+  const handleCancelBooking = async (roomId, bookingId = null) => {
     if (window.confirm('Are you sure you want to cancel this booking?')) {
       try {
-        await meetingRoomAPI.cancelBooking(roomId);
+        if (bookingId) {
+          // Cancel specific booking
+          await meetingRoomAPI.cancelSpecificBooking(roomId, bookingId);
+        } else {
+          // Cancel current booking
+          await meetingRoomAPI.cancelBooking(roomId);
+        }
         toast.success('Booking cancelled successfully');
         fetchRooms();
       } catch (error) {
