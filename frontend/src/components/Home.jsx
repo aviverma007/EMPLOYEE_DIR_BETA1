@@ -289,7 +289,7 @@ const Home = () => {
       title: "PICTURES",
       icon: <Image className="h-6 w-6" />,
       description: "Company gallery and events",
-      color: "bg-blue-600",
+      color: "bg-gradient-to-br from-blue-600 to-blue-700",
       textColor: "text-white",
       interactive: true
     },
@@ -305,7 +305,7 @@ const Home = () => {
       title: "CELEBRATIONS",
       icon: <PartyPopper className="h-6 w-6" />,
       description: "Birthdays, anniversaries & achievements",
-      color: "bg-blue-600",
+      color: "bg-gradient-to-br from-blue-600 to-blue-700",
       textColor: "text-white"
     },
     {
@@ -320,7 +320,7 @@ const Home = () => {
       title: "WORKFLOW",
       icon: <Workflow className="h-6 w-6" />,
       description: "Process management & tracking",
-      color: "bg-blue-600",
+      color: "bg-gradient-to-br from-blue-600 to-blue-700",
       textColor: "text-white"
     },
     {
