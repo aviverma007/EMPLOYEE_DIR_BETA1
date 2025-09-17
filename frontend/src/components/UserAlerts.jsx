@@ -180,9 +180,9 @@ const UserAlerts = () => {
 
   return (
     <>
-      {/* Floating Alert Button */}
+      {/* Floating Alert Button - VERTICAL MOVEMENT ONLY */}
       <div 
-        className={`fixed z-50 cursor-move ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+        className={`fixed z-50 cursor-ns-resize ${isDragging ? 'cursor-ns-resize' : 'cursor-ns-resize'}`}
         style={{ 
           top: `${buttonPosition.top}px`, 
           right: `${buttonPosition.right}px`,
