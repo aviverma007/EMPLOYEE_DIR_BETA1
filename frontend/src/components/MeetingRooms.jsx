@@ -185,8 +185,8 @@ const MeetingRooms = () => {
         </Button>
       </div>
 
-      {/* Filters - Only show for Admin */}
-      {isAdmin() && (
+      {/* Filters - Show for both Admin and Users */}
+      {(
         <Card className="mb-6">
           <CardHeader>
             <CardTitle>Location & Floor Selection</CardTitle>
