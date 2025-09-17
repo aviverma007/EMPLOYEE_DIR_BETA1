@@ -261,7 +261,10 @@ const AppContent = () => {
                       <HolidayCalendar />
                     </TabsContent>
                     
-                    {/* Dashboard content removed from User profile */}
+                    {/* Both Admin and User can access Dashboard */}
+                    <TabsContent value="dashboard" className="mt-0 h-full">
+                      <Dashboard />
+                    </TabsContent>
                     
                     {/* Admin-only content */}
                     {isAdmin() && (
