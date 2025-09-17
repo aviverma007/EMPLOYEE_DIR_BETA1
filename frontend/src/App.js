@@ -53,9 +53,13 @@ const AppContent = () => {
               <Header />
               <div className="flex-1 w-full px-2 sm:px-4 lg:px-6 py-4">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">
-                  {/* Navigation Tabs - Role-based access */}
-                  <div className="flex justify-start mb-4 overflow-x-auto">
-                  <TabsList className="flex w-auto h-10 bg-white shadow-md border border-blue-200 rounded-lg p-1 min-w-max">
+                  {/* Navigation Tabs - Enhanced Role-based access */}
+                  <div className={`flex justify-start mb-4 overflow-x-auto ${isAdmin() ? 'bg-gradient-to-r from-blue-50 to-blue-100 p-2 rounded-lg' : ''}`}>
+                  <TabsList className={`flex w-auto h-10 shadow-md border rounded-lg p-1 min-w-max ${
+                    isAdmin() 
+                      ? 'bg-white border-blue-300' 
+                      : 'bg-white border-blue-200'
+                  }`}>
                       <TabsTrigger 
                         value="home" 
                         className="text-xs sm:text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700 rounded-md px-2 sm:px-4 py-2 whitespace-nowrap"
