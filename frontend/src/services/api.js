@@ -621,8 +621,21 @@ export const meetingRoomAPI = {
     }
   },
 
-  cancelBooking: async (roomId, bookingId) => {
+  cancelBooking: async (roomId, bookingId = null) => {
     try {
+      // If no bookingId provided, find the current booking for this room
+      if (!bookingId) {
+        const rooms = await meetingRoomAPI.getAll();
+        const room = rooms.find(r => r.id === roomId);
+        if (room && room.current_booking) {
+          bookingId = room.current_booking.id;
+        } else if (room && room.bookings && room.bookings.length > 0) {
+          bookingId = room.bookings[0].id;
+        } else {
+          throw new Error('No booking found to cancel');
+        }
+      }
+
       const response = await fetch(`${API_BASE_URL}/api/meeting-rooms/${roomId}/booking/${bookingId}`, {
         method: 'DELETE',
       });
@@ -635,6 +648,24 @@ export const meetingRoomAPI = {
       return await response.json();
     } catch (error) {
       console.error('Error cancelling booking:', error);
+      throw error;
+    }
+  },
+
+  cancelSpecificBooking: async (roomId, bookingId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/meeting-rooms/${roomId}/booking/${bookingId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to cancel booking');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error cancelling specific booking:', error);
       throw error;
     }
   },
