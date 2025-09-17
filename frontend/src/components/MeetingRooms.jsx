@@ -246,22 +246,9 @@ const MeetingRooms = () => {
             </div>
           </CardContent>
         </Card>
-      )}
+      )
 
-      {/* For Users - Show info about 14th floor IFC rooms */}
-      {!isAdmin() && (
-        <Card className="mb-6 bg-blue-50 border-blue-200">
-          <CardContent className="pt-6">
-            <div className="flex items-center space-x-3">
-              <MapPin className="h-5 w-5 text-blue-600" />
-              <div>
-                <h3 className="font-semibold text-blue-900">Meeting Rooms - IFC 14th Floor</h3>
-                <p className="text-sm text-blue-700">Showing available meeting rooms on the 14th floor at IFC location (9 rooms available)</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      /* Removed user-specific restrictions */}
 
       {/* Booking Modal */}
       {selectedRoom && (
