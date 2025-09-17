@@ -127,14 +127,6 @@ const Dashboard = () => {
     );
   }
 
-  // Group dashboards by category
-  const dashboardCategories = {
-    'Financial Analytics': dashboards.filter(d => ['po-dashboard', 'pr-dashboard'].includes(d.id)),
-    'Quality Management': dashboards.filter(d => d.id === 'qms-dashboard'),
-    'Asset Management': dashboards.filter(d => d.id === 'assets-dashboard'),
-    'Human Resources': dashboards.filter(d => d.id === 'attendance-dashboard')
-  };
-
   return (
     <div className="h-full p-6">
       {/* Simple Header */}
@@ -143,53 +135,40 @@ const Dashboard = () => {
         <div className="h-px bg-gray-300 w-full"></div>
       </div>
 
-      {/* Dashboard Categories */}
-      <div className="space-y-6">
-        {Object.entries(dashboardCategories).map(([categoryName, categoryDashboards]) => (
-          <div key={categoryName} className="space-y-3">
-            {/* Category Heading */}
-            <div className="flex items-center gap-3">
-              <h2 className="text-lg font-semibold text-gray-700">{categoryName}</h2>
-              <div className="flex-1 h-px bg-gray-200"></div>
-            </div>
+      {/* All Dashboards in Single Grid Layout */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        {dashboards.map(dashboard => (
+          <Card 
+            key={dashboard.id} 
+            className="cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-102 bg-white border border-gray-200"
+            onClick={() => handleDashboardClick(dashboard)}
+          >
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                {dashboard.icon}
+                <CardTitle className="text-sm font-semibold text-gray-800">
+                  {dashboard.title}
+                </CardTitle>
+              </div>
+            </CardHeader>
             
-            {/* Category Dashboards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-              {categoryDashboards.map(dashboard => (
-                <Card 
-                  key={dashboard.id} 
-                  className="cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-102 bg-white border border-gray-200"
-                  onClick={() => handleDashboardClick(dashboard)}
+            <CardContent className="pt-0">
+              <p className="text-xs text-gray-600 mb-3">
+                {dashboard.description}
+              </p>
+              
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-500">Power BI</span>
+                <Button 
+                  size="sm"
+                  className="h-7 text-xs bg-blue-600 hover:bg-blue-700 text-white"
                 >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center gap-2">
-                      {dashboard.icon}
-                      <CardTitle className="text-sm font-semibold text-gray-800">
-                        {dashboard.title}
-                      </CardTitle>
-                    </div>
-                  </CardHeader>
-                  
-                  <CardContent className="pt-0">
-                    <p className="text-xs text-gray-600 mb-3">
-                      {dashboard.description}
-                    </p>
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500">Power BI</span>
-                      <Button 
-                        size="sm"
-                        className="h-7 text-xs bg-blue-600 hover:bg-blue-700 text-white"
-                      >
-                        View
-                        <ExternalLink className="h-3 w-3 ml-1" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
+                  View
+                  <ExternalLink className="h-3 w-3 ml-1" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
     </div>
