@@ -57,7 +57,7 @@ const Dashboard = () => {
     },
     {
       id: 'pr-dashboard',
-      title: 'PR Dashboard',
+      title: 'PR Dashboard',  
       description: 'Purchase Request Analytics',
       icon: <Calendar className="h-8 w-8 text-indigo-600" />,
       url: 'https://app.powerbi.com/reportEmbed?reportId=b9bb2eaa-6315-4235-a051-d41d2219a899&autoAuth=true&ctid=711f4066-07b7-45a1-9e32-978e86528cad',
@@ -137,69 +137,120 @@ const Dashboard = () => {
       </div>
     );
   }
-    {
-      id: 5,
-      title: "System Settings",
-      description: "Configure system preferences",
-      icon: <Settings className="h-8 w-8" />,
-      url: "#", // Placeholder - user will provide later
-      color: "bg-gray-600 hover:bg-gray-700",
-      textColor: "text-white"
-    }
-  ]);
-
-  const handleButtonClick = (button) => {
-    if (button.url && button.url !== "#") {
-      window.open(button.url, '_blank', 'noopener,noreferrer');
-    } else {
-      // Placeholder behavior - user will add links later
-      console.log(`Button ${button.title} clicked - URL to be configured`);
-    }
-  };
 
   return (
-    <div className="h-full flex flex-col space-y-6 p-6">
-      {/* Dashboard Header */}
-      <div className="mb-6">
-        <div className="flex items-center space-x-3 mb-2">
-          <BarChart3 className="h-8 w-8 text-blue-600" />
-          <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
+    <div className="h-full overflow-auto">
+      {/* Header Section */}
+      <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 text-white p-8 rounded-lg mb-6 shadow-xl">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="p-3 bg-white/20 rounded-full">
+            <Monitor className="h-8 w-8" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold">Business Intelligence Dashboards</h1>
+            <p className="text-blue-100 text-lg">
+              Real-time analytics and insights for data-driven decisions
+            </p>
+          </div>
         </div>
-        <p className="text-gray-600">Quick access to essential tools and services</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <BarChart3 className="h-5 w-5" />
+              <span className="font-semibold">Real-time Data</span>
+            </div>
+            <p className="text-sm text-blue-100">Live business metrics and KPIs</p>
+          </div>
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <TrendingUp className="h-5 w-5" />
+              <span className="font-semibold">Advanced Analytics</span>
+            </div>
+            <p className="text-sm text-blue-100">Predictive insights and trends</p>
+          </div>
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Users className="h-5 w-5" />
+              <span className="font-semibold">Team Collaboration</span>
+            </div>
+            <p className="text-sm text-blue-100">Shared insights across teams</p>
+          </div>
+        </div>
       </div>
 
-      {/* Dashboard Buttons Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-        {buttons.map((button) => (
-          <Card key={button.id} className="hover:shadow-lg transition-all duration-200 cursor-pointer group">
-            <CardContent className="p-6">
-              <button
-                onClick={() => handleButtonClick(button)}
-                className={`w-full h-full flex flex-col items-center space-y-4 p-4 rounded-lg transition-all duration-200 ${button.color} ${button.textColor} group-hover:scale-105`}
-              >
-                {/* Icon */}
-                <div className="flex-shrink-0">
-                  {button.icon}
-                </div>
-                
-                {/* Title and Description */}
-                <div className="text-center space-y-2">
-                  <h3 className="text-lg font-semibold">{button.title}</h3>
-                  <p className="text-sm opacity-90 leading-tight">{button.description}</p>
-                </div>
-                
-                {/* External link indicator */}
-                <div className="flex items-center space-x-1 opacity-70 group-hover:opacity-100 transition-opacity">
-                  <ExternalLink className="h-4 w-4" />
-                  <span className="text-xs">Quick Access</span>
-                </div>
-              </button>
-            </CardContent>
-          </Card>
+      {/* Dashboard Categories */}
+      <div className="space-y-6">
+        {categories.map(category => (
+          <div key={category} className="space-y-4">
+            <div className="flex items-center gap-2">
+              <div className="h-1 w-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded"></div>
+              <h2 className="text-xl font-bold text-gray-800">{category} Dashboards</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {dashboards
+                .filter(dashboard => dashboard.category === category)
+                .map(dashboard => (
+                <Card 
+                  key={dashboard.id} 
+                  className="group cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-105 bg-white border-0 shadow-lg"
+                  onClick={() => handleDashboardClick(dashboard)}
+                >
+                  <CardHeader className={`bg-gradient-to-br ${dashboard.color} text-white rounded-t-lg pb-4`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-white/20 rounded-lg">
+                          {dashboard.icon}
+                        </div>
+                        <div>
+                          <CardTitle className="text-lg font-bold">
+                            {dashboard.title}
+                          </CardTitle>
+                          <Badge variant="secondary" className="mt-1 text-xs">
+                            {dashboard.category}
+                          </Badge>
+                        </div>
+                      </div>
+                      <ExternalLink className="h-5 w-5 opacity-70 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                  </CardHeader>
+                  
+                  <CardContent className="p-6">
+                    <p className="text-gray-600 mb-4">
+                      {dashboard.description}
+                    </p>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <Monitor className="h-4 w-4" />
+                        <span>Power BI Dashboard</span>
+                      </div>
+                      
+                      <Button 
+                        size="sm"
+                        className={`bg-gradient-to-r ${dashboard.color} hover:opacity-90 text-white border-0`}
+                      >
+                        View Dashboard
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
 
-
+      {/* Footer */}
+      <div className="mt-12 p-6 bg-gray-50 rounded-lg text-center">
+        <p className="text-gray-600 mb-2">
+          <strong>SmartWorld Developers</strong> - Business Intelligence Platform
+        </p>
+        <p className="text-sm text-gray-500">
+          Powered by Microsoft Power BI • Real-time data visualization and analytics
+        </p>
+      </div>
     </div>
   );
 };
