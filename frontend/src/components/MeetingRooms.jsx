@@ -359,25 +359,52 @@ const MeetingRooms = () => {
                   </div>
                 )}
 
-                {/* Show upcoming bookings */}
-                {room.bookings && room.bookings.length > 0 && !room.current_booking && (
-                  <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-md">
-                    <div className="flex items-center text-sm text-yellow-800 mb-2">
+                {/* Show all bookings for the room */}
+                {room.bookings && room.bookings.length > 0 && (
+                  <div className="bg-blue-50 border border-blue-200 p-3 rounded-md">
+                    <div className="flex items-center text-sm text-blue-800 mb-2">
                       <Clock className="mr-1 h-4 w-4" />
-                      📅 Upcoming Booking
+                      📋 {room.bookings.length === 1 ? 'Booking' : `${room.bookings.length} Bookings`}
                     </div>
-                    <div className="text-sm">
-                      <p><strong>Employee:</strong> {room.bookings[0].employee_name}</p>
-                      <p><strong>Time:</strong> {new Date(room.bookings[0].start_time).toLocaleString()} - {new Date(room.bookings[0].end_time).toLocaleString()}</p>
-                      {room.bookings[0].purpose && (
-                        <p><strong>Purpose:</strong> {room.bookings[0].purpose}</p>
-                      )}
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {room.bookings.map((booking, index) => (
+                        <div key={booking.id || index} className="text-sm bg-white p-2 rounded border">
+                          <p><strong>Employee:</strong> {booking.employee_name}</p>
+                          <p><strong>Time:</strong> {new Date(booking.start_time).toLocaleString()} - {new Date(booking.end_time).toLocaleString()}</p>
+                          {booking.purpose && (
+                            <p><strong>Purpose:</strong> {booking.purpose}</p>
+                          )}
+                          <div className="flex justify-between items-center mt-1">
+                            <span className={`text-xs px-2 py-1 rounded ${
+                              new Date(booking.start_time) <= new Date() && new Date() <= new Date(booking.end_time)
+                                ? 'bg-red-100 text-red-700' 
+                                : new Date(booking.start_time) > new Date()
+                                ? 'bg-yellow-100 text-yellow-700'
+                                : 'bg-gray-100 text-gray-700'
+                            }`}>
+                              {new Date(booking.start_time) <= new Date() && new Date() <= new Date(booking.end_time)
+                                ? '🔴 ACTIVE' 
+                                : new Date(booking.start_time) > new Date()
+                                ? '📅 UPCOMING'
+                                : '✅ COMPLETED'}
+                            </span>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleCancelBooking(room.id, booking.id)}
+                              className="text-xs px-2 py-1 h-6"
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
 
                 {/* Show truly vacant status */}
-                {room.status === 'vacant' && (!room.bookings || room.bookings.length === 0) && (
+                {(!room.bookings || room.bookings.length === 0) && (
                   <div className="bg-green-50 border border-green-200 p-3 rounded-md">
                     <div className="flex items-center text-sm text-green-800">
                       <CheckCircle className="mr-2 h-4 w-4" />
