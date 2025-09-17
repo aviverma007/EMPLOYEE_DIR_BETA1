@@ -62,7 +62,11 @@ const AppContent = () => {
                   }`}>
                       <TabsTrigger 
                         value="home" 
-                        className="text-xs sm:text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700 rounded-md px-2 sm:px-4 py-2 whitespace-nowrap"
+                        className={`text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap transition-all duration-200 ${
+                          isAdmin() 
+                            ? 'data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white data-[state=inactive]:text-blue-700 data-[state=inactive]:hover:bg-blue-50' 
+                            : 'data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700'
+                        }`}
                       >
                         Home
                       </TabsTrigger>
