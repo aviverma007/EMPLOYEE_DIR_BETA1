@@ -1409,6 +1409,11 @@ class BackendPersistentTester:
         self.test_backend_connectivity()
         self.test_health_check()
         
+        # FOCUSED MEETING ROOMS TESTING FOR REVIEW REQUEST
+        print("\n🎯 FOCUSED MEETING ROOMS TESTING FOR REVIEW REQUEST")
+        print("-" * 50)
+        self.test_meeting_rooms_review_request_focused()
+        
         # Employee data management tests
         self.test_employee_data_management()
         self.test_employee_search_functionality()
