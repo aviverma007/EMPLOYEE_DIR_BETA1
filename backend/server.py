@@ -1067,17 +1067,27 @@ def get_alerts(target_audience: str = "all"):
         current_time = datetime.utcnow().isoformat()
         
         # Filter by target audience
+        audience_filter = []
         if target_audience != "all":
-            query["$or"] = [
+            audience_filter = [
                 {"target_audience": "all"},
                 {"target_audience": target_audience}
             ]
         
         # Filter out expired alerts
-        query["$or"] = [
+        expiry_filter = [
             {"expires_at": {"$gte": current_time}},
             {"expires_at": None}
         ]
+        
+        # Combine filters
+        if audience_filter:
+            query["$and"] = [
+                {"$or": audience_filter},
+                {"$or": expiry_filter}
+            ]
+        else:
+            query["$or"] = expiry_filter
         
         alerts = list(alerts_collection.find(query, {"_id": 0}).sort("created_at", -1))
         return alerts
