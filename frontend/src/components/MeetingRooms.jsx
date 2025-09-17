@@ -418,33 +418,20 @@ const MeetingRooms = () => {
                   <Button 
                     onClick={() => setSelectedRoom(room)}
                     className="flex-1"
-                    variant={room.status === 'vacant' ? 'default' : 'outline'}
                   >
                     <CheckCircle className="mr-1 h-4 w-4" />
-                    {room.status === 'vacant' ? 'Book Room' : 'Book Another Time'}
+                    Book Room
                   </Button>
                   
-                  {/* Show cancel button for occupied rooms */}
-                  {room.status === 'occupied' && room.current_booking && (
+                  {/* Show clear all bookings button if there are any bookings */}
+                  {room.bookings && room.bookings.length > 0 && (
                     <Button 
                       variant="destructive"
-                      onClick={() => handleCancelBooking(room.id)}
+                      onClick={() => handleClearRoomBookings(room.id)}
                       className="flex-1"
                     >
                       <XCircle className="mr-1 h-4 w-4" />
-                      Cancel Current
-                    </Button>
-                  )}
-                  
-                  {/* Show cancel button for upcoming bookings */}
-                  {room.bookings && room.bookings.length > 0 && !room.current_booking && (
-                    <Button 
-                      variant="outline"
-                      onClick={() => handleCancelBooking(room.id, room.bookings[0].id)}
-                      className="flex-1 border-yellow-300 text-yellow-700 hover:bg-yellow-50"
-                    >
-                      <XCircle className="mr-1 h-4 w-4" />
-                      Cancel Upcoming
+                      Clear All ({room.bookings.length})
                     </Button>
                   )}
                 </div>
