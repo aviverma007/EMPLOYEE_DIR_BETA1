@@ -1201,8 +1201,8 @@ class BackendPersistentTester:
         self.test_help_support_api()
         self.test_hierarchy_management_api()
         
-        # Meeting rooms and alerts
-        self.test_meeting_rooms_api()
+        # Meeting rooms comprehensive testing
+        self.test_meeting_rooms_api_comprehensive()
         
         # COMPREHENSIVE TESTING FOR REVIEW REQUEST
         print("\n🔍 COMPREHENSIVE TESTING FOR REVIEW REQUEST")
