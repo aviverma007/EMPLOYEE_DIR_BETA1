@@ -417,9 +417,11 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Tiles Section - Responsive Height Grid */}
-      <div className={`flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${
-        !isAdmin() ? 'max-h-72' : ''
+      {/* Tiles Section - Enhanced Admin Layout */}
+      <div className={`flex-1 grid gap-4 ${
+        isAdmin() 
+          ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3' 
+          : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-h-72'
       }`}>
         {tiles.map((tile, index) => (
           <Card 
