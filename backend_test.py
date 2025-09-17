@@ -479,64 +479,193 @@ class BackendPersistentTester:
         except Exception as e:
             self.log_test("Hierarchy Management API", False, f"Hierarchy management test failed: {str(e)}")
 
-    def test_meeting_rooms_api(self):
-        """Test 12: Meeting Rooms API - GET and booking functionality"""
+    def test_meeting_rooms_api_comprehensive(self):
+        """Test 12: Comprehensive Meeting Rooms API Testing - As per Review Request"""
         try:
-            # Test GET /api/meeting-rooms
+            print("\n🏢 COMPREHENSIVE MEETING ROOMS API TESTING")
+            print("-" * 50)
+            
+            # Test 1: GET /api/meeting-rooms - Verify all 15 meeting rooms
             get_response = self.session.get(f"{self.backend_url}/api/meeting-rooms")
-            if get_response.status_code == 200:
-                meeting_rooms = get_response.json()
-                if isinstance(meeting_rooms, list) and len(meeting_rooms) >= 10:
-                    # Test booking functionality
-                    test_room = meeting_rooms[0]
-                    room_id = test_room.get('id')
-                    
-                    # Get an employee for booking
-                    emp_response = self.session.get(f"{self.backend_url}/api/employees?search=A")
-                    if emp_response.status_code == 200:
-                        employees = emp_response.json()
-                        if employees:
-                            test_employee = employees[0]
-                            
-                            # Test POST /api/meeting-rooms/{id}/book
-                            future_date = datetime.now() + timedelta(days=7)  # 1 week from now
-                            booking_data = {
-                                "employee_name": test_employee.get('name'),
-                                "employee_id": test_employee.get('id'),
-                                "start_time": future_date.replace(hour=10, minute=0, second=0, microsecond=0).isoformat() + "Z",
-                                "end_time": future_date.replace(hour=11, minute=0, second=0, microsecond=0).isoformat() + "Z",
-                                "purpose": "Test Meeting for Backend Persistence"
-                            }
-                            
-                            book_response = self.session.post(f"{self.backend_url}/api/meeting-rooms/{room_id}/book", 
-                                                            json=booking_data)
-                            
-                            if book_response.status_code == 200:
-                                booking_result = book_response.json()
-                                booking_id = booking_result.get('booking', {}).get('id')
-                                if booking_id:
-                                    self.created_items['bookings'].append((room_id, booking_id))
-                                
-                                self.log_test("Meeting Rooms API", True, 
-                                            f"Meeting rooms API working correctly - {len(meeting_rooms)} rooms available, booking successful", 
-                                            f"Booked room {room_id} for {test_employee.get('name')}")
-                            else:
-                                self.log_test("Meeting Rooms API", False, 
-                                            f"Room booking failed with status {book_response.status_code}")
-                        else:
-                            self.log_test("Meeting Rooms API", False, 
-                                        "No employees found for booking test")
-                    else:
-                        self.log_test("Meeting Rooms API", False, 
-                                    "Could not fetch employees for booking test")
-                else:
-                    self.log_test("Meeting Rooms API", False, 
-                                f"Expected at least 10 meeting rooms, got {len(meeting_rooms) if isinstance(meeting_rooms, list) else 'invalid data'}")
+            if get_response.status_code != 200:
+                self.log_test("Meeting Rooms - GET ALL", False, f"GET /api/meeting-rooms failed with status {get_response.status_code}")
+                return
+            
+            meeting_rooms = get_response.json()
+            if not isinstance(meeting_rooms, list):
+                self.log_test("Meeting Rooms - GET ALL", False, "GET /api/meeting-rooms did not return a list")
+                return
+            
+            # Verify we have exactly 15 meeting rooms as expected
+            if len(meeting_rooms) == 15:
+                self.log_test("Meeting Rooms - GET ALL", True, 
+                            f"Successfully retrieved all 15 meeting rooms", 
+                            f"Total rooms: {len(meeting_rooms)}")
             else:
-                self.log_test("Meeting Rooms API", False, 
-                            f"GET meeting rooms failed with status {get_response.status_code}")
+                self.log_test("Meeting Rooms - GET ALL", False, 
+                            f"Expected 15 meeting rooms, got {len(meeting_rooms)}")
+            
+            # Test 2: Verify Location Variety - Multiple locations
+            locations = set()
+            floors = set()
+            location_distribution = {}
+            
+            for room in meeting_rooms:
+                location = room.get('location', 'Unknown')
+                floor = room.get('floor', 'Unknown')
+                locations.add(location)
+                floors.add(floor)
+                
+                if location not in location_distribution:
+                    location_distribution[location] = 0
+                location_distribution[location] += 1
+            
+            expected_locations = {'IFC', 'Central Office 75', 'Office 75', 'Noida', 'Project Office'}
+            if expected_locations.issubset(locations):
+                self.log_test("Meeting Rooms - LOCATION VARIETY", True, 
+                            f"All expected locations found: {sorted(locations)}", 
+                            f"Distribution: {location_distribution}")
+            else:
+                missing_locations = expected_locations - locations
+                self.log_test("Meeting Rooms - LOCATION VARIETY", False, 
+                            f"Missing locations: {missing_locations}", 
+                            f"Found: {sorted(locations)}")
+            
+            # Test 3: Verify Floor Variety - Different floors
+            expected_floors = {'11th Floor', '12th Floor', '14th Floor', '1st Floor'}
+            if expected_floors.issubset(floors):
+                self.log_test("Meeting Rooms - FLOOR VARIETY", True, 
+                            f"All expected floors found: {sorted(floors)}", 
+                            f"IFC has multiple floors, others have 1st floor")
+            else:
+                missing_floors = expected_floors - floors
+                self.log_test("Meeting Rooms - FLOOR VARIETY", False, 
+                            f"Missing floors: {missing_floors}", 
+                            f"Found: {sorted(floors)}")
+            
+            # Test 4: Verify Room Status Visibility - vacant/occupied status
+            status_count = {'vacant': 0, 'occupied': 0, 'other': 0}
+            rooms_with_status = 0
+            
+            for room in meeting_rooms:
+                status = room.get('status')
+                if status:
+                    rooms_with_status += 1
+                    if status in status_count:
+                        status_count[status] += 1
+                    else:
+                        status_count['other'] += 1
+            
+            if rooms_with_status == len(meeting_rooms):
+                self.log_test("Meeting Rooms - STATUS VISIBILITY", True, 
+                            f"All rooms have status visibility", 
+                            f"Status distribution: {status_count}")
+            else:
+                self.log_test("Meeting Rooms - STATUS VISIBILITY", False, 
+                            f"Only {rooms_with_status}/{len(meeting_rooms)} rooms have status")
+            
+            # Test 5: Booking Functionality - POST /api/meeting-rooms/{room_id}/book
+            # Get an employee for booking
+            emp_response = self.session.get(f"{self.backend_url}/api/employees?search=A")
+            if emp_response.status_code != 200:
+                self.log_test("Meeting Rooms - BOOKING PREP", False, "Could not fetch employees for booking test")
+                return
+            
+            employees = emp_response.json()
+            if not employees:
+                self.log_test("Meeting Rooms - BOOKING PREP", False, "No employees found for booking test")
+                return
+            
+            test_employee = employees[0]
+            test_room = meeting_rooms[0]  # Use first room for testing
+            room_id = test_room.get('id')
+            
+            # Create a booking for tomorrow
+            future_date = datetime.now() + timedelta(days=1)
+            booking_data = {
+                "employee_name": test_employee.get('name'),
+                "employee_id": test_employee.get('id'),
+                "start_time": future_date.replace(hour=10, minute=0, second=0, microsecond=0).isoformat() + "Z",
+                "end_time": future_date.replace(hour=11, minute=0, second=0, microsecond=0).isoformat() + "Z",
+                "purpose": "Review Request Test - Meeting Room Booking"
+            }
+            
+            book_response = self.session.post(f"{self.backend_url}/api/meeting-rooms/{room_id}/book", 
+                                            json=booking_data)
+            
+            if book_response.status_code == 200:
+                booking_result = book_response.json()
+                booking_id = booking_result.get('booking', {}).get('id')
+                if booking_id:
+                    self.created_items['bookings'].append((room_id, booking_id))
+                    self.log_test("Meeting Rooms - BOOKING CREATE", True, 
+                                f"Successfully created booking for room {test_room.get('name')}", 
+                                f"Booking ID: {booking_id}, Employee: {test_employee.get('name')}")
+                    
+                    # Test 6: Cancel Booking Functionality - DELETE /api/meeting-rooms/{room_id}/booking/{booking_id}
+                    cancel_response = self.session.delete(f"{self.backend_url}/api/meeting-rooms/{room_id}/booking/{booking_id}")
+                    
+                    if cancel_response.status_code == 200:
+                        self.log_test("Meeting Rooms - BOOKING CANCEL", True, 
+                                    f"Successfully cancelled specific booking", 
+                                    f"Cancelled booking {booking_id} from room {room_id}")
+                        # Remove from cleanup list since we already cancelled it
+                        self.created_items['bookings'] = [(r, b) for r, b in self.created_items['bookings'] if b != booking_id]
+                    else:
+                        self.log_test("Meeting Rooms - BOOKING CANCEL", False, 
+                                    f"Failed to cancel booking: {cancel_response.status_code}")
+                else:
+                    self.log_test("Meeting Rooms - BOOKING CREATE", False, 
+                                "Booking created but no booking ID returned")
+            else:
+                try:
+                    error_detail = book_response.json().get('detail', 'Unknown error')
+                except:
+                    error_detail = book_response.text
+                self.log_test("Meeting Rooms - BOOKING CREATE", False, 
+                            f"Failed to create booking: {book_response.status_code}", 
+                            f"Error: {error_detail}")
+            
+            # Test 7: Clear All Bookings - DELETE /api/meeting-rooms/clear-all-bookings
+            clear_response = self.session.delete(f"{self.backend_url}/api/meeting-rooms/clear-all-bookings")
+            
+            if clear_response.status_code == 200:
+                clear_result = clear_response.json()
+                bookings_cleared = clear_result.get('bookings_cleared', 0)
+                self.log_test("Meeting Rooms - CLEAR ALL BOOKINGS", True, 
+                            f"Successfully cleared all bookings", 
+                            f"Cleared {bookings_cleared} bookings from all rooms")
+                # Clear our tracking since all bookings are now cleared
+                self.created_items['bookings'] = []
+            else:
+                self.log_test("Meeting Rooms - CLEAR ALL BOOKINGS", False, 
+                            f"Failed to clear all bookings: {clear_response.status_code}")
+            
+            # Test 8: Verify specific user concerns from review request
+            # Check that users can see ALL rooms across ALL locations and floors
+            ifc_rooms = [room for room in meeting_rooms if room.get('location') == 'IFC']
+            non_ifc_rooms = [room for room in meeting_rooms if room.get('location') != 'IFC']
+            
+            if len(ifc_rooms) >= 11 and len(non_ifc_rooms) >= 4:
+                self.log_test("Meeting Rooms - USER VISIBILITY", True, 
+                            f"Users can see rooms across all locations and floors", 
+                            f"IFC rooms: {len(ifc_rooms)}, Other locations: {len(non_ifc_rooms)}")
+            else:
+                self.log_test("Meeting Rooms - USER VISIBILITY", False, 
+                            f"Limited room visibility - IFC: {len(ifc_rooms)}, Others: {len(non_ifc_rooms)}")
+            
+            # Verify 14th floor IFC rooms specifically (user mentioned this)
+            floor_14_rooms = [room for room in meeting_rooms if room.get('location') == 'IFC' and '14th' in room.get('floor', '')]
+            if len(floor_14_rooms) >= 9:
+                self.log_test("Meeting Rooms - 14TH FLOOR ACCESS", True, 
+                            f"14th floor IFC rooms accessible", 
+                            f"Found {len(floor_14_rooms)} rooms on 14th floor")
+            else:
+                self.log_test("Meeting Rooms - 14TH FLOOR ACCESS", False, 
+                            f"Limited 14th floor access - only {len(floor_14_rooms)} rooms found")
+                
         except Exception as e:
-            self.log_test("Meeting Rooms API", False, f"Meeting rooms test failed: {str(e)}")
+            self.log_test("Meeting Rooms - COMPREHENSIVE", False, f"Meeting rooms comprehensive test failed: {str(e)}")
 
     def test_alerts_system_comprehensive(self):
         """Test 13: Comprehensive Alert System Testing"""
