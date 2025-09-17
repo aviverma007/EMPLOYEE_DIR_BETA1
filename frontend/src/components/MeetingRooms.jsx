@@ -43,13 +43,6 @@ const MeetingRooms = () => {
     fetchRooms();
     fetchEmployees();
     fetchLocations();
-    
-    // Set up real-time synchronization for cross-system updates
-    const syncInterval = setInterval(() => {
-      fetchRooms(); // Refresh room data every 10 seconds for cross-system sync
-    }, 10000);
-    
-    return () => clearInterval(syncInterval);
   }, []);
 
   useEffect(() => {
