@@ -320,10 +320,10 @@ const MeetingRooms = () => {
                 <CardTitle className="text-lg">{room.name}</CardTitle>
                 <Badge 
                   className={room.status === 'vacant' 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-red-100 text-red-800'}
+                    ? 'bg-green-100 text-green-800 border-green-300' 
+                    : 'bg-red-100 text-red-800 border-red-300'}
                 >
-                  {room.status}
+                  {room.status === 'vacant' ? '✅ VACANT' : '🔴 OCCUPIED'}
                 </Badge>
               </div>
             </CardHeader>
