@@ -29,15 +29,14 @@ const MeetingRooms = () => {
   });
   const [loading, setLoading] = useState(true);
 
-  // Set user-specific filters after component mounts
+  // Set user-specific filters after component mounts - Allow users to see all locations
   useEffect(() => {
-    if (!isAdmin()) {
-      setFilters({
-        location: 'IFC',
-        floor: '14th Floor',
-        status: ''
-      });
-    }
+    // Both admin and users start with no filters to see all rooms
+    setFilters({
+      location: '',
+      floor: '',
+      status: ''
+    });
   }, [isAdmin]);
 
   useEffect(() => {
