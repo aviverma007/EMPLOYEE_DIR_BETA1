@@ -426,10 +426,12 @@ const Home = () => {
         {tiles.map((tile, index) => (
           <Card 
             key={index}
-            className={`${tile.color} ${tile.textColor} shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer flex flex-col ${
-              tile.title === "PICTURES" ? "overflow-hidden border-0 p-0" : "transform hover:scale-105"
+            className={`${tile.color} ${tile.textColor} shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col ${
+              tile.title === "PICTURES" ? "overflow-hidden border-0 p-0" : "transform hover:scale-105 border-0"
             } ${
-              !isAdmin() ? 'h-56' : 'h-full'
+              !isAdmin() ? 'h-56' : 'h-full min-h-48'
+            } ${
+              isAdmin() ? 'hover:shadow-2xl backdrop-blur-sm' : ''
             }`}
           >
             {tile.title === "PICTURES" ? (
