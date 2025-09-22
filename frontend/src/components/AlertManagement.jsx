@@ -232,7 +232,7 @@ const AlertManagement = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Priority
@@ -244,36 +244,39 @@ const AlertManagement = () => {
                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="low">Low</option>
-                    <option value="normal">Normal</option>
+                    <option value="medium">Medium</option>
                     <option value="high">High</option>
+                    <option value="urgent">Urgent</option>
                   </select>
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Expiry Date (Optional)
+                    Target Audience
                   </label>
-                  <Input
-                    type="datetime-local"
-                    name="expiryDate"
-                    value={formData.expiryDate}
+                  <select
+                    name="target_audience"
+                    value={formData.target_audience}
                     onChange={handleInputChange}
-                  />
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="all">All Users</option>
+                    <option value="admin">Admin Only</option>
+                    <option value="user">Users Only</option>
+                  </select>
                 </div>
+              </div>
 
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="isActive"
-                    name="isActive"
-                    checked={formData.isActive}
-                    onChange={handleInputChange}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <label htmlFor="isActive" className="text-sm font-medium text-gray-700">
-                    Active
-                  </label>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Expiry Date (Optional)
+                </label>
+                <Input
+                  type="datetime-local"
+                  name="expires_at"
+                  value={formData.expires_at}
+                  onChange={handleInputChange}
+                />
               </div>
 
               <div className="flex space-x-4 pt-4">
