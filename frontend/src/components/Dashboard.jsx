@@ -56,15 +56,6 @@ const Dashboard = () => {
     window.open(dashboard.url, '_blank');
   };
 
-  const handleBackToDashboards = () => {
-    setSelectedDashboard(null);
-    setFullScreen(false);
-  };
-
-  const toggleFullScreen = () => {
-    setFullScreen(!fullScreen);
-  };
-
   return (
     <div className="h-full p-6">
       {/* Simple Header */}
