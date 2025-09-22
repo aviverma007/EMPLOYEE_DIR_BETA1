@@ -318,17 +318,9 @@ const AlertManagement = () => {
                         <Badge className={getPriorityColors(alert.priority)}>
                           {alert.priority.toUpperCase()}
                         </Badge>
-                        {alert.isActive ? (
-                          <Badge className="bg-green-100 text-green-700">
-                            <Eye className="h-3 w-3 mr-1" />
-                            Active
-                          </Badge>
-                        ) : (
-                          <Badge className="bg-gray-100 text-gray-700">
-                            <EyeOff className="h-3 w-3 mr-1" />
-                            Inactive
-                          </Badge>
-                        )}
+                        <Badge className="bg-blue-100 text-blue-700">
+                          {alert.target_audience.toUpperCase()}
+                        </Badge>
                       </div>
                       
                       <p className="text-sm mb-3">{alert.message}</p>
