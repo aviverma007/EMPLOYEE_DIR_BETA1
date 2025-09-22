@@ -9,9 +9,6 @@ import {
 } from 'lucide-react';
 
 const Dashboard = () => {
-  const [selectedDashboard, setSelectedDashboard] = useState(null);
-  const [fullScreen, setFullScreen] = useState(false);
-
   const dashboards = [
     {
       id: 'po-dashboard',
