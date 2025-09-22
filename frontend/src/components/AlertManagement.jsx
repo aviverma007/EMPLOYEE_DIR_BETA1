@@ -110,8 +110,8 @@ const AlertManagement = () => {
       message: alert.message,
       type: alert.type,
       priority: alert.priority,
-      isActive: alert.isActive,
-      expiryDate: alert.expiryDate || ""
+      target_audience: alert.target_audience || 'all',
+      expires_at: alert.expires_at || ""
     });
     setEditingAlert(alert);
     setShowForm(true);
