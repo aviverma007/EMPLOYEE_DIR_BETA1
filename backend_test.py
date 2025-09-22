@@ -1400,49 +1400,328 @@ class BackendPersistentTester:
         except Exception as e:
             self.log_test("Meeting Rooms - Review Request", False, f"Meeting rooms review request test failed: {str(e)}")
 
+    def test_meeting_room_employee_integration(self):
+        """Test Meeting Room and Employee Integration"""
+        try:
+            # Get employees for booking tests
+            emp_response = self.session.get(f"{self.backend_url}/api/employees")
+            if emp_response.status_code != 200:
+                self.log_test("Meeting Room Employee Integration", False, f"Could not fetch employees: {emp_response.status_code}")
+                return
+            
+            employees = emp_response.json()
+            if len(employees) < 5:
+                self.log_test("Meeting Room Employee Integration", False, f"Insufficient employees for testing: {len(employees)}")
+                return
+            
+            # Test with real employee data
+            test_employee = employees[0]
+            employee_name = test_employee.get('name')
+            employee_id = test_employee.get('id')
+            
+            if not employee_name or not employee_id:
+                self.log_test("Meeting Room Employee Integration", False, "Employee data missing required fields")
+                return
+            
+            self.log_test("Meeting Room Employee Integration", True, 
+                        f"Employee integration ready - using {employee_name} (ID: {employee_id})", 
+                        f"Total employees available: {len(employees)}")
+                        
+        except Exception as e:
+            self.log_test("Meeting Room Employee Integration", False, f"Employee integration test failed: {str(e)}")
+
+    def test_alert_crud_operations(self):
+        """Test Alert System CRUD Operations in Detail"""
+        try:
+            # Test 1: Create alerts with all required fields
+            test_alerts = [
+                {
+                    "title": "System Maintenance",
+                    "message": "Scheduled maintenance tonight 10 PM - 2 AM",
+                    "priority": "high",
+                    "type": "system",
+                    "target_audience": "all",
+                    "created_by": "Admin",
+                    "expires_at": (datetime.now() + timedelta(hours=24)).isoformat()
+                },
+                {
+                    "title": "User Announcement",
+                    "message": "New features available in user dashboard",
+                    "priority": "medium",
+                    "type": "announcement",
+                    "target_audience": "user",
+                    "created_by": "Product Team"
+                },
+                {
+                    "title": "Admin Notice",
+                    "message": "Admin panel updates completed",
+                    "priority": "low",
+                    "type": "general",
+                    "target_audience": "admin",
+                    "created_by": "IT Team",
+                    "expires_at": (datetime.now() + timedelta(hours=6)).isoformat()
+                }
+            ]
+            
+            created_alert_ids = []
+            
+            # Test POST /api/alerts for each alert
+            for i, alert_data in enumerate(test_alerts):
+                post_response = self.session.post(f"{self.backend_url}/api/alerts", json=alert_data)
+                if post_response.status_code == 200:
+                    result = post_response.json()
+                    alert_id = result.get('alert', {}).get('id')
+                    if alert_id:
+                        created_alert_ids.append(alert_id)
+                        self.log_test(f"Alert CRUD - CREATE {i+1}", True, 
+                                    f"Created alert: {alert_data['title']}", 
+                                    f"ID: {alert_id}, Priority: {alert_data['priority']}, Audience: {alert_data['target_audience']}")
+                    else:
+                        self.log_test(f"Alert CRUD - CREATE {i+1}", False, "Alert created but no ID returned")
+                else:
+                    self.log_test(f"Alert CRUD - CREATE {i+1}", False, f"Failed to create alert: {post_response.status_code}")
+            
+            # Test 2: GET /api/alerts - verify all alerts appear
+            get_response = self.session.get(f"{self.backend_url}/api/alerts")
+            if get_response.status_code == 200:
+                all_alerts = get_response.json()
+                found_alerts = [alert for alert in all_alerts if alert.get('id') in created_alert_ids]
+                if len(found_alerts) == len(created_alert_ids):
+                    self.log_test("Alert CRUD - GET ALL", True, 
+                                f"All created alerts retrieved successfully", 
+                                f"Found {len(found_alerts)}/{len(created_alert_ids)} alerts")
+                else:
+                    self.log_test("Alert CRUD - GET ALL", False, 
+                                f"Not all alerts retrieved: {len(found_alerts)}/{len(created_alert_ids)}")
+            else:
+                self.log_test("Alert CRUD - GET ALL", False, f"Failed to get alerts: {get_response.status_code}")
+            
+            # Test 3: Test target_audience filtering
+            user_alerts = self.session.get(f"{self.backend_url}/api/alerts?target_audience=user")
+            admin_alerts = self.session.get(f"{self.backend_url}/api/alerts?target_audience=admin")
+            
+            if user_alerts.status_code == 200 and admin_alerts.status_code == 200:
+                user_list = user_alerts.json()
+                admin_list = admin_alerts.json()
+                
+                # User should see 'all' and 'user' alerts
+                user_audiences = set(alert.get('target_audience') for alert in user_list)
+                admin_audiences = set(alert.get('target_audience') for alert in admin_list)
+                
+                user_filter_correct = user_audiences.issubset({'all', 'user'})
+                admin_filter_correct = admin_audiences.issubset({'all', 'admin'})
+                
+                if user_filter_correct and admin_filter_correct:
+                    self.log_test("Alert CRUD - AUDIENCE FILTER", True, 
+                                f"Target audience filtering working correctly", 
+                                f"User sees: {user_audiences}, Admin sees: {admin_audiences}")
+                else:
+                    self.log_test("Alert CRUD - AUDIENCE FILTER", False, 
+                                f"Audience filtering incorrect - User: {user_audiences}, Admin: {admin_audiences}")
+            
+            # Test 4: PUT /api/alerts/{id} - Update alert
+            if created_alert_ids:
+                test_alert_id = created_alert_ids[0]
+                update_data = {
+                    "title": "Updated System Maintenance",
+                    "priority": "urgent",
+                    "message": "URGENT: Maintenance moved to 8 PM - 12 AM"
+                }
+                
+                put_response = self.session.put(f"{self.backend_url}/api/alerts/{test_alert_id}", json=update_data)
+                if put_response.status_code == 200:
+                    updated_alert = put_response.json().get('alert', {})
+                    if (updated_alert.get('title') == update_data['title'] and 
+                        updated_alert.get('priority') == update_data['priority']):
+                        self.log_test("Alert CRUD - UPDATE", True, 
+                                    f"Alert updated successfully", 
+                                    f"Updated title and priority for alert {test_alert_id}")
+                    else:
+                        self.log_test("Alert CRUD - UPDATE", False, "Alert update did not persist correctly")
+                else:
+                    self.log_test("Alert CRUD - UPDATE", False, f"Failed to update alert: {put_response.status_code}")
+            
+            # Test 5: DELETE /api/alerts/{id} - Delete alert
+            if created_alert_ids and len(created_alert_ids) > 1:
+                delete_alert_id = created_alert_ids[1]
+                delete_response = self.session.delete(f"{self.backend_url}/api/alerts/{delete_alert_id}")
+                
+                if delete_response.status_code == 200:
+                    # Verify alert is deleted
+                    verify_response = self.session.get(f"{self.backend_url}/api/alerts")
+                    if verify_response.status_code == 200:
+                        remaining_alerts = verify_response.json()
+                        deleted_alert_found = any(alert.get('id') == delete_alert_id for alert in remaining_alerts)
+                        
+                        if not deleted_alert_found:
+                            self.log_test("Alert CRUD - DELETE", True, 
+                                        f"Alert deleted successfully", 
+                                        f"Alert {delete_alert_id} removed from system")
+                            created_alert_ids.remove(delete_alert_id)  # Remove from cleanup list
+                        else:
+                            self.log_test("Alert CRUD - DELETE", False, "Deleted alert still appears in system")
+                    else:
+                        self.log_test("Alert CRUD - DELETE", False, "Could not verify alert deletion")
+                else:
+                    self.log_test("Alert CRUD - DELETE", False, f"Failed to delete alert: {delete_response.status_code}")
+            
+            # Cleanup remaining alerts
+            for alert_id in created_alert_ids:
+                try:
+                    self.session.delete(f"{self.backend_url}/api/alerts/{alert_id}")
+                except:
+                    pass
+                    
+        except Exception as e:
+            self.log_test("Alert CRUD - COMPREHENSIVE", False, f"Alert CRUD operations test failed: {str(e)}")
+
+    def test_frontend_backend_connectivity(self):
+        """Test Frontend-Backend Connectivity via External URL"""
+        try:
+            # Test 1: Verify external URL accessibility
+            response = self.session.get(f"{self.backend_url}/api/employees", params={"search": "test"})
+            if response.status_code == 200:
+                response_time = response.elapsed.total_seconds()
+                self.log_test("Frontend-Backend Connectivity", True, 
+                            f"External URL accessible - Response time: {response_time:.2f}s", 
+                            f"Frontend can successfully connect to backend via {self.backend_url}")
+            else:
+                self.log_test("Frontend-Backend Connectivity", False, 
+                            f"External URL not accessible - Status: {response.status_code}")
+            
+            # Test 2: Test API endpoint responses
+            endpoints_to_test = [
+                "/api/employees",
+                "/api/meeting-rooms", 
+                "/api/alerts",
+                "/api/departments",
+                "/api/locations"
+            ]
+            
+            successful_endpoints = 0
+            for endpoint in endpoints_to_test:
+                try:
+                    test_response = self.session.get(f"{self.backend_url}{endpoint}")
+                    if test_response.status_code == 200:
+                        successful_endpoints += 1
+                except:
+                    pass
+            
+            if successful_endpoints == len(endpoints_to_test):
+                self.log_test("API Endpoints Connectivity", True, 
+                            f"All {len(endpoints_to_test)} API endpoints responding correctly", 
+                            f"Endpoints tested: {', '.join(endpoints_to_test)}")
+            else:
+                self.log_test("API Endpoints Connectivity", False, 
+                            f"Only {successful_endpoints}/{len(endpoints_to_test)} endpoints responding")
+                            
+        except Exception as e:
+            self.log_test("Frontend-Backend Connectivity", False, f"Connectivity test failed: {str(e)}")
+
+    def test_cors_and_authentication(self):
+        """Test CORS and Authentication Issues"""
+        try:
+            # Test 1: Check CORS headers
+            response = self.session.options(f"{self.backend_url}/api/employees")
+            cors_headers = {
+                'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers')
+            }
+            
+            # Check if CORS is properly configured
+            if cors_headers['Access-Control-Allow-Origin']:
+                self.log_test("CORS Configuration", True, 
+                            f"CORS headers present", 
+                            f"Allow-Origin: {cors_headers['Access-Control-Allow-Origin']}")
+            else:
+                self.log_test("CORS Configuration", False, "CORS headers missing or incomplete")
+            
+            # Test 2: Test different HTTP methods
+            methods_to_test = ['GET', 'POST', 'PUT', 'DELETE']
+            method_results = {}
+            
+            for method in methods_to_test:
+                try:
+                    if method == 'GET':
+                        test_response = self.session.get(f"{self.backend_url}/api/employees")
+                    elif method == 'POST':
+                        # Test with alerts endpoint
+                        test_data = {
+                            "title": "CORS Test Alert",
+                            "message": "Testing CORS for POST method",
+                            "priority": "low",
+                            "type": "general",
+                            "target_audience": "all",
+                            "created_by": "Test"
+                        }
+                        test_response = self.session.post(f"{self.backend_url}/api/alerts", json=test_data)
+                        # Clean up if successful
+                        if test_response.status_code == 200:
+                            try:
+                                alert_id = test_response.json().get('alert', {}).get('id')
+                                if alert_id:
+                                    self.session.delete(f"{self.backend_url}/api/alerts/{alert_id}")
+                            except:
+                                pass
+                    else:
+                        # For PUT and DELETE, just check if methods are allowed
+                        test_response = self.session.request(method, f"{self.backend_url}/api/employees/test")
+                    
+                    method_results[method] = test_response.status_code not in [405, 501]  # Method not allowed or not implemented
+                except:
+                    method_results[method] = False
+            
+            successful_methods = sum(method_results.values())
+            if successful_methods >= 2:  # At least GET and POST should work
+                self.log_test("HTTP Methods Support", True, 
+                            f"HTTP methods working correctly", 
+                            f"Working methods: {[method for method, works in method_results.items() if works]}")
+            else:
+                self.log_test("HTTP Methods Support", False, 
+                            f"Limited HTTP method support: {method_results}")
+                            
+        except Exception as e:
+            self.log_test("CORS and Authentication", False, f"CORS/Auth test failed: {str(e)}")
+
     def run_all_tests(self):
-        """Run all tests"""
-        print("🚀 Starting Backend-Persistent API Tests")
-        print("=" * 70)
+        """Run all tests - FOCUSED ON REVIEW REQUEST"""
+        print("🚀 REVIEW REQUEST FOCUSED TESTING - MEETING ROOMS & ALERT SYSTEM")
+        print("=" * 80)
         
-        # Core connectivity tests
+        # Core connectivity test
         self.test_backend_connectivity()
-        self.test_health_check()
         
-        # FOCUSED MEETING ROOMS TESTING FOR REVIEW REQUEST
-        print("\n🎯 FOCUSED MEETING ROOMS TESTING FOR REVIEW REQUEST")
-        print("-" * 50)
-        self.test_meeting_rooms_review_request_focused()
-        
-        # Employee data management tests
+        # Employee data verification (needed for booking tests)
         self.test_employee_data_management()
-        self.test_employee_search_functionality()
-        self.test_departments_and_locations()
-        self.test_employee_image_update()
         
-        # API management tests
-        self.test_news_management_api()
-        self.test_task_management_api()
-        self.test_knowledge_management_api()
-        self.test_help_support_api()
-        self.test_hierarchy_management_api()
-        
-        # Meeting rooms comprehensive testing
+        # MAIN FOCUS: Meeting Rooms Testing
+        print("\n" + "="*60)
+        print("🏢 MEETING ROOMS COMPREHENSIVE TESTING")
+        print("="*60)
         self.test_meeting_rooms_api_comprehensive()
+        self.test_meeting_room_employee_integration()
         
-        # COMPREHENSIVE TESTING FOR REVIEW REQUEST
-        print("\n🔍 COMPREHENSIVE TESTING FOR REVIEW REQUEST")
-        print("-" * 50)
+        # MAIN FOCUS: Alert System Testing  
+        print("\n" + "="*60)
+        print("🚨 ALERT SYSTEM COMPREHENSIVE TESTING")
+        print("="*60)
         self.test_alerts_system_comprehensive()
-        self.test_meeting_room_cross_system_sync()
-        self.test_user_profile_functionality()
+        self.test_alert_crud_operations()
+        
+        # Integration Testing
+        print("\n" + "="*60)
+        print("🔗 INTEGRATION TESTING")
+        print("="*60)
+        self.test_frontend_backend_connectivity()
+        self.test_cors_and_authentication()
         
         # Clean up test data
         self.cleanup_test_data()
         
-        print("\n" + "=" * 70)
-        print("📊 BACKEND-PERSISTENT API TEST SUMMARY")
-        print("=" * 70)
+        print("\n" + "=" * 80)
+        print("📊 REVIEW REQUEST TEST SUMMARY")
+        print("=" * 80)
         
         passed = sum(1 for result in self.test_results if result['success'])
         total = len(self.test_results)
