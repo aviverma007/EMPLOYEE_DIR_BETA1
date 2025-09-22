@@ -1054,6 +1054,26 @@ def cancel_booking(room_id: str, booking_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.delete("/api/meeting-rooms/reinitialize")
+async def reinitialize_meeting_rooms():
+    """Reinitialize meeting rooms data with updated structure"""
+    try:
+        # Clear existing meeting rooms
+        meeting_rooms_collection.delete_many({})
+        
+        # Reinitialize with new data
+        initialize_meeting_rooms()
+        
+        # Get updated count
+        total_rooms = meeting_rooms_collection.count_documents({})
+        
+        return {
+            "message": f"Meeting rooms reinitialized successfully",
+            "total_rooms": total_rooms
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error reinitializing meeting rooms: {str(e)}")
+
 @app.delete("/api/meeting-rooms/clear-all-bookings")
 def clear_all_bookings():
     """Clear all bookings from all meeting rooms"""
