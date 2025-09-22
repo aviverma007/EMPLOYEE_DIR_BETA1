@@ -112,41 +112,6 @@ const Dashboard = () => {
       </div>
     </div>
   );
-          <Card 
-            key={dashboard.id} 
-            className="cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-102 bg-white border border-gray-200"
-            onClick={() => handleDashboardClick(dashboard)}
-          >
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                {dashboard.icon}
-                <CardTitle className="text-sm font-semibold text-gray-800">
-                  {dashboard.title}
-                </CardTitle>
-              </div>
-            </CardHeader>
-            
-            <CardContent className="pt-0">
-              <p className="text-xs text-gray-600 mb-3">
-                {dashboard.description}
-              </p>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500">Power BI</span>
-                <Button 
-                  size="sm"
-                  className="h-7 text-xs bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  View
-                  <ExternalLink className="h-3 w-3 ml-1" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
 };
 
 export default Dashboard;
