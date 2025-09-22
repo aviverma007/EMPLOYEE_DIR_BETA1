@@ -1193,6 +1193,12 @@ def delete_alert(alert_id: str):
 def initialize_meeting_rooms():
     """Initialize meeting rooms data if collection is empty"""
     meeting_rooms_data = [
+        # IFC 11th Floor - 1 room
+        {"id": "ifc_11a", "name": "IFC Conference Room 11A", "location": "IFC", "floor": "11th Floor", "capacity": 8, "equipment": "Projector, Whiteboard"},
+        
+        # IFC 12th Floor - 1 room
+        {"id": "ifc_12a", "name": "IFC Conference Room 12A", "location": "IFC", "floor": "12th Floor", "capacity": 12, "equipment": "Video Conference, Smart Board"},
+        
         # IFC 14th Floor - Multiple rooms (as exception)
         {"id": "oval", "name": "OVAL MEETING ROOM", "location": "IFC", "floor": "14th Floor", "capacity": 10, "equipment": "Smart Board, Audio System"},
         {"id": "petronas", "name": "PETRONAS MEETING ROOM", "location": "IFC", "floor": "14th Floor", "capacity": 5, "equipment": "Projector"},
