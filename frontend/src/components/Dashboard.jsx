@@ -73,105 +73,6 @@ const Dashboard = () => {
     setFullScreen(!fullScreen);
   };
 
-  if (selectedDashboard) {
-    return (
-      <div className={`${fullScreen ? 'fixed inset-0 z-50 bg-white' : 'h-full'} flex flex-col`}>
-        {/* Header */}
-        <div className={`flex items-center justify-between p-4 bg-gradient-to-r ${selectedDashboard.color} text-white ${fullScreen ? 'shadow-lg' : 'rounded-t-lg'}`}>
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleBackToDashboards}
-              className="text-white hover:bg-white/20"
-            >
-              ← Back to Dashboards
-            </Button>
-            <div className="flex items-center gap-2">
-              {selectedDashboard.icon}
-              <h2 className="text-xl font-bold">{selectedDashboard.title}</h2>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleFullScreen}
-              className="text-white hover:bg-white/20"
-              title={fullScreen ? "Exit Full Screen" : "Full Screen"}
-            >
-              {fullScreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => window.open(selectedDashboard.url, '_blank')}
-              className="text-white hover:bg-white/20"
-              title="Open in New Tab"
-            >
-              <ExternalLink className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Dashboard Embed */}
-        <div className={`flex-1 ${fullScreen ? '' : 'p-4'}`}>
-          <div className="w-full h-full border-0 rounded-lg shadow-lg bg-white flex flex-col">
-            {/* Demo Dashboard Content */}
-            <div className="p-6 flex-1">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
-                {/* Chart 1 */}
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 flex flex-col items-center justify-center">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">₹47.2L</div>
-                  <div className="text-gray-600 text-sm">Total Revenue</div>
-                  <div className="w-full h-20 mt-4 bg-blue-200 rounded flex items-end justify-center space-x-1">
-                    {[40, 65, 45, 80, 60, 75, 90].map((height, i) => (
-                      <div key={i} className="bg-blue-500 w-6 rounded-t" style={{height: `${height}%`}}></div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Chart 2 */}
-                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 flex flex-col items-center justify-center">
-                  <div className="text-3xl font-bold text-green-600 mb-2">285</div>
-                  <div className="text-gray-600 text-sm">Active Projects</div>
-                  <div className="w-20 h-20 mt-4 relative">
-                    <div className="w-full h-full bg-green-200 rounded-full"></div>
-                    <div className="absolute inset-2 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">78%</div>
-                  </div>
-                </div>
-
-                {/* Chart 3 */}
-                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 flex flex-col items-center justify-center">
-                  <div className="text-3xl font-bold text-purple-600 mb-2">1,247</div>
-                  <div className="text-gray-600 text-sm">Total Orders</div>
-                  <div className="flex items-center space-x-2 mt-4">
-                    <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                    <div className="text-sm text-gray-600">+12% from last month</div>
-                  </div>
-                </div>
-
-                {/* Chart 4 */}
-                <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 flex flex-col items-center justify-center">
-                  <div className="text-3xl font-bold text-orange-600 mb-2">98.5%</div>
-                  <div className="text-gray-600 text-sm">System Uptime</div>
-                  <div className="w-full h-6 mt-4 bg-orange-200 rounded-full overflow-hidden">
-                    <div className="h-full bg-orange-500 rounded-full" style={{width: '98.5%'}}></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Footer with note */}
-            <div className="p-4 border-t bg-gray-50 text-center text-sm text-gray-500">
-              📊 Demo {selectedDashboard.title} - Sample Analytics Data
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="h-full p-6">
       {/* Simple Header */}
@@ -183,6 +84,34 @@ const Dashboard = () => {
       {/* All Dashboards in Single Grid Layout */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {dashboards.map(dashboard => (
+          <div
+            key={dashboard.id}
+            onClick={() => handleDashboardClick(dashboard)}
+            className="cursor-pointer group relative overflow-hidden rounded-xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+          >
+            <div className={`h-32 bg-gradient-to-br ${dashboard.color} p-4 flex flex-col justify-between text-white`}>
+              <div className="flex items-center justify-between">
+                {dashboard.icon}
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <ExternalLink className="h-5 w-5" />
+                </div>
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg">{dashboard.title}</h3>
+              </div>
+            </div>
+            <div className="p-4">
+              <p className="text-sm text-gray-600">{dashboard.description}</p>
+              <div className="mt-3 flex items-center text-blue-600 text-sm font-medium">
+                <span>View Dashboard</span>
+                <ExternalLink className="ml-1 h-4 w-4" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
           <Card 
             key={dashboard.id} 
             className="cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-102 bg-white border border-gray-200"
