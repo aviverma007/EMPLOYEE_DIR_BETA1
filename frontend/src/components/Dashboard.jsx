@@ -1,16 +1,11 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
+import React from 'react';
 import { 
   BarChart3, 
   TrendingUp, 
   Users, 
   Calendar,
   FileText,
-  ExternalLink,
-  Maximize2,
-  Minimize2
+  ExternalLink
 } from 'lucide-react';
 
 const Dashboard = () => {
