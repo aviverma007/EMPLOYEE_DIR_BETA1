@@ -330,10 +330,10 @@ const AlertManagement = () => {
                           <Clock className="h-3 w-3 mr-1" />
                           Created: {new Date(alert.created_at).toLocaleDateString()}
                         </span>
-                        {alert.expiryDate && (
+                        {alert.expires_at && (
                           <span className="flex items-center">
                             <Calendar className="h-3 w-3 mr-1" />
-                            Expires: {new Date(alert.expiryDate).toLocaleDateString()}
+                            Expires: {new Date(alert.expires_at).toLocaleDateString()}
                           </span>
                         )}
                       </div>
