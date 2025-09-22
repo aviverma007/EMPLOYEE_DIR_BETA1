@@ -343,14 +343,6 @@ const AlertManagement = () => {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleToggleStatus(alert.id)}
-                        className="h-8"
-                      >
-                        {alert.isActive ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
                         onClick={() => handleEdit(alert)}
                         className="h-8"
                       >
