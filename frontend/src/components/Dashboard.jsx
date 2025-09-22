@@ -61,7 +61,7 @@ const Dashboard = () => {
   ];
 
   const handleDashboardClick = (dashboard) => {
-    setSelectedDashboard(dashboard);
+    window.open(dashboard.url, '_blank');
   };
 
   const handleBackToDashboards = () => {
