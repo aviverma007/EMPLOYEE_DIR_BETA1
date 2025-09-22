@@ -15,7 +15,7 @@ const Dashboard = () => {
       title: 'PO Dashboard',
       description: 'Purchase Order Analytics and Tracking',
       icon: <FileText className="h-6 w-6 text-blue-600" />,
-      url: 'https://app.powerbi.com/view?r=eyJrIjoiYjk4YjVlM2YtYzJhZC00ZGJlLWE4YjQtOTYzZTU2MzkzYjZlIiwidCI6IjUwZjA5ZmVmLTc0NzQtNGE0MC1hM2RmLWJhNzQ3NDA4YmJjNCJ9',
+      url: 'https://app.powerbi.com/reportEmbed?reportId=8eff9893-39e5-44ff-8393-eed2716e5c86&autoAuth=true&ctid=711f4066-07b7-45a1-9e32-978e86528cad',
       color: 'from-blue-500 to-blue-700'
     },
     {
@@ -23,7 +23,7 @@ const Dashboard = () => {
       title: 'QMS Dashboard',
       description: 'Quality Management System Analytics',
       icon: <TrendingUp className="h-6 w-6 text-green-600" />,
-      url: 'https://app.powerbi.com/view?r=eyJrIjoiNmE4YzJkYzAtZTNiNC00MjIwLTkzYzgtOTU3MTQzNzNmODc3IiwidCI6IjUwZjA5ZmVmLTc0NzQtNGE0MC1hM2RmLWJhNzQ3NDA4YmJjNCJ9',
+      url: 'https://app.powerbi.com/reportEmbed?reportId=ff391e55-8a76-42c8-b62c-1c209a6c2663&autoAuth=true&ctid=711f4066-07b7-45a1-9e32-978e86528cad',
       color: 'from-green-500 to-green-700'
     },
     {
@@ -31,7 +31,7 @@ const Dashboard = () => {
       title: 'Assets Dashboard',
       description: 'Asset Management and Tracking',
       icon: <BarChart3 className="h-6 w-6 text-purple-600" />,
-      url: 'https://app.powerbi.com/view?r=eyJrIjoiZmM4OGEyNzMtNjE4ZC00ZDczLWE4MDQtNzJhYjBjMzMyZjZlIiwidCI6IjUwZjA5ZmVmLTc0NzQtNGE0MC1hM2RmLWJhNzQ3NDA4YmJjNCJ9',
+      url: 'https://app.powerbi.com/reportEmbed?reportId=95bc0742-cbfd-46a6-81da-e05ee4b628e8&autoAuth=true&ctid=711f4066-07b7-45a1-9e32-978e86528cad',
       color: 'from-purple-500 to-purple-700'
     },
     {
@@ -39,7 +39,7 @@ const Dashboard = () => {
       title: 'Employee Attendance',
       description: 'Employee Attendance Analytics',
       icon: <Users className="h-6 w-6 text-orange-600" />,
-      url: 'https://app.powerbi.com/view?r=eyJrIjoiOWE3MzIxM2QtOWY1ZC00ODcwLWJlZDctMjQxZGY0ZjYwNzQ2IiwidCI6IjUwZjA5ZmVmLTc0NzQtNGE0MC1hM2RmLWJhNzQ3NDA4YmJjNCJ9',
+      url: 'https://app.powerbi.com/reportEmbed?reportId=4be8796e-c0a4-4712-879c-9cd9a183e365&autoAuth=true&ctid=711f4066-07b7-45a1-9e32-978e86528cad',
       color: 'from-orange-500 to-orange-700'
     },
     {
@@ -47,7 +47,7 @@ const Dashboard = () => {
       title: 'PR Dashboard',  
       description: 'Purchase Request Analytics',
       icon: <Calendar className="h-6 w-6 text-indigo-600" />,
-      url: 'https://app.powerbi.com/view?r=eyJrIjoiYzA4ZDJlMDctYjk4YS00NzY4LTg3MzMtNzE2NjkzNGEzYjcwIiwidCI6IjUwZjA5ZmVmLTc0NzQtNGE0MC1hM2RmLWJhNzQ3NDA4YmJjNCJ9',
+      url: 'https://app.powerbi.com/reportEmbed?reportId=b9bb2eaa-6315-4235-a051-d41d2219a899&autoAuth=true&ctid=711f4066-07b7-45a1-9e32-978e86528cad',
       color: 'from-indigo-500 to-indigo-700'
     }
   ];
