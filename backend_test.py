@@ -126,6 +126,51 @@ class BackendPersistentTester:
         except Exception as e:
             self.log_test("Employee Data Loading", False, f"Employee data test failed: {str(e)}")
 
+    def test_employee_data_verification_625(self):
+        """Test: Employee Data Verification - Exactly 625 employees as per review request"""
+        try:
+            response = self.session.get(f"{self.backend_url}/api/employees")
+            if response.status_code == 200:
+                employees = response.json()
+                if isinstance(employees, list):
+                    employee_count = len(employees)
+                    # Review request specifically mentions 625 employees
+                    if employee_count == 625:
+                        self.log_test("Employee Count Verification", True, 
+                                    f"✅ EXACTLY 625 employees loaded from Excel as required", 
+                                    f"Employee count matches review request specification")
+                    else:
+                        self.log_test("Employee Count Verification", False, 
+                                    f"❌ Expected exactly 625 employees, got {employee_count}", 
+                                    f"Review request specifies exactly 625 employees")
+                    
+                    # Test employee search functionality for booking assignment
+                    if employees:
+                        sample_employee = employees[0]
+                        search_term = sample_employee.get('name', '')[:3] if sample_employee.get('name') else 'A'
+                        search_response = self.session.get(f"{self.backend_url}/api/employees?search={search_term}")
+                        
+                        if search_response.status_code == 200:
+                            search_results = search_response.json()
+                            if search_results and len(search_results) > 0:
+                                self.log_test("Employee Search for Booking", True, 
+                                            f"Employee search functionality working for booking assignment", 
+                                            f"Search '{search_term}' returned {len(search_results)} results")
+                            else:
+                                self.log_test("Employee Search for Booking", False, 
+                                            f"Employee search returned no results for '{search_term}'")
+                        else:
+                            self.log_test("Employee Search for Booking", False, 
+                                        f"Employee search failed with status {search_response.status_code}")
+                else:
+                    self.log_test("Employee Count Verification", False, 
+                                "Employees endpoint did not return a list")
+            else:
+                self.log_test("Employee Count Verification", False, 
+                            f"Employees endpoint returned status {response.status_code}")
+        except Exception as e:
+            self.log_test("Employee Count Verification", False, f"Employee verification test failed: {str(e)}")
+
     def test_employee_search_functionality(self):
         """Test 4: Employee Search Functionality"""
         try:
