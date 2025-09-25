@@ -2247,7 +2247,27 @@ class BackendPersistentTester:
         self.cleanup_test_data()
         
         # Print summary
-        return self.print_summary()
+        print("\n" + "=" * 80)
+        print("📊 REVIEW REQUEST TEST SUMMARY")
+        print("=" * 80)
+        
+        passed = sum(1 for result in self.test_results if result['success'])
+        total = len(self.test_results)
+        
+        print(f"Total Tests: {total}")
+        print(f"Passed: {passed}")
+        print(f"Failed: {total - passed}")
+        print(f"Success Rate: {(passed/total)*100:.1f}%")
+        
+        if passed == total:
+            print("\n🎉 ALL REVIEW REQUEST TESTS PASSED!")
+            print("✅ Alert System fully functional - All CRUD operations working")
+            print("✅ Meeting Room Booking system operational - All booking features working")
+            print("✅ Employee data verified - Exactly 625 employees loaded")
+        else:
+            print(f"\n⚠️  {total - passed} test(s) failed. Check the details above.")
+            
+        return passed == total
 
 if __name__ == "__main__":
     import sys
