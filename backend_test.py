@@ -1656,6 +1656,13 @@ class BackendPersistentTester:
                 self.session.delete(f"{self.backend_url}/api/meeting-rooms/{room_id}/booking/{booking_id}")
             except:
                 pass
+        
+        # Clean up alerts
+        for alert_id in self.created_items['alerts']:
+            try:
+                self.session.delete(f"{self.backend_url}/api/alerts/{alert_id}")
+            except:
+                pass
 
     def test_meeting_rooms_review_request_focused(self):
         """Test Meeting Rooms API - Focused on Review Request Issues"""
