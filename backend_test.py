@@ -1218,6 +1218,258 @@ class BackendPersistentTester:
         except Exception as e:
             self.log_test("Cross-System Sync - COMPREHENSIVE", False, f"Cross-system sync test failed: {str(e)}")
 
+    def test_meeting_room_booking_review_request(self):
+        """Test: Meeting Room Booking as per Review Request - GET rooms, POST booking, DELETE booking, conflict detection"""
+        try:
+            print("\n🏢 MEETING ROOM BOOKING TESTING - REVIEW REQUEST SPECIFICATIONS")
+            print("-" * 70)
+            
+            # Test 1: GET /api/meeting-rooms to fetch all 15 meeting rooms
+            get_response = self.session.get(f"{self.backend_url}/api/meeting-rooms")
+            if get_response.status_code == 200:
+                meeting_rooms = get_response.json()
+                if isinstance(meeting_rooms, list):
+                    room_count = len(meeting_rooms)
+                    if room_count == 15:
+                        self.log_test("Meeting Rooms - GET All 15 Rooms", True, 
+                                    f"✅ Successfully fetched all 15 meeting rooms as specified", 
+                                    f"Room count matches review request specification")
+                    else:
+                        self.log_test("Meeting Rooms - GET All 15 Rooms", False, 
+                                    f"❌ Expected 15 meeting rooms, got {room_count}", 
+                                    f"Review request specifies exactly 15 meeting rooms")
+                else:
+                    self.log_test("Meeting Rooms - GET All 15 Rooms", False, 
+                                "GET /api/meeting-rooms did not return a list")
+                    return
+            else:
+                self.log_test("Meeting Rooms - GET All 15 Rooms", False, 
+                            f"GET /api/meeting-rooms failed with status {get_response.status_code}")
+                return
+            
+            # Verify room distribution and structure
+            locations = {}
+            for room in meeting_rooms:
+                location = room.get('location', 'Unknown')
+                if location not in locations:
+                    locations[location] = []
+                locations[location].append(room)
+            
+            self.log_test("Meeting Rooms - Location Distribution", True, 
+                        f"Rooms distributed across {len(locations)} locations", 
+                        f"Locations: {list(locations.keys())}")
+            
+            # Test 2: Get employee for booking tests
+            emp_response = self.session.get(f"{self.backend_url}/api/employees?search=A")
+            if emp_response.status_code != 200:
+                self.log_test("Meeting Rooms - Employee Fetch", False, "Could not fetch employees for booking test")
+                return
+            
+            employees = emp_response.json()
+            if not employees or len(employees) == 0:
+                self.log_test("Meeting Rooms - Employee Fetch", False, "No employees found for booking test")
+                return
+            
+            test_employee = employees[0]
+            test_room = meeting_rooms[0]  # Use first room for testing
+            room_id = test_room.get('id')
+            
+            self.log_test("Meeting Rooms - Employee Integration", True, 
+                        f"Employee data available for booking assignment", 
+                        f"Test employee: {test_employee.get('name')} (ID: {test_employee.get('id')})")
+            
+            # Test 3: POST /api/meeting-rooms/{room_id}/book to create bookings
+            future_date = datetime.now() + timedelta(days=1)
+            booking_data = {
+                "employee_name": test_employee.get('name'),
+                "employee_id": test_employee.get('id'),
+                "start_time": future_date.replace(hour=10, minute=0, second=0, microsecond=0).isoformat() + "Z",
+                "end_time": future_date.replace(hour=11, minute=0, second=0, microsecond=0).isoformat() + "Z",
+                "purpose": "Review Request Test - Meeting Room Booking Functionality"
+            }
+            
+            book_response = self.session.post(f"{self.backend_url}/api/meeting-rooms/{room_id}/book", 
+                                            json=booking_data)
+            
+            if book_response.status_code == 200:
+                booking_result = book_response.json()
+                booking_id = booking_result.get('booking', {}).get('id')
+                if booking_id:
+                    self.log_test("Meeting Rooms - POST Booking", True, 
+                                f"✅ Successfully created booking for room {test_room.get('name')}", 
+                                f"Booking ID: {booking_id}, Employee: {test_employee.get('name')}")
+                    
+                    # Store for cleanup
+                    if 'bookings' not in self.created_items:
+                        self.created_items['bookings'] = []
+                    self.created_items['bookings'].append((room_id, booking_id))
+                else:
+                    self.log_test("Meeting Rooms - POST Booking", False, 
+                                "Booking created but no booking ID returned")
+                    return
+            else:
+                try:
+                    error_detail = book_response.json().get('detail', 'Unknown error')
+                except:
+                    error_detail = book_response.text
+                self.log_test("Meeting Rooms - POST Booking", False, 
+                            f"Failed to create booking: {book_response.status_code}", 
+                            f"Error: {error_detail}")
+                return
+            
+            # Test 4: Verify booking persistence and proper employee assignment
+            rooms_after_booking = self.session.get(f"{self.backend_url}/api/meeting-rooms")
+            if rooms_after_booking.status_code == 200:
+                updated_rooms = rooms_after_booking.json()
+                booked_room = next((room for room in updated_rooms if room.get('id') == room_id), None)
+                
+                if booked_room:
+                    room_bookings = booked_room.get('bookings', [])
+                    booking_found = any(booking.get('id') == booking_id for booking in room_bookings)
+                    
+                    if booking_found:
+                        # Verify employee assignment
+                        our_booking = next((b for b in room_bookings if b.get('id') == booking_id), None)
+                        if (our_booking and 
+                            our_booking.get('employee_name') == test_employee.get('name') and
+                            our_booking.get('employee_id') == test_employee.get('id')):
+                            self.log_test("Meeting Rooms - Booking Persistence", True, 
+                                        "✅ Booking persistence and employee assignment working correctly", 
+                                        f"Booking persisted with correct employee details")
+                        else:
+                            self.log_test("Meeting Rooms - Booking Persistence", False, 
+                                        "Booking persisted but employee assignment incorrect")
+                    else:
+                        self.log_test("Meeting Rooms - Booking Persistence", False, 
+                                    "Booking not found in room's booking list")
+                else:
+                    self.log_test("Meeting Rooms - Booking Persistence", False, 
+                                "Could not find booked room in updated room list")
+            
+            # Test 5: Verify room status updates (vacant/occupied) work correctly
+            if booked_room:
+                room_status = booked_room.get('status', 'unknown')
+                # For future bookings, room should still be 'vacant' but have bookings listed
+                if room_status in ['vacant', 'occupied']:
+                    self.log_test("Meeting Rooms - Room Status Updates", True, 
+                                f"✅ Room status updates working correctly", 
+                                f"Room status: {room_status}, Bookings: {len(booked_room.get('bookings', []))}")
+                else:
+                    self.log_test("Meeting Rooms - Room Status Updates", False, 
+                                f"Room status '{room_status}' not recognized")
+            
+            # Test 6: Test booking conflict detection (single booking per room enforcement)
+            # Try to book the same room for overlapping time
+            conflict_booking_data = {
+                "employee_name": test_employee.get('name'),
+                "employee_id": test_employee.get('id'),
+                "start_time": future_date.replace(hour=10, minute=30, second=0, microsecond=0).isoformat() + "Z",  # Overlapping time
+                "end_time": future_date.replace(hour=11, minute=30, second=0, microsecond=0).isoformat() + "Z",
+                "purpose": "Conflict Test - Should be rejected"
+            }
+            
+            conflict_response = self.session.post(f"{self.backend_url}/api/meeting-rooms/{room_id}/book", 
+                                                json=conflict_booking_data)
+            
+            if conflict_response.status_code == 400:  # Should be rejected
+                try:
+                    error_detail = conflict_response.json().get('detail', '')
+                    if 'already booked' in error_detail.lower() or 'conflict' in error_detail.lower():
+                        self.log_test("Meeting Rooms - Booking Conflict Detection", True, 
+                                    "✅ Booking conflict detection working correctly", 
+                                    f"Overlapping booking properly rejected: {error_detail}")
+                    else:
+                        self.log_test("Meeting Rooms - Booking Conflict Detection", False, 
+                                    f"Booking rejected but error message unclear: {error_detail}")
+                except:
+                    self.log_test("Meeting Rooms - Booking Conflict Detection", True, 
+                                "✅ Booking conflict detection working - overlapping booking rejected")
+            else:
+                self.log_test("Meeting Rooms - Booking Conflict Detection", False, 
+                            f"Booking conflict detection failed - overlapping booking allowed (Status: {conflict_response.status_code})")
+            
+            # Test 7: DELETE /api/meeting-rooms/{room_id}/booking/{booking_id} to cancel specific bookings
+            cancel_response = self.session.delete(f"{self.backend_url}/api/meeting-rooms/{room_id}/booking/{booking_id}")
+            
+            if cancel_response.status_code == 200:
+                # Verify booking is cancelled
+                rooms_after_cancel = self.session.get(f"{self.backend_url}/api/meeting-rooms")
+                if rooms_after_cancel.status_code == 200:
+                    rooms_after = rooms_after_cancel.json()
+                    cancelled_room = next((room for room in rooms_after if room.get('id') == room_id), None)
+                    
+                    if cancelled_room:
+                        remaining_bookings = cancelled_room.get('bookings', [])
+                        booking_still_exists = any(booking.get('id') == booking_id for booking in remaining_bookings)
+                        
+                        if not booking_still_exists:
+                            self.log_test("Meeting Rooms - DELETE Specific Booking", True, 
+                                        "✅ Successfully cancelled specific booking", 
+                                        f"Booking {booking_id} removed from room {room_id}")
+                            # Remove from cleanup list since we already cancelled it
+                            self.created_items['bookings'] = [(r, b) for r, b in self.created_items['bookings'] if b != booking_id]
+                        else:
+                            self.log_test("Meeting Rooms - DELETE Specific Booking", False, 
+                                        f"Booking {booking_id} still exists after cancellation")
+                    else:
+                        self.log_test("Meeting Rooms - DELETE Specific Booking", False, 
+                                    "Could not find room after cancellation")
+                else:
+                    self.log_test("Meeting Rooms - DELETE Specific Booking", False, 
+                                "Could not verify cancellation - GET rooms failed")
+            else:
+                self.log_test("Meeting Rooms - DELETE Specific Booking", False, 
+                            f"Booking cancellation failed: {cancel_response.status_code}")
+            
+            # Test 8: DELETE /api/meeting-rooms/clear-all-bookings to clear all bookings
+            # First create a test booking to clear
+            test_booking_data = {
+                "employee_name": test_employee.get('name'),
+                "employee_id": test_employee.get('id'),
+                "start_time": future_date.replace(hour=14, minute=0, second=0, microsecond=0).isoformat() + "Z",
+                "end_time": future_date.replace(hour=15, minute=0, second=0, microsecond=0).isoformat() + "Z",
+                "purpose": "Test booking for clear all functionality"
+            }
+            
+            test_book_response = self.session.post(f"{self.backend_url}/api/meeting-rooms/{room_id}/book", 
+                                                 json=test_booking_data)
+            
+            if test_book_response.status_code == 200:
+                # Now test clear all bookings
+                clear_response = self.session.delete(f"{self.backend_url}/api/meeting-rooms/clear-all-bookings")
+                
+                if clear_response.status_code == 200:
+                    clear_result = clear_response.json()
+                    bookings_cleared = clear_result.get('bookings_cleared', 0)
+                    
+                    # Verify all bookings are cleared
+                    rooms_after_clear = self.session.get(f"{self.backend_url}/api/meeting-rooms")
+                    if rooms_after_clear.status_code == 200:
+                        cleared_rooms = rooms_after_clear.json()
+                        total_bookings = sum(len(room.get('bookings', [])) for room in cleared_rooms)
+                        
+                        if total_bookings == 0:
+                            self.log_test("Meeting Rooms - DELETE Clear All Bookings", True, 
+                                        "✅ Successfully cleared all bookings from all rooms", 
+                                        f"Cleared {bookings_cleared} bookings, verified 0 remaining")
+                            # Clear our tracking since all bookings are cleared
+                            self.created_items['bookings'] = []
+                        else:
+                            self.log_test("Meeting Rooms - DELETE Clear All Bookings", False, 
+                                        f"Clear all bookings incomplete - {total_bookings} bookings still remain")
+                    else:
+                        self.log_test("Meeting Rooms - DELETE Clear All Bookings", False, 
+                                    "Could not verify clear all operation - GET rooms failed")
+                else:
+                    self.log_test("Meeting Rooms - DELETE Clear All Bookings", False, 
+                                f"Clear all bookings failed: {clear_response.status_code}")
+            else:
+                self.log_test("Meeting Rooms - DELETE Clear All Bookings", False, 
+                            "Could not create test booking for clear all test")
+                
+        except Exception as e:
+            self.log_test("Meeting Rooms - REVIEW REQUEST", False, f"Meeting room booking review request test failed: {str(e)}")
+
     def test_user_profile_functionality(self):
         """Test 15: User Profile Related Functionality"""
         try:
