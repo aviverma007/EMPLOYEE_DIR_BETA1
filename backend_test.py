@@ -2169,10 +2169,206 @@ class BackendPersistentTester:
         except Exception as e:
             self.log_test("CORS and Authentication", False, f"CORS/Auth test failed: {str(e)}")
 
+    def test_review_request_critical_apis(self):
+        """Test Critical Backend APIs as per Review Request - FastAPI Middleware Bug Fix Verification"""
+        try:
+            print("\n🎯 REVIEW REQUEST CRITICAL API TESTING - FASTAPI MIDDLEWARE BUG FIX")
+            print("=" * 80)
+            print("Testing critical backend functionality after FastAPI upgrade from 0.104.1 to 0.117.1")
+            print("-" * 80)
+            
+            # Test 1: Employee Management - GET /api/employees with search and filtering (should return 625 employees)
+            print("\n1️⃣ EMPLOYEE MANAGEMENT API TESTING")
+            emp_response = self.session.get(f"{self.backend_url}/api/employees")
+            if emp_response.status_code == 200:
+                employees = emp_response.json()
+                employee_count = len(employees)
+                if employee_count == 625:
+                    self.log_test("Employee Management - Count Verification", True, 
+                                f"✅ EXACTLY 625 employees returned as specified in review request", 
+                                f"Employee count matches requirement: {employee_count}")
+                else:
+                    self.log_test("Employee Management - Count Verification", False, 
+                                f"❌ Expected 625 employees, got {employee_count}", 
+                                f"Review request specifies exactly 625 employees")
+                
+                # Test search functionality
+                search_response = self.session.get(f"{self.backend_url}/api/employees?search=A")
+                if search_response.status_code == 200:
+                    search_results = search_response.json()
+                    self.log_test("Employee Management - Search", True, 
+                                f"Search functionality working - found {len(search_results)} results for 'A'", 
+                                f"Search API responding correctly after FastAPI upgrade")
+                else:
+                    self.log_test("Employee Management - Search", False, 
+                                f"Search failed with status {search_response.status_code}")
+                
+                # Test filtering by department
+                dept_response = self.session.get(f"{self.backend_url}/api/employees?department=IT")
+                if dept_response.status_code == 200:
+                    dept_results = dept_response.json()
+                    self.log_test("Employee Management - Filtering", True, 
+                                f"Department filtering working - found {len(dept_results)} IT employees", 
+                                f"Filter API responding correctly after FastAPI upgrade")
+                else:
+                    self.log_test("Employee Management - Filtering", False, 
+                                f"Department filtering failed with status {dept_response.status_code}")
+            else:
+                self.log_test("Employee Management - API", False, 
+                            f"❌ CRITICAL: Employee API failed with status {emp_response.status_code}")
+            
+            # Test 2: Meeting Rooms - GET /api/meeting-rooms (should return 15 meeting rooms)
+            print("\n2️⃣ MEETING ROOMS API TESTING")
+            rooms_response = self.session.get(f"{self.backend_url}/api/meeting-rooms")
+            if rooms_response.status_code == 200:
+                meeting_rooms = rooms_response.json()
+                room_count = len(meeting_rooms)
+                if room_count == 15:
+                    self.log_test("Meeting Rooms - Count Verification", True, 
+                                f"✅ EXACTLY 15 meeting rooms returned as specified in review request", 
+                                f"Meeting room count matches requirement: {room_count}")
+                else:
+                    self.log_test("Meeting Rooms - Count Verification", False, 
+                                f"❌ Expected 15 meeting rooms, got {room_count}", 
+                                f"Review request specifies exactly 15 meeting rooms")
+                
+                # Verify room structure and data integrity
+                if meeting_rooms:
+                    sample_room = meeting_rooms[0]
+                    required_fields = ['id', 'name', 'location', 'floor', 'capacity']
+                    missing_fields = [field for field in required_fields if field not in sample_room]
+                    if not missing_fields:
+                        self.log_test("Meeting Rooms - Data Structure", True, 
+                                    "Meeting room data structure intact after FastAPI upgrade", 
+                                    f"All required fields present: {required_fields}")
+                    else:
+                        self.log_test("Meeting Rooms - Data Structure", False, 
+                                    f"Missing required fields: {missing_fields}")
+            else:
+                self.log_test("Meeting Rooms - API", False, 
+                            f"❌ CRITICAL: Meeting Rooms API failed with status {rooms_response.status_code}")
+            
+            # Test 3: Alerts System - GET /api/alerts and POST /api/alerts
+            print("\n3️⃣ ALERTS SYSTEM API TESTING")
+            alerts_get_response = self.session.get(f"{self.backend_url}/api/alerts")
+            if alerts_get_response.status_code == 200:
+                existing_alerts = alerts_get_response.json()
+                self.log_test("Alerts System - GET", True, 
+                            f"GET /api/alerts working correctly - found {len(existing_alerts)} alerts", 
+                            f"Alerts retrieval API responding after FastAPI upgrade")
+                
+                # Test POST /api/alerts - create a test alert and verify it's saved
+                test_alert = {
+                    "title": "FastAPI Upgrade Test Alert",
+                    "message": "This alert verifies the alerts system is working after FastAPI middleware bug fix.",
+                    "priority": "high",
+                    "type": "system",
+                    "target_audience": "all",
+                    "created_by": "Testing Agent",
+                    "expires_at": (datetime.now() + timedelta(hours=24)).isoformat()
+                }
+                
+                alerts_post_response = self.session.post(f"{self.backend_url}/api/alerts", json=test_alert)
+                if alerts_post_response.status_code == 200:
+                    created_alert = alerts_post_response.json()
+                    alert_id = created_alert.get('alert', {}).get('id')
+                    if alert_id:
+                        self.created_items['alerts'].append(alert_id)
+                        self.log_test("Alerts System - POST", True, 
+                                    f"✅ Test alert created and saved successfully", 
+                                    f"Alert ID: {alert_id}, POST API working after FastAPI upgrade")
+                        
+                        # Verify the alert is actually saved by fetching it again
+                        verify_response = self.session.get(f"{self.backend_url}/api/alerts")
+                        if verify_response.status_code == 200:
+                            updated_alerts = verify_response.json()
+                            alert_found = any(alert.get('id') == alert_id for alert in updated_alerts)
+                            if alert_found:
+                                self.log_test("Alerts System - Persistence", True, 
+                                            "✅ Created alert verified in database - persistence working", 
+                                            "Alert successfully saved and retrievable")
+                            else:
+                                self.log_test("Alerts System - Persistence", False, 
+                                            "❌ Created alert not found in subsequent GET request")
+                    else:
+                        self.log_test("Alerts System - POST", False, 
+                                    "Alert created but no ID returned")
+                else:
+                    self.log_test("Alerts System - POST", False, 
+                                f"❌ CRITICAL: POST /api/alerts failed with status {alerts_post_response.status_code}")
+            else:
+                self.log_test("Alerts System - GET", False, 
+                            f"❌ CRITICAL: GET /api/alerts failed with status {alerts_get_response.status_code}")
+            
+            # Test 4: Excel Data Loading - Verify employees count and data integrity
+            print("\n4️⃣ EXCEL DATA LOADING VERIFICATION")
+            # This is already covered in Employee Management test, but let's verify data integrity
+            if emp_response.status_code == 200:
+                employees = emp_response.json()
+                # Check data integrity - verify employees have required fields
+                if employees:
+                    sample_employee = employees[0]
+                    required_fields = ['id', 'name', 'department', 'location']
+                    missing_fields = [field for field in required_fields if not sample_employee.get(field)]
+                    if not missing_fields:
+                        self.log_test("Excel Data Loading - Data Integrity", True, 
+                                    "✅ Employee data integrity verified - all required fields present", 
+                                    f"Sample employee has: {list(sample_employee.keys())}")
+                    else:
+                        self.log_test("Excel Data Loading - Data Integrity", False, 
+                                    f"❌ Employee data missing required fields: {missing_fields}")
+                    
+                    # Verify data variety (different departments and locations)
+                    departments = set(emp.get('department', '') for emp in employees[:100])  # Check first 100
+                    locations = set(emp.get('location', '') for emp in employees[:100])
+                    if len(departments) > 5 and len(locations) > 3:
+                        self.log_test("Excel Data Loading - Data Variety", True, 
+                                    f"✅ Excel data shows good variety - {len(departments)} departments, {len(locations)} locations", 
+                                    "Excel data loading working correctly")
+                    else:
+                        self.log_test("Excel Data Loading - Data Variety", False, 
+                                    f"❌ Limited data variety - {len(departments)} departments, {len(locations)} locations")
+            
+            # Test 5: Stats Endpoint - GET /api/stats for system health check
+            print("\n5️⃣ STATS ENDPOINT SYSTEM HEALTH CHECK")
+            stats_response = self.session.get(f"{self.backend_url}/api/stats")
+            if stats_response.status_code == 200:
+                stats_data = stats_response.json()
+                required_stats = ['employees', 'departments', 'locations']
+                missing_stats = [stat for stat in required_stats if stat not in stats_data]
+                if not missing_stats:
+                    employee_stat = stats_data.get('employees', 0)
+                    dept_stat = stats_data.get('departments', 0)
+                    loc_stat = stats_data.get('locations', 0)
+                    
+                    if employee_stat == 625:
+                        self.log_test("Stats Endpoint - System Health", True, 
+                                    f"✅ Stats endpoint working correctly - {employee_stat} employees, {dept_stat} departments, {loc_stat} locations", 
+                                    "System health check passed after FastAPI upgrade")
+                    else:
+                        self.log_test("Stats Endpoint - System Health", False, 
+                                    f"❌ Stats show {employee_stat} employees, expected 625")
+                else:
+                    self.log_test("Stats Endpoint - System Health", False, 
+                                f"❌ Stats endpoint missing required fields: {missing_stats}")
+            else:
+                self.log_test("Stats Endpoint - System Health", False, 
+                            f"❌ CRITICAL: Stats endpoint failed with status {stats_response.status_code}")
+            
+            print("\n" + "=" * 80)
+            print("🎯 REVIEW REQUEST CRITICAL API TESTING COMPLETED")
+            print("=" * 80)
+            
+        except Exception as e:
+            self.log_test("Review Request Critical APIs", False, f"Critical API testing failed: {str(e)}")
+
     def run_all_tests(self):
         """Run all tests - FOCUSED ON REVIEW REQUEST"""
         print("🚀 REVIEW REQUEST FOCUSED TESTING - MEETING ROOMS & ALERT SYSTEM")
         print("=" * 80)
+        
+        # PRIORITY: Review Request Critical API Testing
+        self.test_review_request_critical_apis()
         
         # Core connectivity test
         self.test_backend_connectivity()
