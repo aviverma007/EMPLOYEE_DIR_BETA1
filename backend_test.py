@@ -42,7 +42,8 @@ class BackendPersistentTester:
             'knowledge': [],
             'help': [],
             'hierarchy': [],
-            'bookings': []
+            'bookings': [],
+            'alerts': []
         }
 
     def log_test(self, test_name, success, message, details=None):
