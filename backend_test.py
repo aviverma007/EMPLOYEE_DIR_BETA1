@@ -848,6 +848,186 @@ class BackendPersistentTester:
         except Exception as e:
             self.log_test("Alert System - COMPREHENSIVE", False, f"Alert system comprehensive test failed: {str(e)}")
 
+    def test_alert_system_review_request(self):
+        """Test: Alert System as per Review Request - GET, POST, PUT, DELETE with priorities, types, filtering"""
+        try:
+            print("\n🚨 ALERT SYSTEM TESTING - REVIEW REQUEST SPECIFICATIONS")
+            print("-" * 60)
+            
+            # Test 1: GET /api/alerts to fetch existing alerts
+            get_response = self.session.get(f"{self.backend_url}/api/alerts")
+            if get_response.status_code == 200:
+                existing_alerts = get_response.json()
+                self.log_test("Alert System - GET /api/alerts", True, 
+                            f"Successfully fetched existing alerts", 
+                            f"Found {len(existing_alerts)} existing alerts")
+            else:
+                self.log_test("Alert System - GET /api/alerts", False, 
+                            f"GET /api/alerts failed with status {get_response.status_code}")
+                return
+            
+            # Test 2: POST /api/alerts with different priorities (high, medium, low) and types (system, announcement, general)
+            test_alerts_data = [
+                {
+                    "title": "High Priority System Alert",
+                    "message": "Critical system maintenance scheduled for tonight.",
+                    "priority": "high",
+                    "type": "system", 
+                    "target_audience": "all",
+                    "created_by": "System Admin",
+                    "expires_at": (datetime.now() + timedelta(hours=24)).isoformat()
+                },
+                {
+                    "title": "Medium Priority Announcement",
+                    "message": "New company policy updates are now available.",
+                    "priority": "medium",
+                    "type": "announcement",
+                    "target_audience": "user",
+                    "created_by": "HR Department",
+                    "expires_at": (datetime.now() + timedelta(hours=48)).isoformat()
+                },
+                {
+                    "title": "Low Priority General Notice",
+                    "message": "Cafeteria menu has been updated for next week.",
+                    "priority": "low",
+                    "type": "general",
+                    "target_audience": "admin",
+                    "created_by": "Facilities",
+                    "expires_at": (datetime.now() + timedelta(hours=72)).isoformat()
+                }
+            ]
+            
+            created_alert_ids = []
+            for i, alert_data in enumerate(test_alerts_data):
+                post_response = self.session.post(f"{self.backend_url}/api/alerts", json=alert_data)
+                if post_response.status_code == 200:
+                    created_alert = post_response.json()
+                    alert_id = created_alert.get('alert', {}).get('id')
+                    if alert_id:
+                        created_alert_ids.append(alert_id)
+                        self.log_test(f"Alert System - POST Alert {i+1}", True, 
+                                    f"Created {alert_data['priority']} priority {alert_data['type']} alert", 
+                                    f"Alert ID: {alert_id}, Target: {alert_data['target_audience']}")
+                    else:
+                        self.log_test(f"Alert System - POST Alert {i+1}", False, 
+                                    f"Alert created but no ID returned")
+                else:
+                    self.log_test(f"Alert System - POST Alert {i+1}", False, 
+                                f"Failed to create alert - Status: {post_response.status_code}")
+            
+            # Test 3: Test alert filtering by target_audience (user, admin, all)
+            for audience in ['user', 'admin', 'all']:
+                filter_response = self.session.get(f"{self.backend_url}/api/alerts?target_audience={audience}")
+                if filter_response.status_code == 200:
+                    filtered_alerts = filter_response.json()
+                    # Verify filtering logic
+                    valid_alerts = []
+                    for alert in filtered_alerts:
+                        alert_audience = alert.get('target_audience', '')
+                        if audience == 'all' or alert_audience == 'all' or alert_audience == audience:
+                            valid_alerts.append(alert)
+                    
+                    if len(valid_alerts) == len(filtered_alerts):
+                        self.log_test(f"Alert System - Filter {audience.upper()}", True, 
+                                    f"Target audience filtering working for '{audience}'", 
+                                    f"Returned {len(filtered_alerts)} alerts for {audience} audience")
+                    else:
+                        self.log_test(f"Alert System - Filter {audience.upper()}", False, 
+                                    f"Target audience filtering incorrect for '{audience}'")
+                else:
+                    self.log_test(f"Alert System - Filter {audience.upper()}", False, 
+                                f"Filtering failed for '{audience}' - Status: {filter_response.status_code}")
+            
+            # Test 4: PUT /api/alerts/{id} to update alerts
+            if created_alert_ids:
+                test_alert_id = created_alert_ids[0]
+                update_data = {
+                    "title": "Updated High Priority System Alert",
+                    "priority": "urgent",
+                    "message": "URGENT: Critical system maintenance moved to immediate execution."
+                }
+                
+                put_response = self.session.put(f"{self.backend_url}/api/alerts/{test_alert_id}", json=update_data)
+                if put_response.status_code == 200:
+                    updated_alert = put_response.json()
+                    alert_data = updated_alert.get('alert', {})
+                    if (alert_data.get('title') == update_data['title'] and 
+                        alert_data.get('priority') == update_data['priority']):
+                        self.log_test("Alert System - PUT /api/alerts/{id}", True, 
+                                    f"Successfully updated alert {test_alert_id}", 
+                                    f"Title and priority updated correctly")
+                    else:
+                        self.log_test("Alert System - PUT /api/alerts/{id}", False, 
+                                    f"Alert update did not persist correctly")
+                else:
+                    self.log_test("Alert System - PUT /api/alerts/{id}", False, 
+                                f"Alert update failed - Status: {put_response.status_code}")
+            
+            # Test 5: DELETE /api/alerts/{id} to delete alerts
+            if created_alert_ids and len(created_alert_ids) > 1:
+                delete_alert_id = created_alert_ids[1]  # Delete second alert
+                delete_response = self.session.delete(f"{self.backend_url}/api/alerts/{delete_alert_id}")
+                if delete_response.status_code == 200:
+                    # Verify alert is deleted
+                    verify_response = self.session.get(f"{self.backend_url}/api/alerts")
+                    if verify_response.status_code == 200:
+                        remaining_alerts = verify_response.json()
+                        deleted_alert_found = any(alert.get('id') == delete_alert_id for alert in remaining_alerts)
+                        if not deleted_alert_found:
+                            self.log_test("Alert System - DELETE /api/alerts/{id}", True, 
+                                        f"Successfully deleted alert {delete_alert_id}", 
+                                        f"Alert removed from system")
+                            # Remove from our tracking
+                            created_alert_ids.remove(delete_alert_id)
+                        else:
+                            self.log_test("Alert System - DELETE /api/alerts/{id}", False, 
+                                        f"Alert {delete_alert_id} still exists after deletion")
+                    else:
+                        self.log_test("Alert System - DELETE /api/alerts/{id}", False, 
+                                    f"Could not verify deletion - GET failed")
+                else:
+                    self.log_test("Alert System - DELETE /api/alerts/{id}", False, 
+                                f"Alert deletion failed - Status: {delete_response.status_code}")
+            
+            # Test 6: Verify alert expiration logic works correctly
+            # Create an expired alert
+            expired_alert = {
+                "title": "Expired Alert Test",
+                "message": "This alert should be filtered out due to expiration.",
+                "priority": "low",
+                "type": "general",
+                "target_audience": "all",
+                "created_by": "Test System",
+                "expires_at": (datetime.now() - timedelta(hours=1)).isoformat()  # Already expired
+            }
+            
+            expired_post = self.session.post(f"{self.backend_url}/api/alerts", json=expired_alert)
+            if expired_post.status_code == 200:
+                # Check if expired alert is filtered out from active alerts
+                active_alerts_response = self.session.get(f"{self.backend_url}/api/alerts")
+                if active_alerts_response.status_code == 200:
+                    active_alerts = active_alerts_response.json()
+                    expired_found = any(alert.get('title') == 'Expired Alert Test' for alert in active_alerts)
+                    if not expired_found:
+                        self.log_test("Alert System - EXPIRATION LOGIC", True, 
+                                    "Alert expiration logic working correctly", 
+                                    "Expired alerts are filtered out from active alerts")
+                    else:
+                        self.log_test("Alert System - EXPIRATION LOGIC", False, 
+                                    "Alert expiration logic not working - expired alert still returned")
+                else:
+                    self.log_test("Alert System - EXPIRATION LOGIC", False, 
+                                f"Could not test expiration logic - GET failed")
+            
+            # Store remaining alert IDs for cleanup
+            for alert_id in created_alert_ids:
+                if 'alerts' not in self.created_items:
+                    self.created_items['alerts'] = []
+                self.created_items['alerts'].append(alert_id)
+                
+        except Exception as e:
+            self.log_test("Alert System - REVIEW REQUEST", False, f"Alert system review request test failed: {str(e)}")
+
     def test_meeting_room_cross_system_sync(self):
         """Test 14: Meeting Room Booking Cross-System Synchronization"""
         try:
