@@ -2226,7 +2226,37 @@ class BackendPersistentTester:
             
         return passed == total
 
+    def run_review_request_tests(self):
+        """Run specific tests for the review request - Alert System and Meeting Room Booking"""
+        print("🎯 REVIEW REQUEST TESTING - Alert System & Meeting Room Booking")
+        print("=" * 70)
+        
+        # Core connectivity test
+        self.test_backend_connectivity()
+        
+        # Employee data verification (exactly 625 employees)
+        self.test_employee_data_verification_625()
+        
+        # Alert System Testing (as per review request)
+        self.test_alert_system_review_request()
+        
+        # Meeting Room Booking Testing (as per review request)  
+        self.test_meeting_room_booking_review_request()
+        
+        # Cleanup
+        self.cleanup_test_data()
+        
+        # Print summary
+        return self.print_summary()
+
 if __name__ == "__main__":
+    import sys
     tester = BackendPersistentTester()
-    success = tester.run_all_tests()
+    
+    # Check if we should run review request tests specifically
+    if len(sys.argv) > 1 and sys.argv[1] == "--review-request":
+        success = tester.run_review_request_tests()
+    else:
+        success = tester.run_all_tests()
+    
     sys.exit(0 if success else 1)
