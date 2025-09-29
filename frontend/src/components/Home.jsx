@@ -158,18 +158,27 @@ const Home = () => {
     const fetchEmployees = async () => {
       try {
         const data = await employeeAPI.getAll();
-        // Filter employees who joined in the last 1 month
-        const oneMonthAgo = new Date();
-        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+        
+        // Filter employees who joined in the last month (60 days for more flexibility)
+        const twoMonthsAgo = new Date();
+        twoMonthsAgo.setDate(twoMonthsAgo.getDate() - 60);
         
         const recentJoinees = data.filter(emp => {
           if (!emp.date_of_joining && !emp.dateOfJoining) return false;
           const joinDate = new Date(emp.date_of_joining || emp.dateOfJoining);
-          return joinDate >= oneMonthAgo;
+          return joinDate >= twoMonthsAgo;
         }).sort((a, b) => new Date(b.date_of_joining || b.dateOfJoining) - new Date(a.date_of_joining || a.dateOfJoining));
         
-        // If no recent joinees, show latest 10 employees as fallback
-        const employeesToShow = recentJoinees.length > 0 ? recentJoinees : data.slice(0, 10);
+        // If still no recent joinees, get the latest 15 employees by joining date
+        let employeesToShow = recentJoinees;
+        if (employeesToShow.length === 0) {
+          // Sort all employees by joining date and get the latest ones
+          const allEmployeesSorted = data
+            .filter(emp => emp.date_of_joining || emp.dateOfJoining)
+            .sort((a, b) => new Date(b.date_of_joining || b.dateOfJoining) - new Date(a.date_of_joining || a.dateOfJoining));
+          
+          employeesToShow = allEmployeesSorted.slice(0, 15);
+        }
         
         setEmployees(employeesToShow.slice(0, 15)); // Show latest 15 employees
       } catch (error) {
