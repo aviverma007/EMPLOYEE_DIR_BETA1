@@ -2376,6 +2376,12 @@ class BackendPersistentTester:
         # Employee data verification (needed for booking tests)
         self.test_employee_data_management()
         
+        # NEW JOINEES FILTERING TEST - As per Review Request
+        print("\n" + "="*60)
+        print("👥 NEW JOINEES FILTERING TESTING")
+        print("="*60)
+        self.test_new_joinees_filtering()
+        
         # MAIN FOCUS: Meeting Rooms Testing
         print("\n" + "="*60)
         print("🏢 MEETING ROOMS COMPREHENSIVE TESTING")
