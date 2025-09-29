@@ -158,32 +158,67 @@ const Home = () => {
     const fetchEmployees = async () => {
       try {
         const data = await employeeAPI.getAll();
+        console.log('Fetched employees data:', data.length);
         
-        // Filter employees who joined in the last month (60 days for more flexibility)
-        const twoMonthsAgo = new Date();
-        twoMonthsAgo.setDate(twoMonthsAgo.getDate() - 60);
+        // Get current date and calculate last month's start date
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth();
+        const currentYear = currentDate.getFullYear();
+        
+        // Calculate last month
+        let lastMonth = currentMonth - 1;
+        let lastMonthYear = currentYear;
+        if (lastMonth < 0) {
+          lastMonth = 11;
+          lastMonthYear = currentYear - 1;
+        }
+        
+        // Create date range for last month
+        const lastMonthStart = new Date(lastMonthYear, lastMonth, 1);
+        const lastMonthEnd = new Date(currentYear, currentMonth, 0); // Last day of last month
+        
+        console.log('Date range for new joinees:', {
+          lastMonthStart: lastMonthStart.toDateString(),
+          lastMonthEnd: lastMonthEnd.toDateString(),
+          currentDate: currentDate.toDateString()
+        });
         
         const recentJoinees = data.filter(emp => {
-          if (!emp.date_of_joining && !emp.dateOfJoining) return false;
-          const joinDate = new Date(emp.date_of_joining || emp.dateOfJoining);
-          return joinDate >= twoMonthsAgo;
-        }).sort((a, b) => new Date(b.date_of_joining || b.dateOfJoining) - new Date(a.date_of_joining || a.dateOfJoining));
+          if (!emp.date_of_joining) return false;
+          
+          // Parse the date_of_joining field (format: "YYYY-MM-DD HH:MM:SS")
+          const joinDate = new Date(emp.date_of_joining);
+          
+          // Check if joining date is valid
+          if (isNaN(joinDate.getTime())) return false;
+          
+          // Check if employee joined in the last month
+          return joinDate >= lastMonthStart && joinDate <= lastMonthEnd;
+        }).sort((a, b) => new Date(b.date_of_joining) - new Date(a.date_of_joining));
         
-        // If still no recent joinees, get the latest 15 employees by joining date
+        console.log('Recent joinees found:', recentJoinees.length);
+        
+        // If no recent joinees from last month, get the latest 15 employees by joining date
         let employeesToShow = recentJoinees;
         if (employeesToShow.length === 0) {
-          // Sort all employees by joining date and get the latest ones
+          console.log('No recent joinees from last month, showing latest 15 employees');
           const allEmployeesSorted = data
-            .filter(emp => emp.date_of_joining || emp.dateOfJoining)
-            .sort((a, b) => new Date(b.date_of_joining || b.dateOfJoining) - new Date(a.date_of_joining || a.dateOfJoining));
+            .filter(emp => emp.date_of_joining && !isNaN(new Date(emp.date_of_joining).getTime()))
+            .sort((a, b) => new Date(b.date_of_joining) - new Date(a.date_of_joining));
           
           employeesToShow = allEmployeesSorted.slice(0, 15);
         }
         
-        setEmployees(employeesToShow.slice(0, 15)); // Show latest 15 employees
+        // Normalize the employee objects to ensure consistent field names
+        const normalizedEmployees = employeesToShow.slice(0, 15).map(emp => ({
+          ...emp,
+          dateOfJoining: emp.date_of_joining, // Create camelCase alias for consistency
+        }));
+        
+        console.log('Final employees to show:', normalizedEmployees.length);
+        setEmployees(normalizedEmployees);
       } catch (error) {
         console.error('Error fetching employees:', error);
-        // Fallback data for demonstration
         setEmployees([]);
       }
     };
