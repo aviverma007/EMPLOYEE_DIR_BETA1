@@ -2701,7 +2701,7 @@ class BackendPersistentTester:
         print("\n" + "="*60)
         print("👥 NEW JOINEES FILTERING TESTING")
         print("="*60)
-        self.test_new_joinees_filtering()
+        self.test_new_joinees_filtering_functionality()
         
         # MAIN FOCUS: Meeting Rooms Testing
         print("\n" + "="*60)
