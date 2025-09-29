@@ -56,7 +56,7 @@ const Header = () => {
           <div className={`flex items-center ${isAdmin() ? 'space-x-4' : 'space-x-3'}`}>
             <div className={`flex items-center ${isAdmin() ? 'space-x-4' : 'space-x-3'}`}>
               <img 
-                src="https://customer-assets.emergentagent.com/job_site-modifier-3/artifacts/j921etso_2%5B2%5D.png"
+                src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=100&h=100&fit=crop&crop=center"
                 alt="Company Logo"
                 className={`object-contain rounded-lg ${isAdmin() ? 'h-24 w-24 shadow-md' : 'h-12 w-12 shadow-sm'}`}
               />
