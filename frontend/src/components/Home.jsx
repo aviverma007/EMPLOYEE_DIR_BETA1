@@ -118,37 +118,37 @@ const Home = () => {
       title: "HR Portal",
       description: "Adrenaline",
       url: "https://maxhr.myadrenalin.com/AdrenalinMax/",
-      image: "https://customer-assets.emergentagent.com/job_change-maker-1/artifacts/otz1j4e1_adrenaline%20hrms%20logo.png"
+      image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=100&h=100&fit=crop&crop=center"
     },
     {
       title: "BIMABRO",
       description: "Employee Portal",
       url: "https://employee.bimabro.com/",
-      image: "https://customer-assets.emergentagent.com/job_fast-modify/artifacts/s5o6c9cu_BimaBro.jpg"
+      image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=100&h=100&fit=crop&crop=center"
     },
     {
       title: "MAFOI",
       description: "HR Suite",
       url: "https://mafoi.hfactor.app/hrsuite/#/login/smartworld",
-      image: "https://customer-assets.emergentagent.com/job_change-maker-1/artifacts/hnug73tl_MAFOI%20logo.jpg"
+      image: "https://images.unsplash.com/photo-1556761175-4b46a572b786?w=100&h=100&fit=crop&crop=center"
     },
     {
       title: "VENDORGLOBE",
       description: "QMS Portal",
       url: "https://smartworlddevelopersonline.com/qms/",
-      image: "/images/vendorglobe.png"
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=center"
     },
     {
       title: "Company",
       description: "Website",
       url: "https://smartworlddevelopers.com/",
-      image: "https://customer-assets.emergentagent.com/job_change-maker-1/artifacts/d2zoi8qy_company%20logo.png"
+      image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=100&h=100&fit=crop&crop=center"
     },
     {
       title: "Projects",
       description: "Our Developments",
       url: "#",
-      image: "https://customer-assets.emergentagent.com/job_change-maker-1/artifacts/ulju1r77_projects.png",
+      image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=100&h=100&fit=crop&crop=center",
       isDropdown: true
     }
   ];
