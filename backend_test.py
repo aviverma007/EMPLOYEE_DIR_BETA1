@@ -2362,6 +2362,182 @@ class BackendPersistentTester:
         except Exception as e:
             self.log_test("Review Request Critical APIs", False, f"Critical API testing failed: {str(e)}")
 
+    def test_new_joinees_filtering(self):
+        """Test: New Joinees Filtering - Verify employees with recent joining dates from August 2025"""
+        try:
+            print("\n👥 NEW JOINEES FILTERING TESTING - REVIEW REQUEST VERIFICATION")
+            print("-" * 70)
+            
+            # Test 1: GET /api/employees to get all employee data
+            response = self.session.get(f"{self.backend_url}/api/employees")
+            if response.status_code != 200:
+                self.log_test("New Joinees - GET ALL EMPLOYEES", False, 
+                            f"GET /api/employees failed with status {response.status_code}")
+                return
+            
+            employees = response.json()
+            if not isinstance(employees, list):
+                self.log_test("New Joinees - GET ALL EMPLOYEES", False, 
+                            "GET /api/employees did not return a list")
+                return
+            
+            self.log_test("New Joinees - GET ALL EMPLOYEES", True, 
+                        f"Successfully retrieved {len(employees)} employees", 
+                        f"Employee data structure ready for filtering")
+            
+            # Test 2: Check if date_of_joining field exists in employee data
+            employees_with_joining_date = []
+            employees_without_joining_date = []
+            
+            for employee in employees:
+                if 'date_of_joining' in employee and employee['date_of_joining']:
+                    employees_with_joining_date.append(employee)
+                else:
+                    employees_without_joining_date.append(employee)
+            
+            if employees_with_joining_date:
+                self.log_test("New Joinees - DATE_OF_JOINING FIELD", True, 
+                            f"Found {len(employees_with_joining_date)} employees with date_of_joining field", 
+                            f"Field is properly accessible for filtering")
+            else:
+                self.log_test("New Joinees - DATE_OF_JOINING FIELD", False, 
+                            f"No employees found with date_of_joining field", 
+                            f"Field may be missing from employee data structure")
+                # Continue testing even if field is missing to check if it needs to be added
+            
+            # Test 3: Search for specific employees mentioned in review request
+            target_employees = [
+                {"name": "Rajat Sachdeva", "id": "81269", "joining_date": "2025-08-22"},
+                {"name": "Manisha Bisht", "id": "81268", "joining_date": "2025-08-19"},
+                {"name": "Umang Garg", "id": "81266", "joining_date": "2025-08-18"},
+                {"name": "Amrutha Vijayan Panicker", "id": "81267", "joining_date": "2025-08-18"}
+            ]
+            
+            found_employees = []
+            missing_employees = []
+            
+            for target in target_employees:
+                # Search by ID first (most reliable)
+                employee_found = None
+                for emp in employees:
+                    if emp.get('id') == target['id']:
+                        employee_found = emp
+                        break
+                
+                # If not found by ID, search by name
+                if not employee_found:
+                    for emp in employees:
+                        if target['name'].lower() in emp.get('name', '').lower():
+                            employee_found = emp
+                            break
+                
+                if employee_found:
+                    found_employees.append({
+                        'target': target,
+                        'found': employee_found,
+                        'has_joining_date': 'date_of_joining' in employee_found
+                    })
+                else:
+                    missing_employees.append(target)
+            
+            if found_employees:
+                self.log_test("New Joinees - TARGET EMPLOYEES FOUND", True, 
+                            f"Found {len(found_employees)}/{len(target_employees)} target employees", 
+                            f"Found: {[emp['found']['name'] for emp in found_employees]}")
+                
+                # Check joining dates for found employees
+                employees_with_correct_dates = []
+                for emp_data in found_employees:
+                    emp = emp_data['found']
+                    target = emp_data['target']
+                    
+                    if 'date_of_joining' in emp and emp['date_of_joining']:
+                        if target['joining_date'] in emp['date_of_joining']:
+                            employees_with_correct_dates.append(emp_data)
+                
+                if employees_with_correct_dates:
+                    self.log_test("New Joinees - JOINING DATES VERIFICATION", True, 
+                                f"Found {len(employees_with_correct_dates)} employees with correct August 2025 joining dates", 
+                                f"Dates properly formatted and accessible")
+                else:
+                    self.log_test("New Joinees - JOINING DATES VERIFICATION", False, 
+                                "No employees found with expected August 2025 joining dates", 
+                                "Date format or data may need verification")
+            else:
+                self.log_test("New Joinees - TARGET EMPLOYEES FOUND", False, 
+                            f"None of the target employees found in database", 
+                            f"Missing: {[emp['name'] for emp in target_employees]}")
+            
+            # Test 4: Test filtering functionality for August 2025 new joinees
+            august_2025_employees = []
+            if employees_with_joining_date:
+                for employee in employees_with_joining_date:
+                    joining_date = employee.get('date_of_joining', '')
+                    if '2025-08' in joining_date or 'August 2025' in joining_date or '08/2025' in joining_date:
+                        august_2025_employees.append(employee)
+                
+                if august_2025_employees:
+                    self.log_test("New Joinees - AUGUST 2025 FILTERING", True, 
+                                f"Found {len(august_2025_employees)} employees who joined in August 2025", 
+                                f"Filtering logic can identify recent joiners")
+                else:
+                    self.log_test("New Joinees - AUGUST 2025 FILTERING", False, 
+                                "No employees found with August 2025 joining dates", 
+                                "May need to check date format or add test data")
+            
+            # Test 5: Verify data structure for frontend filtering
+            if employees:
+                sample_employee = employees[0]
+                required_fields = ['id', 'name', 'department', 'location']
+                missing_fields = [field for field in required_fields if field not in sample_employee]
+                
+                if not missing_fields:
+                    self.log_test("New Joinees - DATA STRUCTURE", True, 
+                                "Employee data has all required fields for frontend filtering", 
+                                f"Fields available: {list(sample_employee.keys())}")
+                else:
+                    self.log_test("New Joinees - DATA STRUCTURE", False, 
+                                f"Missing required fields: {missing_fields}", 
+                                f"Available fields: {list(sample_employee.keys())}")
+            
+            # Test 6: Test search functionality for new joinees (if they exist)
+            if august_2025_employees:
+                test_employee = august_2025_employees[0]
+                search_term = test_employee.get('name', '')[:3]
+                
+                search_response = self.session.get(f"{self.backend_url}/api/employees?search={search_term}")
+                if search_response.status_code == 200:
+                    search_results = search_response.json()
+                    target_found = any(emp.get('id') == test_employee.get('id') for emp in search_results)
+                    
+                    if target_found:
+                        self.log_test("New Joinees - SEARCH FUNCTIONALITY", True, 
+                                    f"New joinee searchable via API", 
+                                    f"Search '{search_term}' found target employee")
+                    else:
+                        self.log_test("New Joinees - SEARCH FUNCTIONALITY", False, 
+                                    f"New joinee not found in search results")
+                else:
+                    self.log_test("New Joinees - SEARCH FUNCTIONALITY", False, 
+                                f"Search API failed with status {search_response.status_code}")
+            
+            # Summary for review request
+            print(f"\n📋 NEW JOINEES FILTERING SUMMARY:")
+            print(f"   • Total Employees: {len(employees)}")
+            print(f"   • Employees with joining dates: {len(employees_with_joining_date)}")
+            print(f"   • August 2025 joiners found: {len(august_2025_employees)}")
+            print(f"   • Target employees found: {len(found_employees)}/{len(target_employees)}")
+            
+            if missing_employees:
+                print(f"   • Missing target employees: {[emp['name'] for emp in missing_employees]}")
+            
+            if not employees_with_joining_date:
+                print(f"   ⚠️  WARNING: No date_of_joining field found in employee data")
+                print(f"   ⚠️  This field may need to be added to the Employee model and Excel data")
+                
+        except Exception as e:
+            self.log_test("New Joinees - COMPREHENSIVE", False, f"New joinees filtering test failed: {str(e)}")
+
     def run_all_tests(self):
         """Run all tests - FOCUSED ON REVIEW REQUEST"""
         print("🚀 REVIEW REQUEST FOCUSED TESTING - MEETING ROOMS & ALERT SYSTEM")
