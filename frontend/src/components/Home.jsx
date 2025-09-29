@@ -45,20 +45,20 @@ const Home = () => {
 
   // SmartWorld project banner images
   const bannerImages = [
-    "https://customer-assets.emergentagent.com/job_alpha-search-fix/artifacts/5nmzbaqz_smart-world-orchard.webp",
-    "https://customer-assets.emergentagent.com/job_alpha-search-fix/artifacts/fdyg3j9u_smart-world-one-dxp.webp", 
-    "https://customer-assets.emergentagent.com/job_alpha-search-fix/artifacts/55c7jl50_smart-world-gems.webp",
-    "https://customer-assets.emergentagent.com/job_alpha-search-fix/artifacts/0m7sp116_smart-world-the-edition.webp",
-    "https://customer-assets.emergentagent.com/job_alpha-search-fix/artifacts/twxag3rn_smart-world-sky-arc.webp"
+    "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=400&fit=crop&crop=building",
+    "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&h=400&fit=crop&crop=building", 
+    "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&h=400&fit=crop&crop=building",
+    "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=800&h=400&fit=crop&crop=building",
+    "https://images.unsplash.com/photo-1515378791036-0648a814c963?w=800&h=400&fit=crop&crop=building"
   ];
 
   // Company gallery images for photo slideshow
   const galleryImages = [
-    "https://customer-assets.emergentagent.com/job_38901552-4b3f-4152-8c86-1ce1635ab130/artifacts/70beszdu_IMG-20250814-WA0090.jpg",
-    "https://customer-assets.emergentagent.com/job_38901552-4b3f-4152-8c86-1ce1635ab130/artifacts/xq6fbjnj_IMG-20250814-WA0147.jpg",
-    "https://customer-assets.emergentagent.com/job_38901552-4b3f-4152-8c86-1ce1635ab130/artifacts/apkd9exk_IMG-20250814-WA0181.jpeg",
-    "https://customer-assets.emergentagent.com/job_38901552-4b3f-4152-8c86-1ce1635ab130/artifacts/w6boogvj_IMG-20250814-WA0201.jpg",
-    "https://customer-assets.emergentagent.com/job_38901552-4b3f-4152-8c86-1ce1635ab130/artifacts/exnv01mp_IMG-20250814-WA0224.jpg"
+    "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&h=400&fit=crop&crop=office",
+    "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=600&h=400&fit=crop&crop=office",
+    "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=600&h=400&fit=crop&crop=office",
+    "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=600&h=400&fit=crop&crop=office",
+    "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=600&h=400&fit=crop&crop=office"
   ];
 
   // Project links data
