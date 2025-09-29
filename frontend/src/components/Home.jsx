@@ -45,20 +45,20 @@ const Home = () => {
 
   // SmartWorld project banner images
   const bannerImages = [
-    "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=400&fit=crop&crop=building",
-    "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&h=400&fit=crop&crop=building", 
-    "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&h=400&fit=crop&crop=building",
-    "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=800&h=400&fit=crop&crop=building",
-    "https://images.unsplash.com/photo-1515378791036-0648a814c963?w=800&h=400&fit=crop&crop=building"
+    "/images/smart-world-orchard.webp",
+    "/images/smart-world-one-dxp.webp", 
+    "/images/smart-world-gems.webp",
+    "/images/smart-world-the-edition.webp",
+    "/images/smart-world-sky-arc.webp"
   ];
 
   // Company gallery images for photo slideshow
   const galleryImages = [
-    "https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&h=400&fit=crop&crop=office",
-    "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=600&h=400&fit=crop&crop=office",
-    "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=600&h=400&fit=crop&crop=office",
-    "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=600&h=400&fit=crop&crop=office",
-    "https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=600&h=400&fit=crop&crop=office"
+    "/images/gallery-1.jpg",
+    "/images/gallery-2.jpg",
+    "/images/gallery-3.jpeg",
+    "/images/gallery-4.jpg",
+    "/images/gallery-5.jpg"
   ];
 
   // Project links data
