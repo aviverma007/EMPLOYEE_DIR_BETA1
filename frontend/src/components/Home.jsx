@@ -281,12 +281,38 @@ const Home = () => {
         }
         
         // Normalize the employee objects to ensure consistent field names
-        const normalizedEmployees = employeesToShow.slice(0, 15).map(emp => ({
-          ...emp,
-          dateOfJoining: emp.date_of_joining, // Create camelCase alias for consistency
-        }));
+        const normalizedEmployees = employeesToShow.slice(0, 15).map(emp => {
+          const dateField = emp.dateOfJoining || emp.date_of_joining;
+          let formattedDate = '';
+          
+          if (dateField) {
+            let joinDate;
+            if (typeof dateField === 'string') {
+              joinDate = new Date(dateField);
+            } else if (typeof dateField === 'number') {
+              const excelEpoch = new Date(1900, 0, 1);
+              const msPerDay = 24 * 60 * 60 * 1000;
+              joinDate = new Date(excelEpoch.getTime() + (dateField - 2) * msPerDay);
+            }
+            
+            if (joinDate && !isNaN(joinDate.getTime())) {
+              formattedDate = joinDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+            }
+          }
+          
+          return {
+            ...emp,
+            dateOfJoining: formattedDate, // Ensure consistent format
+          };
+        });
         
-        console.log('Final employees to show:', normalizedEmployees.length);
+        console.log('Final new joinees to show:', normalizedEmployees.length);
+        if (normalizedEmployees.length > 0) {
+          console.log('Date range of joinees:', {
+            earliest: normalizedEmployees[normalizedEmployees.length - 1]?.dateOfJoining,
+            latest: normalizedEmployees[0]?.dateOfJoining
+          });
+        }
         setEmployees(normalizedEmployees);
       } catch (error) {
         console.error('Error fetching employees:', error);
