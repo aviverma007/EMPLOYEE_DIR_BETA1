@@ -258,6 +258,47 @@ class ImageStorageService {
       request.onerror = () => reject(request.error);
     });
   }
+
+  // Process and store image (API compatibility method)
+  async processAndStore(imageData, employeeId) {
+    try {
+      // If imageData is already a data URL, use it directly
+      if (typeof imageData === 'string' && imageData.startsWith('data:')) {
+        this.saveImageUrlToLocalStorage(employeeId, imageData);
+        return { profileImage: imageData };
+      }
+
+      // If imageData has imageUrl property
+      if (imageData && imageData.imageUrl) {
+        this.saveImageUrlToLocalStorage(employeeId, imageData.imageUrl);
+        return { profileImage: imageData.imageUrl };
+      }
+
+      // If it's an object with profileImage property
+      if (imageData && imageData.profileImage) {
+        this.saveImageUrlToLocalStorage(employeeId, imageData.profileImage);
+        return { profileImage: imageData.profileImage };
+      }
+
+      // Fallback - treat as direct image data
+      this.saveImageUrlToLocalStorage(employeeId, imageData);
+      return { profileImage: imageData };
+    } catch (error) {
+      console.error('Error processing and storing image:', error);
+      throw error;
+    }
+  }
+
+  // Convert file to data URL (API compatibility method)
+  async fileToDataURL(file) {
+    try {
+      const dataURL = await this.fileToBase64(file);
+      return dataURL;
+    } catch (error) {
+      console.error('Error converting file to data URL:', error);
+      throw error;
+    }
+  }
 }
 
 // Create and export singleton instance
