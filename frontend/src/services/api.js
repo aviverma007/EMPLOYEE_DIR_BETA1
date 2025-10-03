@@ -2,27 +2,12 @@
 import dataService from './dataService';
 import imageStorage from './imageStorage';
 
-// API Base URL from environment variable
-const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
-
-// Employee API endpoints - Backend persistent
+// Employee API endpoints - Frontend-only using dataService
 export const employeeAPI = {
   // Get all employees with optional search and filters
   getAll: async (searchParams = {}) => {
     try {
-      const url = new URL(`${API_BASE_URL}/api/employees`);
-      
-      // Add search parameters to URL
-      if (searchParams.search) url.searchParams.append('search', searchParams.search);
-      if (searchParams.department) url.searchParams.append('department', searchParams.department);
-      if (searchParams.location) url.searchParams.append('location', searchParams.location);
-      
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error('Failed to fetch employees');
-      }
-      
-      return await response.json();
+      return await dataService.getEmployees(searchParams);
     } catch (error) {
       console.error('Error fetching employees:', error);
       throw error;
@@ -32,19 +17,9 @@ export const employeeAPI = {
   // Update employee profile image
   updateImage: async (employeeId, imageData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/employees/${employeeId}/image`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ imageUrl: imageData }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to update employee image');
-      }
-      
-      return await response.json();
+      // Store image locally using imageStorage service
+      const processedImage = await imageStorage.processAndStore(imageData, employeeId);
+      return await dataService.updateEmployeeImage(employeeId, processedImage);
     } catch (error) {
       console.error('Error updating employee image:', error);
       throw error;
@@ -54,19 +29,9 @@ export const employeeAPI = {
   // Upload employee profile image file
   uploadImage: async (employeeId, imageFile) => {
     try {
-      const formData = new FormData();
-      formData.append('file', imageFile);
-      
-      const response = await fetch(`${API_BASE_URL}/api/employees/${employeeId}/upload-image`, {
-        method: 'POST',
-        body: formData,
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to upload employee image');
-      }
-      
-      return await response.json();
+      // Convert file to base64 and store locally
+      const imageData = await imageStorage.fileToDataURL(imageFile);
+      return await this.updateImage(employeeId, imageData);
     } catch (error) {
       console.error('Error uploading employee image:', error);
       throw error;
@@ -74,16 +39,12 @@ export const employeeAPI = {
   }
 };
 
-// Hierarchy API endpoints - Backend persistent
+// Hierarchy API endpoints - Frontend-only using dataService
 export const hierarchyAPI = {
   // Get all hierarchy relationships
   getAll: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/hierarchy`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch hierarchy');
-      }
-      return await response.json();
+      return await dataService.getHierarchy();
     } catch (error) {
       console.error('Error fetching hierarchy:', error);
       throw error;
@@ -93,20 +54,7 @@ export const hierarchyAPI = {
   // Add new hierarchy relationship
   create: async (relationshipData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/hierarchy`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(relationshipData),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to create hierarchy relationship');
-      }
-      
-      return await response.json();
+      return await dataService.createHierarchy(relationshipData);
     } catch (error) {
       console.error('Error creating hierarchy:', error);
       throw error;
@@ -116,16 +64,7 @@ export const hierarchyAPI = {
   // Remove hierarchy relationship
   remove: async (employeeId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/hierarchy/${employeeId}`, {
-        method: 'DELETE',
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to delete hierarchy relationship');
-      }
-      
-      return await response.json();
+      return await dataService.deleteHierarchy(employeeId);
     } catch (error) {
       console.error('Error deleting hierarchy:', error);
       throw error;
@@ -135,16 +74,7 @@ export const hierarchyAPI = {
   // Clear all hierarchy relationships
   clearAll: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/hierarchy/clear`, {
-        method: 'DELETE',
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to clear hierarchy');
-      }
-      
-      return await response.json();
+      return await dataService.clearAllHierarchy();
     } catch (error) {
       console.error('Error clearing hierarchy:', error);
       throw error;
@@ -152,20 +82,14 @@ export const hierarchyAPI = {
   }
 };
 
-// Utility API endpoints - Backend persistent
+// Utility API endpoints - Frontend-only using dataService
 export const utilityAPI = {
   // Refresh Excel data
   refreshExcel: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/refresh-excel`, {
-        method: 'POST',
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to refresh Excel data');
-      }
-      
-      return await response.json();
+      // Reload all data from Excel files
+      const result = await dataService.loadAllData();
+      return { message: 'Excel data refreshed successfully', ...result };
     } catch (error) {
       console.error('Error refreshing Excel data:', error);
       throw error;
@@ -175,11 +99,7 @@ export const utilityAPI = {
   // Get departments
   getDepartments: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/departments`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch departments');
-      }
-      return await response.json();
+      return await dataService.getDepartments();
     } catch (error) {
       console.error('Error fetching departments:', error);
       throw error;
@@ -189,11 +109,7 @@ export const utilityAPI = {
   // Get locations  
   getLocations: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/locations`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch locations');
-      }
-      return await response.json();
+      return await dataService.getLocations();
     } catch (error) {
       console.error('Error fetching locations:', error);
       throw error;
@@ -203,11 +119,7 @@ export const utilityAPI = {
   // Get system statistics
   getStats: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/stats`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch stats');
-      }
-      return await response.json();
+      return await dataService.getStats();
     } catch (error) {
       console.error('Error fetching stats:', error);
       throw error;
@@ -215,15 +127,11 @@ export const utilityAPI = {
   }
 };
 
-// News API endpoints - Backend persistent
+// News API endpoints - Frontend-only using dataService
 export const newsAPI = {
   getAll: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/news`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch news');
-      }
-      return await response.json();
+      return await dataService.getNews();
     } catch (error) {
       console.error('Error fetching news:', error);
       throw error;
@@ -232,20 +140,7 @@ export const newsAPI = {
 
   create: async (newsData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/news`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newsData),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to create news');
-      }
-      
-      return await response.json();
+      return await dataService.createNews(newsData);
     } catch (error) {
       console.error('Error creating news:', error);
       throw error;
@@ -254,20 +149,7 @@ export const newsAPI = {
 
   update: async (id, newsData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/news/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newsData),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to update news');
-      }
-      
-      return await response.json();
+      return await dataService.updateNews(id, newsData);
     } catch (error) {
       console.error('Error updating news:', error);
       throw error;
@@ -276,16 +158,7 @@ export const newsAPI = {
 
   delete: async (id) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/news/${id}`, {
-        method: 'DELETE',
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to delete news');
-      }
-      
-      return await response.json();
+      return await dataService.deleteNews(id);
     } catch (error) {
       console.error('Error deleting news:', error);
       throw error;
@@ -293,15 +166,11 @@ export const newsAPI = {
   }
 };
 
-// Task API endpoints - Backend persistent
+// Task API endpoints - Frontend-only using dataService
 export const taskAPI = {
   getAll: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/tasks`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch tasks');
-      }
-      return await response.json();
+      return await dataService.getTasks();
     } catch (error) {
       console.error('Error fetching tasks:', error);
       throw error;
@@ -310,20 +179,7 @@ export const taskAPI = {
 
   create: async (taskData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/tasks`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(taskData),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to create task');
-      }
-      
-      return await response.json();
+      return await dataService.createTask(taskData);
     } catch (error) {
       console.error('Error creating task:', error);
       throw error;
@@ -332,20 +188,7 @@ export const taskAPI = {
 
   update: async (id, taskData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/tasks/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(taskData),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to update task');
-      }
-      
-      return await response.json();
+      return await dataService.updateTask(id, taskData);
     } catch (error) {
       console.error('Error updating task:', error);
       throw error;
@@ -354,16 +197,7 @@ export const taskAPI = {
 
   delete: async (id) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/tasks/${id}`, {
-        method: 'DELETE',
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to delete task');
-      }
-      
-      return await response.json();
+      return await dataService.deleteTask(id);
     } catch (error) {
       console.error('Error deleting task:', error);
       throw error;
@@ -371,15 +205,11 @@ export const taskAPI = {
   }
 };
 
-// Knowledge API endpoints - Backend persistent
+// Knowledge API endpoints - Frontend-only using dataService
 export const knowledgeAPI = {
   getAll: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/knowledge`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch knowledge');
-      }
-      return await response.json();
+      return await dataService.getKnowledge();
     } catch (error) {
       console.error('Error fetching knowledge:', error);
       throw error;
@@ -388,20 +218,7 @@ export const knowledgeAPI = {
 
   create: async (knowledgeData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/knowledge`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(knowledgeData),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to create knowledge');
-      }
-      
-      return await response.json();
+      return await dataService.createKnowledge(knowledgeData);
     } catch (error) {
       console.error('Error creating knowledge:', error);
       throw error;
@@ -410,20 +227,7 @@ export const knowledgeAPI = {
 
   update: async (id, knowledgeData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/knowledge/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(knowledgeData),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to update knowledge');
-      }
-      
-      return await response.json();
+      return await dataService.updateKnowledge(id, knowledgeData);
     } catch (error) {
       console.error('Error updating knowledge:', error);
       throw error;
@@ -432,16 +236,7 @@ export const knowledgeAPI = {
 
   delete: async (id) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/knowledge/${id}`, {
-        method: 'DELETE',
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to delete knowledge');
-      }
-      
-      return await response.json();
+      return await dataService.deleteKnowledge(id);
     } catch (error) {
       console.error('Error deleting knowledge:', error);
       throw error;
@@ -449,15 +244,11 @@ export const knowledgeAPI = {
   }
 };
 
-// Help API endpoints - Backend persistent
+// Help API endpoints - Frontend-only using dataService
 export const helpAPI = {
   getAll: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/help`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch help requests');
-      }
-      return await response.json();
+      return await dataService.getHelp();
     } catch (error) {
       console.error('Error fetching help requests:', error);
       throw error;
@@ -466,20 +257,7 @@ export const helpAPI = {
 
   create: async (helpData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/help`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(helpData),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to create help request');
-      }
-      
-      return await response.json();
+      return await dataService.createHelp(helpData);
     } catch (error) {
       console.error('Error creating help request:', error);
       throw error;
@@ -488,20 +266,7 @@ export const helpAPI = {
 
   update: async (id, helpData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/help/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(helpData),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to update help request');
-      }
-      
-      return await response.json();
+      return await dataService.updateHelp(id, helpData);
     } catch (error) {
       console.error('Error updating help request:', error);
       throw error;
@@ -510,20 +275,7 @@ export const helpAPI = {
 
   addReply: async (id, replyData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/help/${id}/reply`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(replyData),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to add reply');
-      }
-      
-      return await response.json();
+      return await dataService.addHelpReply(id, replyData);
     } catch (error) {
       console.error('Error adding reply:', error);
       throw error;
@@ -532,16 +284,7 @@ export const helpAPI = {
 
   delete: async (id) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/help/${id}`, {
-        method: 'DELETE',
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to delete help request');
-      }
-      
-      return await response.json();
+      return await dataService.deleteHelp(id);
     } catch (error) {
       console.error('Error deleting help request:', error);
       throw error;
@@ -549,28 +292,11 @@ export const helpAPI = {
   }
 };
 
-// Meeting Rooms API endpoints - Backend persistent
+// Meeting Rooms API endpoints - Frontend-only using dataService
 export const meetingRoomAPI = {
   getAll: async (filters = {}) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/meeting-rooms`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch meeting rooms');
-      }
-      let rooms = await response.json();
-      
-      // Apply frontend filters if needed
-      if (filters.location) {
-        rooms = rooms.filter(room => room.location === filters.location);
-      }
-      if (filters.floor) {
-        rooms = rooms.filter(room => room.floor === filters.floor);
-      }
-      if (filters.status) {
-        rooms = rooms.filter(room => room.status === filters.status);
-      }
-      
-      return rooms;
+      return await dataService.getMeetingRooms(filters);
     } catch (error) {
       console.error('Error fetching meeting rooms:', error);
       throw error;
@@ -579,7 +305,7 @@ export const meetingRoomAPI = {
 
   getLocations: async () => {
     try {
-      const rooms = await meetingRoomAPI.getAll();
+      const rooms = await dataService.getMeetingRooms();
       const locations = [...new Set(rooms.map(room => room.location))];
       return locations;
     } catch (error) {
@@ -590,7 +316,7 @@ export const meetingRoomAPI = {
 
   getFloors: async () => {
     try {
-      const rooms = await meetingRoomAPI.getAll();
+      const rooms = await dataService.getMeetingRooms();
       const floors = [...new Set(rooms.map(room => room.floor))];
       return floors;
     } catch (error) {
@@ -601,20 +327,7 @@ export const meetingRoomAPI = {
 
   book: async (roomId, bookingData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/meeting-rooms/${roomId}/book`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(bookingData),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to book meeting room');
-      }
-      
-      return await response.json();
+      return await dataService.bookMeetingRoom(roomId, bookingData);
     } catch (error) {
       console.error('Error booking meeting room:', error);
       throw error;
@@ -623,29 +336,7 @@ export const meetingRoomAPI = {
 
   cancelBooking: async (roomId, bookingId = null) => {
     try {
-      // If no bookingId provided, find the current booking for this room
-      if (!bookingId) {
-        const rooms = await meetingRoomAPI.getAll();
-        const room = rooms.find(r => r.id === roomId);
-        if (room && room.current_booking) {
-          bookingId = room.current_booking.id;
-        } else if (room && room.bookings && room.bookings.length > 0) {
-          bookingId = room.bookings[0].id;
-        } else {
-          throw new Error('No booking found to cancel');
-        }
-      }
-
-      const response = await fetch(`${API_BASE_URL}/api/meeting-rooms/${roomId}/booking/${bookingId}`, {
-        method: 'DELETE',
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to cancel booking');
-      }
-      
-      return await response.json();
+      return await dataService.cancelMeetingRoomBooking(roomId, bookingId);
     } catch (error) {
       console.error('Error cancelling booking:', error);
       throw error;
@@ -654,16 +345,7 @@ export const meetingRoomAPI = {
 
   cancelSpecificBooking: async (roomId, bookingId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/meeting-rooms/${roomId}/booking/${bookingId}`, {
-        method: 'DELETE',
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to cancel booking');
-      }
-      
-      return await response.json();
+      return await dataService.cancelMeetingRoomBooking(roomId, bookingId);
     } catch (error) {
       console.error('Error cancelling specific booking:', error);
       throw error;
@@ -672,16 +354,7 @@ export const meetingRoomAPI = {
 
   clearAllBookings: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/meeting-rooms/clear-all-bookings`, {
-        method: 'DELETE',
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to clear bookings');
-      }
-      
-      return await response.json();
+      return await dataService.clearAllMeetingRoomBookings();
     } catch (error) {
       console.error('Error clearing all bookings:', error);
       throw error;
@@ -689,15 +362,18 @@ export const meetingRoomAPI = {
   }
 };
 
-// Alerts API endpoints - Backend persistent
+// Alerts API endpoints - Frontend-only using dataService
 export const alertAPI = {
   getAll: async (targetAudience = 'all') => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/alerts?target_audience=${targetAudience}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch alerts');
+      const allAlerts = dataService.getAlerts();
+      // Filter by target audience if specified
+      if (targetAudience && targetAudience !== 'all') {
+        return allAlerts.filter(alert => 
+          alert.target_audience === 'all' || alert.target_audience === targetAudience
+        );
       }
-      return await response.json();
+      return allAlerts;
     } catch (error) {
       console.error('Error fetching alerts:', error);
       throw error;
@@ -706,20 +382,7 @@ export const alertAPI = {
 
   create: async (alertData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/alerts`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(alertData),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to create alert');
-      }
-      
-      return await response.json();
+      return dataService.createAlert(alertData);
     } catch (error) {
       console.error('Error creating alert:', error);
       throw error;
@@ -728,20 +391,7 @@ export const alertAPI = {
 
   update: async (alertId, alertData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/alerts/${alertId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(alertData),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to update alert');
-      }
-      
-      return await response.json();
+      return dataService.updateAlert(alertId, alertData);
     } catch (error) {
       console.error('Error updating alert:', error);
       throw error;
@@ -750,16 +400,7 @@ export const alertAPI = {
 
   delete: async (alertId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/alerts/${alertId}`, {
-        method: 'DELETE',
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to delete alert');
-      }
-      
-      return await response.json();
+      return dataService.deleteAlert(alertId);
     } catch (error) {
       console.error('Error deleting alert:', error);
       throw error;
@@ -767,18 +408,11 @@ export const alertAPI = {
   }
 };
 
-// Attendance API endpoints - Backend persistent
+// Attendance API endpoints - Frontend-only using dataService
 export const attendanceAPI = {
   getAll: async (searchParams = {}) => {
     try {
-      const url = new URL(`${API_BASE_URL}/api/attendance`);
-      if (searchParams.search) url.searchParams.append('search', searchParams.search);
-      
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error('Failed to fetch attendance');
-      }
-      return await response.json();
+      return await dataService.getAttendance(searchParams);
     } catch (error) {
       console.error('Error fetching attendance:', error);
       throw error;
@@ -787,20 +421,7 @@ export const attendanceAPI = {
 
   create: async (attendanceData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/attendance`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(attendanceData),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to create attendance');
-      }
-      
-      return await response.json();
+      return await dataService.createAttendance(attendanceData);
     } catch (error) {
       console.error('Error creating attendance:', error);
       throw error;
@@ -809,20 +430,18 @@ export const attendanceAPI = {
 
   update: async (id, attendanceData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/attendance/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(attendanceData),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to update attendance');
+      // Note: dataService doesn't have updateAttendance method, 
+      // so we'll find and update manually
+      const attendance = dataService.attendance.find(a => a.id === id);
+      if (!attendance) {
+        throw new Error('Attendance record not found');
       }
       
-      return await response.json();
+      Object.assign(attendance, attendanceData, {
+        updated_at: new Date().toISOString()
+      });
+      
+      return attendance;
     } catch (error) {
       console.error('Error updating attendance:', error);
       throw error;
@@ -830,15 +449,11 @@ export const attendanceAPI = {
   }
 };
 
-// Policies API endpoints - Backend persistent
+// Policies API endpoints - Frontend-only using dataService
 export const policyAPI = {
   getAll: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/policies`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch policies');
-      }
-      return await response.json();
+      return await dataService.getPolicies();
     } catch (error) {
       console.error('Error fetching policies:', error);
       throw error;
@@ -847,20 +462,7 @@ export const policyAPI = {
 
   create: async (policyData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/policies`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(policyData),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to create policy');
-      }
-      
-      return await response.json();
+      return await dataService.createPolicy(policyData);
     } catch (error) {
       console.error('Error creating policy:', error);
       throw error;
@@ -869,20 +471,17 @@ export const policyAPI = {
 
   update: async (id, policyData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/policies/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(policyData),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to update policy');
+      // Find and update manually since dataService doesn't have updatePolicy
+      const policy = dataService.policies.find(p => p.id === id);
+      if (!policy) {
+        throw new Error('Policy not found');
       }
       
-      return await response.json();
+      Object.assign(policy, policyData, {
+        updated_at: new Date().toISOString()
+      });
+      
+      return policy;
     } catch (error) {
       console.error('Error updating policy:', error);
       throw error;
@@ -891,16 +490,13 @@ export const policyAPI = {
 
   delete: async (id) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/policies/${id}`, {
-        method: 'DELETE',
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to delete policy');
+      const index = dataService.policies.findIndex(p => p.id === id);
+      if (index === -1) {
+        throw new Error('Policy not found');
       }
       
-      return await response.json();
+      dataService.policies.splice(index, 1);
+      return { message: 'Policy deleted successfully' };
     } catch (error) {
       console.error('Error deleting policy:', error);
       throw error;
@@ -908,15 +504,11 @@ export const policyAPI = {
   }
 };
 
-// Workflows API endpoints - Backend persistent
+// Workflows API endpoints - Frontend-only using dataService
 export const workflowAPI = {
   getAll: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/workflows`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch workflows');
-      }
-      return await response.json();
+      return await dataService.getWorkflows();
     } catch (error) {
       console.error('Error fetching workflows:', error);
       throw error;
@@ -925,20 +517,7 @@ export const workflowAPI = {
 
   create: async (workflowData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/workflows`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(workflowData),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to create workflow');
-      }
-      
-      return await response.json();
+      return await dataService.createWorkflow(workflowData);
     } catch (error) {
       console.error('Error creating workflow:', error);
       throw error;
@@ -947,20 +526,17 @@ export const workflowAPI = {
 
   update: async (id, workflowData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/workflows/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(workflowData),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to update workflow');
+      // Find and update manually since dataService doesn't have updateWorkflow
+      const workflow = dataService.workflows.find(w => w.id === id);
+      if (!workflow) {
+        throw new Error('Workflow not found');
       }
       
-      return await response.json();
+      Object.assign(workflow, workflowData, {
+        updated_at: new Date().toISOString()
+      });
+      
+      return workflow;
     } catch (error) {
       console.error('Error updating workflow:', error);
       throw error;
@@ -968,23 +544,23 @@ export const workflowAPI = {
   }
 };
 
-// Chat API endpoints (simplified for backend mode)
+// Chat API endpoints (simplified for frontend-only mode)
 export const chatAPI = {
   getHistory: async (sessionId) => {
-    // Return empty history for backend mode
+    // Return empty history for frontend-only mode
     return [];
   },
 
   send: async (message, sessionId) => {
-    // Return a mock response for backend mode
+    // Return a mock response for frontend-only mode
     return {
-      response: "I'm sorry, the AI chat feature is currently unavailable. Please use other features of the application.",
+      response: "I'm sorry, the AI chat feature is currently unavailable in frontend-only mode. Please use other features of the application.",
       sessionId: sessionId
     };
   },
 
   clearHistory: async (sessionId) => {
-    // No-op for backend mode
+    // No-op for frontend-only mode
     return { message: 'Chat history cleared' };
   }
 };
