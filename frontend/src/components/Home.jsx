@@ -649,15 +649,27 @@ const Home = () => {
             ) : (
               <>
                 <CardHeader className="pb-2 flex-shrink-0">
-                  <div className="flex items-center space-x-2">
-                    {tile.icon}
-                    <CardTitle className="text-base font-bold">{tile.title}</CardTitle>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      {tile.icon}
+                      <CardTitle className="text-base font-bold">{tile.title}</CardTitle>
+                    </div>
+                    {tile.title === "NEW JOINEES" && employees.length > 0 && (
+                      <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
+                        Last 30 days
+                      </span>
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent className="pt-0 flex-1 flex flex-col">
                   {tile.interactive && tile.title === "NEW JOINEES" ? (
                     <div className="flex-1 flex flex-col">
-                      <p className="text-xs opacity-90 mb-3">{tile.description}</p>
+                      <p className="text-xs opacity-90 mb-3">
+                        {employees.length > 0 
+                          ? `${employees.length} employees joined recently`
+                          : tile.description
+                        }
+                      </p>
                       
                       {/* New Joinees Enhanced Display */}
                       {employees.length > 0 ? (
