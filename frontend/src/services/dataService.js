@@ -952,9 +952,16 @@ class DataService {
 
   // ===== ALERTS MANAGEMENT =====
   
-  // Get all alerts
-  getAlerts() {
-    return this.alerts;
+  // Get all alerts with backend-compatible format
+  async getAlerts() {
+    const now = new Date();
+    return this.alerts.filter(alert => {
+      // Filter out expired alerts
+      if (alert.expires_at && new Date(alert.expires_at) < now) {
+        return false;
+      }
+      return true;
+    });
   }
 
   // Get active alerts (for user display)
@@ -962,30 +969,30 @@ class DataService {
     const now = new Date();
     return this.alerts.filter(alert => 
       alert.isActive && 
-      (!alert.expiryDate || new Date(alert.expiryDate) > now)
+      (!alert.expires_at || new Date(alert.expires_at) > now)
     );
   }
 
-  // Create a new alert (Admin only)
-  createAlert(alertData) {
+  // Create a new alert (Admin only) - Backend-compatible format
+  async createAlert(alertData) {
     const newAlert = {
       id: `alert_${Date.now()}`,
       title: alertData.title || 'Alert',
       message: alertData.message || '',
-      type: alertData.type || 'info', // info, warning, success, error
-      priority: alertData.priority || 'normal', // high, normal, low
-      isActive: alertData.isActive !== undefined ? alertData.isActive : true,
-      expiryDate: alertData.expiryDate || null,
+      type: alertData.type || 'general', // general, system, announcement
+      priority: alertData.priority || 'medium', // low, medium, high, urgent
+      target_audience: alertData.target_audience || 'all', // all, admin, user
+      created_by: alertData.created_by || 'admin',
+      expires_at: alertData.expires_at || null,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      createdBy: alertData.createdBy || 'admin'
+      updated_at: new Date().toISOString()
     };
     this.alerts.unshift(newAlert);
     return newAlert;
   }
 
   // Update alert (Admin only)
-  updateAlert(alertId, alertData) {
+  async updateAlert(alertId, alertData) {
     const alertIndex = this.alerts.findIndex(alert => alert.id === alertId);
     if (alertIndex === -1) {
       throw new Error('Alert not found');
@@ -1001,14 +1008,14 @@ class DataService {
   }
 
   // Delete alert (Admin only)
-  deleteAlert(alertId) {
+  async deleteAlert(alertId) {
     const alertIndex = this.alerts.findIndex(alert => alert.id === alertId);
     if (alertIndex === -1) {
       throw new Error('Alert not found');
     }
 
     const deletedAlert = this.alerts.splice(alertIndex, 1)[0];
-    return deletedAlert;
+    return { message: 'Alert deleted successfully' };
   }
 
   // Toggle alert status (Admin only)
@@ -1032,25 +1039,25 @@ class DataService {
           id: 'alert_demo_1',
           title: 'Welcome to SmartWorld!',
           message: 'Welcome to the SmartWorld Employee Management System. We are excited to have you on board!',
-          type: 'success',
+          type: 'announcement',
           priority: 'high',
-          isActive: true,
-          expiryDate: null,
+          target_audience: 'all',
+          created_by: 'system',
+          expires_at: null,
           created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          createdBy: 'system'
+          updated_at: new Date().toISOString()
         },
         {
           id: 'alert_demo_2',
           title: 'System Updates',
           message: 'New features have been added to the system. Check out the enhanced employee directory and meeting room booking system.',
-          type: 'info',
-          priority: 'normal',
-          isActive: true,
-          expiryDate: null,
+          type: 'system',
+          priority: 'medium',
+          target_audience: 'all',
+          created_by: 'system',
+          expires_at: null,
           created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          createdBy: 'system'
+          updated_at: new Date().toISOString()
         }
       ];
       
