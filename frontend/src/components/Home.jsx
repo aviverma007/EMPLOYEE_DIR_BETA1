@@ -160,51 +160,122 @@ const Home = () => {
         const data = await employeeAPI.getAll();
         console.log('Fetched employees data:', data.length);
         
-        // Get current date and calculate last month's start date
+        // Get current date and calculate last 30 days
         const currentDate = new Date();
-        const currentMonth = currentDate.getMonth();
-        const currentYear = currentDate.getFullYear();
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(currentDate.getDate() - 30);
         
-        // Calculate last month
-        let lastMonth = currentMonth - 1;
-        let lastMonthYear = currentYear;
-        if (lastMonth < 0) {
-          lastMonth = 11;
-          lastMonthYear = currentYear - 1;
-        }
-        
-        // Create date range for last month
-        const lastMonthStart = new Date(lastMonthYear, lastMonth, 1);
-        const lastMonthEnd = new Date(currentYear, currentMonth, 0); // Last day of last month
-        
-        console.log('Date range for new joinees:', {
-          lastMonthStart: lastMonthStart.toDateString(),
-          lastMonthEnd: lastMonthEnd.toDateString(),
+        console.log('Date range for new joinees (last 30 days):', {
+          thirtyDaysAgo: thirtyDaysAgo.toDateString(),
           currentDate: currentDate.toDateString()
         });
         
+        // Filter employees who joined in the last 30 days
         const recentJoinees = data.filter(emp => {
-          if (!emp.date_of_joining) return false;
+          if (!emp.dateOfJoining && !emp.date_of_joining) return false;
           
-          // Parse the date_of_joining field (format: "YYYY-MM-DD HH:MM:SS")
-          const joinDate = new Date(emp.date_of_joining);
+          // Use either dateOfJoining or date_of_joining field
+          const dateField = emp.dateOfJoining || emp.date_of_joining;
+          
+          // Parse the joining date - handle both string and Excel serial number formats
+          let joinDate;
+          
+          if (typeof dateField === 'string') {
+            // Handle string dates (YYYY-MM-DD format)
+            joinDate = new Date(dateField);
+          } else if (typeof dateField === 'number') {
+            // Handle Excel serial dates
+            const excelEpoch = new Date(1900, 0, 1);
+            const msPerDay = 24 * 60 * 60 * 1000;
+            joinDate = new Date(excelEpoch.getTime() + (dateField - 2) * msPerDay);
+          } else {
+            return false;
+          }
           
           // Check if joining date is valid
-          if (isNaN(joinDate.getTime())) return false;
+          if (isNaN(joinDate.getTime())) {
+            console.log('Invalid date for employee:', emp.name, 'Date:', dateField);
+            return false;
+          }
           
-          // Check if employee joined in the last month
-          return joinDate >= lastMonthStart && joinDate <= lastMonthEnd;
-        }).sort((a, b) => new Date(b.date_of_joining) - new Date(a.date_of_joining));
+          // Check if employee joined in the last 30 days
+          const isRecentJoinee = joinDate >= thirtyDaysAgo && joinDate <= currentDate;
+          
+          if (isRecentJoinee) {
+            console.log('Recent joinee found:', emp.name, 'Joined:', joinDate.toDateString());
+          }
+          
+          return isRecentJoinee;
+        }).sort((a, b) => {
+          const dateA = new Date(a.dateOfJoining || a.date_of_joining);
+          const dateB = new Date(b.dateOfJoining || b.date_of_joining);
+          return dateB - dateA; // Most recent first
+        });
         
-        console.log('Recent joinees found:', recentJoinees.length);
+        console.log('Recent joinees found (last 30 days):', recentJoinees.length);
         
-        // If no recent joinees from last month, get the latest 15 employees by joining date
+        // If no recent joinees from last 30 days, show employees from last 60 days
         let employeesToShow = recentJoinees;
         if (employeesToShow.length === 0) {
-          console.log('No recent joinees from last month, showing latest 15 employees');
+          console.log('No joinees in last 30 days, expanding to last 60 days');
+          const sixtyDaysAgo = new Date();
+          sixtyDaysAgo.setDate(currentDate.getDate() - 60);
+          
+          const extendedRecentJoinees = data.filter(emp => {
+            if (!emp.dateOfJoining && !emp.date_of_joining) return false;
+            
+            const dateField = emp.dateOfJoining || emp.date_of_joining;
+            let joinDate;
+            
+            if (typeof dateField === 'string') {
+              joinDate = new Date(dateField);
+            } else if (typeof dateField === 'number') {
+              const excelEpoch = new Date(1900, 0, 1);
+              const msPerDay = 24 * 60 * 60 * 1000;
+              joinDate = new Date(excelEpoch.getTime() + (dateField - 2) * msPerDay);
+            } else {
+              return false;
+            }
+            
+            if (isNaN(joinDate.getTime())) return false;
+            
+            return joinDate >= sixtyDaysAgo && joinDate <= currentDate;
+          }).sort((a, b) => {
+            const dateA = new Date(a.dateOfJoining || a.date_of_joining);
+            const dateB = new Date(b.dateOfJoining || b.date_of_joining);
+            return dateB - dateA;
+          });
+          
+          employeesToShow = extendedRecentJoinees.slice(0, 15);
+          console.log('Extended search found:', employeesToShow.length, 'employees');
+        }
+        
+        // If still no recent joinees, get the latest 15 employees by joining date
+        if (employeesToShow.length === 0) {
+          console.log('No recent joinees found, showing latest 15 employees by joining date');
           const allEmployeesSorted = data
-            .filter(emp => emp.date_of_joining && !isNaN(new Date(emp.date_of_joining).getTime()))
-            .sort((a, b) => new Date(b.date_of_joining) - new Date(a.date_of_joining));
+            .filter(emp => {
+              const dateField = emp.dateOfJoining || emp.date_of_joining;
+              if (!dateField) return false;
+              
+              let joinDate;
+              if (typeof dateField === 'string') {
+                joinDate = new Date(dateField);
+              } else if (typeof dateField === 'number') {
+                const excelEpoch = new Date(1900, 0, 1);
+                const msPerDay = 24 * 60 * 60 * 1000;
+                joinDate = new Date(excelEpoch.getTime() + (dateField - 2) * msPerDay);
+              } else {
+                return false;
+              }
+              
+              return !isNaN(joinDate.getTime());
+            })
+            .sort((a, b) => {
+              const dateA = new Date(a.dateOfJoining || a.date_of_joining);
+              const dateB = new Date(b.dateOfJoining || b.date_of_joining);
+              return dateB - dateA;
+            });
           
           employeesToShow = allEmployeesSorted.slice(0, 15);
         }
