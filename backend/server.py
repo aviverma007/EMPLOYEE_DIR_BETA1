@@ -1335,6 +1335,174 @@ initialize_data()
 
 
 # ============================================================================
+# BANNER MANAGEMENT API
+# ============================================================================
+
+@app.post("/api/upload-banner")
+async def upload_banner(image: UploadFile = File(...), bannerType: str = ""):
+    """Upload and store banner images"""
+    try:
+        # Create banners directory
+        banners_dir = os.path.join(uploads_path, "banners")
+        os.makedirs(banners_dir, exist_ok=True)
+        
+        # Generate filename
+        file_extension = image.filename.split(".")[-1]
+        filename = f"{bannerType}_{uuid.uuid4()}.{file_extension}"
+        file_path = os.path.join(banners_dir, filename)
+        
+        # Save file
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(image.file, buffer)
+        
+        # Return URL
+        image_url = f"/api/uploads/banners/{filename}"
+        return {"imageUrl": image_url, "message": "Banner uploaded successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error uploading banner: {str(e)}")
+
+
+# ============================================================================
+# EMPLOYEE MANAGEMENT API - CRUD Operations
+# ============================================================================
+
+class EmployeeCreate(BaseModel):
+    id: str
+    name: str
+    designation: Optional[str] = ""
+    department: str
+    location: Optional[str] = ""
+    grade: Optional[str] = ""
+    mobile: Optional[str] = ""
+    email: Optional[str] = ""
+    date_of_joining: Optional[str] = ""
+    date_of_birth: Optional[str] = ""
+    blood_group: Optional[str] = ""
+    emergency_contact: Optional[str] = ""
+    profileImage: Optional[str] = ""
+
+@app.post("/api/employees")
+async def create_employee(employee: EmployeeCreate):
+    """Create a new employee"""
+    if employees_collection is None:
+        raise HTTPException(status_code=500, detail="Database not connected")
+    
+    try:
+        # Check if employee ID already exists
+        existing = employees_collection.find_one({"id": employee.id})
+        if existing:
+            raise HTTPException(status_code=400, detail="Employee ID already exists")
+        
+        # Convert to dict and add metadata
+        employee_data = employee.dict()
+        employee_data["created_at"] = datetime.now()
+        employee_data["updated_at"] = datetime.now()
+        
+        # Insert into database
+        employees_collection.insert_one(employee_data)
+        
+        return {"message": "Employee created successfully", "id": employee.id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creating employee: {str(e)}")
+
+@app.put("/api/employees/{employee_id}")
+async def update_employee(employee_id: str, employee: EmployeeCreate):
+    """Update an existing employee"""
+    if employees_collection is None:
+        raise HTTPException(status_code=500, detail="Database not connected")
+    
+    try:
+        # Check if employee exists
+        existing = employees_collection.find_one({"id": employee_id})
+        if not existing:
+            raise HTTPException(status_code=404, detail="Employee not found")
+        
+        # Convert to dict and update timestamp
+        employee_data = employee.dict()
+        employee_data["updated_at"] = datetime.now()
+        
+        # Update in database
+        employees_collection.update_one(
+            {"id": employee_id},
+            {"$set": employee_data}
+        )
+        
+        return {"message": "Employee updated successfully", "id": employee_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating employee: {str(e)}")
+
+@app.delete("/api/employees/{employee_id}")
+async def delete_employee(employee_id: str):
+    """Delete an employee"""
+    if employees_collection is None:
+        raise HTTPException(status_code=500, detail="Database not connected")
+    
+    try:
+        # Check if employee exists
+        existing = employees_collection.find_one({"id": employee_id})
+        if not existing:
+            raise HTTPException(status_code=404, detail="Employee not found")
+        
+        # Delete from database
+        employees_collection.delete_one({"id": employee_id})
+        
+        return {"message": "Employee deleted successfully", "id": employee_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting employee: {str(e)}")
+
+@app.get("/api/employees/export-excel")
+async def export_employees_excel():
+    """Export employees to Excel file"""
+    if employees_collection is None:
+        raise HTTPException(status_code=500, detail="Database not connected")
+    
+    try:
+        import openpyxl
+        from openpyxl import Workbook
+        
+        # Get all employees
+        employees = list(employees_collection.find({}, {"_id": 0}))
+        
+        # Create workbook
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Employees"
+        
+        # Headers
+        headers = ["id", "name", "designation", "department", "location", "grade", 
+                   "mobile", "email", "date_of_joining", "date_of_birth", "blood_group", 
+                   "emergency_contact", "profileImage"]
+        ws.append(headers)
+        
+        # Add employee data
+        for emp in employees:
+            row = [emp.get(h, "") for h in headers]
+            ws.append(row)
+        
+        # Save to file
+        export_dir = os.path.join(uploads_path, "exports")
+        os.makedirs(export_dir, exist_ok=True)
+        filename = f"employees_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+        filepath = os.path.join(export_dir, filename)
+        wb.save(filepath)
+        
+        return FileResponse(
+            filepath,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            filename=filename
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error exporting employees: {str(e)}")
+
+
+
+# ============================================================================
 # STATIC FILE SERVING
 # ============================================================================
 
