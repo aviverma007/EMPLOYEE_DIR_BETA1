@@ -38,8 +38,7 @@ import EmployeeManagement from "./components/admin/EmployeeManagement";
 
 const AppContent = () => {
   const { isAuthenticated, initializeAuth, isAdmin, isUser } = useAuth();
-  const [activeTab, setActiveTab] = useState("home");
-  const [activeDirectorySection, setActiveDirectorySection] = useState("directory");
+  const [activeTab, setActiveTab] = useState(isAdmin() ? "banner-management" : "home");
 
   useEffect(() => {
     initializeAuth();
