@@ -2760,7 +2760,7 @@ class BackendPersistentTester:
             if len(updated_banners) > 0:
                 update_banner_url = "https://via.placeholder.com/800x400?text=Updated+Banner"
                 banner_put_response = self.session.put(f"{self.backend_url}/home-sliders/banner/0", 
-                                                     json=update_banner_url)
+                                                     json={"image_url": update_banner_url})
                 
                 if banner_put_response.status_code == 200:
                     self.log_test("Home Sliders - PUT /api/home-sliders/banner/0", True, 
