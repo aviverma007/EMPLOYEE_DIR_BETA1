@@ -58,162 +58,84 @@ const AppContent = () => {
               <Header />
               <div className="flex-1 w-full px-2 sm:px-4 lg:px-6 py-4">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">
-                  {/* Navigation Tabs - Enhanced Role-based access */}
+                  {/* Navigation Tabs - Role-based access */}
                   <div className={`flex justify-start mb-4 overflow-x-auto ${isAdmin() ? 'bg-gradient-to-r from-blue-50 to-blue-100 p-2 rounded-lg' : ''}`}>
                   <TabsList className={`flex w-auto h-10 shadow-md border rounded-lg p-1 min-w-max ${
                     isAdmin() 
                       ? 'bg-white border-blue-300' 
                       : 'bg-white border-blue-200'
                   }`}>
-                      <TabsTrigger 
-                        value="home" 
-                        className={`text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap transition-all duration-200 ${
-                          isAdmin() 
-                            ? 'data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white data-[state=inactive]:text-blue-700 data-[state=inactive]:hover:bg-blue-50' 
-                            : 'data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700'
-                        }`}
-                      >
-                        Home
-                      </TabsTrigger>
-                      
-                      {/* Employee Directory - Admin gets dropdown, User gets direct access */}
-                      {isAdmin() ? (
-                        <div className="relative">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                className={`h-8 text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap ${
-                                  activeTab === "directory" 
-                                    ? "bg-blue-600 text-white" 
-                                    : "text-blue-700 hover:bg-blue-50"
-                                } flex items-center justify-center gap-1`}
-                                onClick={() => setActiveTab("directory")}
-                              >
-                                Employee Directory
-                                <ChevronDown className="h-3 w-3" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="center" className="w-48">
-                              <DropdownMenuItem 
-                                onClick={() => {
-                                  setActiveTab("directory");
-                                  setActiveDirectorySection("directory");
-                                }}
-                                className="cursor-pointer"
-                              >
-                                Employee Directory
-                              </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                onClick={() => {
-                                  setActiveTab("directory");
-                                  setActiveDirectorySection("hierarchy");
-                                }}
-                                className="cursor-pointer"
-                              >
-                                Hierarchy Builder
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      ) : (
-                        <TabsTrigger 
-                          value="directory" 
-                          className="text-xs sm:text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700 rounded-md px-2 sm:px-4 py-2 whitespace-nowrap"
-                        >
-                          Employee Directory
-                        </TabsTrigger>
+                      {/* Admin gets only 3 tabs */}
+                      {isAdmin() && (
+                        <>
+                          <TabsTrigger 
+                            value="banner-management" 
+                            className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white data-[state=inactive]:text-blue-700 data-[state=inactive]:hover:bg-blue-50"
+                          >
+                            Banner Management
+                          </TabsTrigger>
+                          
+                          <TabsTrigger 
+                            value="alerts-management" 
+                            className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white data-[state=inactive]:text-blue-700 data-[state=inactive]:hover:bg-blue-50"
+                          >
+                            Alerts Management
+                          </TabsTrigger>
+                          
+                          <TabsTrigger 
+                            value="employee-management" 
+                            className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white data-[state=inactive]:text-blue-700 data-[state=inactive]:hover:bg-blue-50"
+                          >
+                            Employee Management
+                          </TabsTrigger>
+                        </>
                       )}
                       
-                      {/* Admin-only tabs */}
-                      {isAdmin() && (
-                        <TabsTrigger 
-                          value="work" 
-                          className="text-xs sm:text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700 rounded-md px-2 sm:px-4 py-2 whitespace-nowrap"
-                        >
-                          Work
-                        </TabsTrigger>
-                      )}
-                      
-                      {isAdmin() && (
-                        <TabsTrigger 
-                          value="knowledge" 
-                          className="text-xs sm:text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700 rounded-md px-2 sm:px-4 py-2 whitespace-nowrap"
-                        >
-                          Knowledge
-                        </TabsTrigger>
-                      )}
-                      
-                      {/* Both Admin and User get Policies */}
-                      <TabsTrigger 
-                        value="policies" 
-                        className="text-xs sm:text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700 rounded-md px-2 sm:px-4 py-2 whitespace-nowrap"
-                      >
-                        Policies
-                      </TabsTrigger>
-                      
-                      {/* Admin-only tab */}
-                      {isAdmin() && (
-                        <TabsTrigger 
-                          value="workflows" 
-                          className="text-xs sm:text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700 rounded-md px-2 sm:px-4 py-2 whitespace-nowrap"
-                        >
-                          Workflows
-                        </TabsTrigger>
-                      )}
-                      
-                      {/* Both Admin and User get Meeting Rooms */}
-                      <TabsTrigger 
-                        value="meeting-rooms" 
-                        className="text-xs sm:text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700 rounded-md px-2 sm:px-4 py-2 whitespace-nowrap"
-                      >
-                        Meeting Rooms
-                      </TabsTrigger>
-                      
-                      {/* Both Admin and User get Holiday Calendar */}
-                      <TabsTrigger 
-                        value="holiday-calendar" 
-                        className="text-xs sm:text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700 rounded-md px-2 sm:px-4 py-2 whitespace-nowrap"
-                      >
-                        Holiday Calendar
-                      </TabsTrigger>
-                      
-                      {/* Dashboard tab for both Admin and User */}
-                      <TabsTrigger 
-                        value="dashboard" 
-                        className="text-xs sm:text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700 rounded-md px-2 sm:px-4 py-2 whitespace-nowrap"
-                      >
-                        Dashboard
-                      </TabsTrigger>
-                      
-                      {/* Admin-only tab */}
-                      {isAdmin() && (
-                        <TabsTrigger 
-                          value="attendance" 
-                          className="text-xs sm:text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700 rounded-md px-2 sm:px-4 py-2 whitespace-nowrap"
-                        >
-                          Attendance
-                        </TabsTrigger>
-                      )}
-                      
-                      {/* Admin-only Help tab */}
-                      {isAdmin() && (
-                        <TabsTrigger 
-                          value="help" 
-                          className="text-xs sm:text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700 rounded-md px-2 sm:px-4 py-2 whitespace-nowrap"
-                        >
-                          Help
-                        </TabsTrigger>
-                      )}
-                      
-                      {/* Admin-only Alerts tab */}
-                      {isAdmin() && (
-                        <TabsTrigger 
-                          value="alerts" 
-                          className="text-xs sm:text-sm font-medium data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700 rounded-md px-2 sm:px-4 py-2 whitespace-nowrap"
-                        >
-                          Alerts
-                        </TabsTrigger>
+                      {/* User gets all original tabs */}
+                      {isUser() && (
+                        <>
+                          <TabsTrigger 
+                            value="home" 
+                            className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
+                          >
+                            Home
+                          </TabsTrigger>
+                          
+                          <TabsTrigger 
+                            value="directory" 
+                            className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
+                          >
+                            Employee Directory
+                          </TabsTrigger>
+                          
+                          <TabsTrigger 
+                            value="policies" 
+                            className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
+                          >
+                            Policies
+                          </TabsTrigger>
+                          
+                          <TabsTrigger 
+                            value="meeting-rooms" 
+                            className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
+                          >
+                            Meeting Rooms
+                          </TabsTrigger>
+                          
+                          <TabsTrigger 
+                            value="holiday-calendar" 
+                            className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
+                          >
+                            Holiday Calendar
+                          </TabsTrigger>
+                          
+                          <TabsTrigger 
+                            value="help" 
+                            className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
+                          >
+                            Help
+                          </TabsTrigger>
+                        </>
                       )}
                     </TabsList>
                   </div>
