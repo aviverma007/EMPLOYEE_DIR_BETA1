@@ -39,19 +39,40 @@ const BannerManagement = () => {
     setLoading(true);
     try {
       const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      console.log('Fetching sliders from:', `${backendUrl}/api/home-sliders`);
+      
       const response = await fetch(`${backendUrl}/api/home-sliders`);
+      console.log('Sliders response status:', response.status);
       
       if (response.ok) {
         const data = await response.json();
+        console.log('Sliders data:', data);
         setBannerImages(data.bannerImages || []);
         setGalleryImages(data.galleryImages || []);
-        toast.success('Sliders loaded successfully');
+        toast.success(`Loaded ${data.bannerImages?.length || 0} banner images and ${data.galleryImages?.length || 0} gallery images`);
       } else {
-        throw new Error('Failed to load sliders');
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        throw new Error(`Failed to load sliders: ${response.status}`);
       }
     } catch (error) {
       console.error('Error fetching sliders:', error);
-      toast.error('Failed to load sliders');
+      toast.error(`Failed to load sliders: ${error.message}`);
+      // Set default images on error
+      setBannerImages([
+        "/images/smart-world-orchard.webp",
+        "/images/smart-world-one-dxp.webp",
+        "/images/smart-world-gems.webp",
+        "/images/smart-world-the-edition.webp",
+        "/images/smart-world-sky-arc.webp"
+      ]);
+      setGalleryImages([
+        "/images/gallery-1.jpg",
+        "/images/gallery-2.jpg",
+        "/images/gallery-3.jpeg",
+        "/images/gallery-4.jpg",
+        "/images/gallery-5.jpg"
+      ]);
     } finally {
       setLoading(false);
     }
