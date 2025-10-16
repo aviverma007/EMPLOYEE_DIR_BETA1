@@ -2712,7 +2712,7 @@ class BackendPersistentTester:
             # Test 2: POST /api/home-sliders/banner - Add new banner image
             test_banner_url = "https://via.placeholder.com/800x400?text=Test+Banner"
             banner_post_response = self.session.post(f"{self.backend_url}/home-sliders/banner", 
-                                                   json={"image_url": test_banner_url})
+                                                   json=test_banner_url)
             
             if banner_post_response.status_code == 200:
                 banner_result = banner_post_response.json()
