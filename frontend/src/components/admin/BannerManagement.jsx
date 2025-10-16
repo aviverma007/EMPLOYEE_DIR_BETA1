@@ -11,17 +11,18 @@ const BannerManagement = () => {
     heroBanner: '/images/company logo.png',
     policyBanner: '/images/Policies_Banner.png',
     profileTiles: {
-      pictures: '/images/default-tile.png',
-      newJoinees: '/images/default-tile.png',
-      celebrations: '/images/default-tile.png',
-      todo: '/images/default-tile.png',
-      workflow: '/images/default-tile.png',
-      news: '/images/default-tile.png'
+      pictures: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400',
+      newJoinees: 'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=400',
+      celebrations: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=400',
+      todo: 'https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=400',
+      workflow: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400',
+      news: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400'
     }
   });
   
   const [previews, setPreviews] = useState({});
   const [uploading, setUploading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const bannerTypes = [
     { key: 'heroBanner', label: 'Hero Banner (Login Page)', current: banners.heroBanner },
