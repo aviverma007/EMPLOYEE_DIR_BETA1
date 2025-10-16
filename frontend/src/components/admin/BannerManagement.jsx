@@ -165,7 +165,19 @@ const BannerManagement = () => {
             <CardContent className="space-y-4">
               {/* Current Banner Preview */}
               <div>
-                <Label className="text-sm font-medium text-gray-700">Current Banner</Label>
+                <div className="flex justify-between items-center mb-2">
+                  <Label className="text-sm font-medium text-gray-700">Current Banner</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleRemoveBanner(key)}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-3 w-3 mr-1" />
+                    Remove
+                  </Button>
+                </div>
                 <div className="mt-2 border-2 border-gray-200 rounded-lg overflow-hidden bg-gray-50">
                   <img 
                     src={current} 
