@@ -51,6 +51,7 @@ attendance_collection = db.attendance if db is not None else None
 policies_collection = db.policies if db is not None else None
 workflows_collection = db.workflows if db is not None else None
 hierarchy_collection = db.hierarchy if db is not None else None
+home_sliders_collection = db.home_sliders if db is not None else None
 
 # Data Models
 class MeetingRoomBooking(BaseModel):
