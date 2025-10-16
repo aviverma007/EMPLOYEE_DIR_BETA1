@@ -2726,7 +2726,7 @@ class BackendPersistentTester:
             # Test 3: POST /api/home-sliders/gallery - Add new gallery image
             test_gallery_url = "https://via.placeholder.com/800x400?text=Test+Gallery"
             gallery_post_response = self.session.post(f"{self.backend_url}/home-sliders/gallery", 
-                                                    json=test_gallery_url)
+                                                    json={"image_url": test_gallery_url})
             
             if gallery_post_response.status_code == 200:
                 gallery_result = gallery_post_response.json()
