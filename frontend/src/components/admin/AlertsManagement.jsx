@@ -41,14 +41,29 @@ const AlertsManagement = () => {
   }, []);
 
   const fetchAlerts = async () => {
+    setLoading(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/alerts`);
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      console.log('Fetching alerts from:', `${backendUrl}/api/alerts`);
+      
+      const response = await fetch(`${backendUrl}/api/alerts`);
+      console.log('Alerts response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('Alerts loaded:', data.length);
         setAlerts(data);
+        if (data.length === 0) {
+          toast.info('No alerts created yet. Create your first alert!');
+        }
+      } else {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
     } catch (error) {
       console.error('Error fetching alerts:', error);
+      toast.error(`Failed to load alerts: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
