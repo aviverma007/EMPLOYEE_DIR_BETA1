@@ -2774,7 +2774,7 @@ class BackendPersistentTester:
             if len(updated_galleries) > 0:
                 update_gallery_url = "https://via.placeholder.com/800x400?text=Updated+Gallery"
                 gallery_put_response = self.session.put(f"{self.backend_url}/home-sliders/gallery/0", 
-                                                       json=update_gallery_url)
+                                                       json={"image_url": update_gallery_url})
                 
                 if gallery_put_response.status_code == 200:
                     self.log_test("Home Sliders - PUT /api/home-sliders/gallery/0", True, 
