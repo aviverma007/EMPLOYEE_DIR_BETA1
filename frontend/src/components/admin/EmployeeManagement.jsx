@@ -66,16 +66,28 @@ const EmployeeManagement = () => {
   }, [searchTerm, employees]);
 
   const fetchEmployees = async () => {
+    setLoading(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/employees`);
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      console.log('Fetching employees from:', `${backendUrl}/api/employees`);
+      
+      const response = await fetch(`${backendUrl}/api/employees`);
+      console.log('Response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('Employees loaded:', data.length);
         setEmployees(data);
         setFilteredEmployees(data);
+        toast.success(`Loaded ${data.length} employees successfully`);
+      } else {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
     } catch (error) {
       console.error('Error fetching employees:', error);
-      toast.error('Failed to load employees');
+      toast.error(`Failed to load employees: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
