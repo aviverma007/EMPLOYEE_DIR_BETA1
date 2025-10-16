@@ -141,77 +141,50 @@ const AppContent = () => {
                   </div>
                   
                   <div className="flex-1 overflow-auto">
-                    <TabsContent value="home" className="mt-0 h-full">
-                      <Home />
-                    </TabsContent>
-                    
-                    <TabsContent value="directory" className="mt-0 h-full">
-                      {isAdmin() && activeDirectorySection === "hierarchy" ? (
-                        <HierarchyBuilder />
-                      ) : (
-                        <EmployeeDirectory />
-                      )}
-                    </TabsContent>
-                    
-                    {/* Admin-only content */}
+                    {/* Admin-only 3 management tabs */}
                     {isAdmin() && (
-                      <TabsContent value="work" className="mt-0 h-full">
-                        <Work />
-                      </TabsContent>
+                      <>
+                        <TabsContent value="banner-management" className="mt-0 h-full">
+                          <BannerManagement />
+                        </TabsContent>
+                        
+                        <TabsContent value="alerts-management" className="mt-0 h-full">
+                          <AlertsManagement />
+                        </TabsContent>
+                        
+                        <TabsContent value="employee-management" className="mt-0 h-full">
+                          <EmployeeManagement />
+                        </TabsContent>
+                      </>
                     )}
                     
-                    {isAdmin() && (
-                      <TabsContent value="knowledge" className="mt-0 h-full">
-                        <Knowledge />
-                      </TabsContent>
-                    )}
-                    
-                    {/* Both Admin and User can access Policies */}
-                    <TabsContent value="policies" className="mt-0 h-full">
-                      <Policies />
-                    </TabsContent>
-                    
-                    {/* Admin-only content */}
-                    {isAdmin() && (
-                      <TabsContent value="workflows" className="mt-0 h-full">
-                        <Workflows />
-                      </TabsContent>
-                    )}
-                    
-                    {/* Both Admin and User can access Meeting Rooms */}
-                    <TabsContent value="meeting-rooms" className="mt-0 h-full">
-                      <MeetingRooms />
-                    </TabsContent>
-                    
-                    {/* Both Admin and User can access Holiday Calendar */}
-                    <TabsContent value="holiday-calendar" className="mt-0 h-full">
-                      <HolidayCalendar />
-                    </TabsContent>
-                    
-                    {/* Both Admin and User can access Dashboard */}
-                    <TabsContent value="dashboard" className="mt-0 h-full">
-                      <Dashboard />
-                    </TabsContent>
-                    
-                    {/* Admin-only content */}
-                    {isAdmin() && (
-                      <TabsContent value="attendance" className="mt-0 h-full">
-                        <Attendance />
-                      </TabsContent>
-                    )}
-                    
-                    {/* Admin-only Help */}
-                    {isAdmin() && (
-                      <TabsContent value="help" className="mt-0 h-full">
-                        <Help />
-                      </TabsContent>
-                    )}
-                    
-                    {/* Admin-only Alerts Management */}
-                    {isAdmin() && (
-                      <TabsContent value="alerts" className="mt-0 h-full">
-                        <AlertManagement />
-                      </TabsContent>
+                    {/* User tabs - all original functionality */}
+                    {isUser() && (
+                      <>
+                        <TabsContent value="home" className="mt-0 h-full">
+                          <Home />
+                        </TabsContent>
+                        
+                        <TabsContent value="directory" className="mt-0 h-full">
+                          <EmployeeDirectory />
+                        </TabsContent>
+                        
+                        <TabsContent value="policies" className="mt-0 h-full">
+                          <Policies />
+                        </TabsContent>
+                        
+                        <TabsContent value="meeting-rooms" className="mt-0 h-full">
+                          <MeetingRooms />
+                        </TabsContent>
+                        
+                        <TabsContent value="holiday-calendar" className="mt-0 h-full">
+                          <HolidayCalendar />
+                        </TabsContent>
+                        
+                        <TabsContent value="help" className="mt-0 h-full">
+                          <Help />
+                        </TabsContent>
+                      </>
                     )}
                   </div>
                 </Tabs>
