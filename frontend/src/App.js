@@ -31,6 +31,11 @@ import AlertManagement from "./components/AlertManagement";
 import UserAlerts from "./components/UserAlerts";
 import Dashboard from "./components/Dashboard";
 
+// Admin-only components
+import BannerManagement from "./components/admin/BannerManagement";
+import AlertsManagement from "./components/admin/AlertsManagement";
+import EmployeeManagement from "./components/admin/EmployeeManagement";
+
 const AppContent = () => {
   const { isAuthenticated, initializeAuth, isAdmin, isUser } = useAuth();
   const [activeTab, setActiveTab] = useState("home");
