@@ -123,6 +123,29 @@ const BannerManagement = () => {
     if (input) input.value = '';
   };
 
+  const handleRemoveBanner = async (key) => {
+    if (!window.confirm('Are you sure you want to remove this banner? It will be replaced with default image.')) return;
+    
+    try {
+      // Reset to default image
+      const defaultImage = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23e5e7eb" width="400" height="300"/%3E%3Ctext fill="%239ca3af" x="50%25" y="50%25" text-anchor="middle" dy=".3em" font-size="20"%3ENo Banner%3C/text%3E%3C/svg%3E';
+      
+      if (key === 'heroBanner' || key === 'policyBanner') {
+        setBanners(prev => ({ ...prev, [key]: defaultImage }));
+      } else {
+        setBanners(prev => ({
+          ...prev,
+          profileTiles: { ...prev.profileTiles, [key]: defaultImage }
+        }));
+      }
+      
+      toast.success('Banner removed successfully!');
+    } catch (error) {
+      console.error('Remove error:', error);
+      toast.error('Failed to remove banner');
+    }
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-6">
