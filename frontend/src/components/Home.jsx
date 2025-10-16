@@ -43,23 +43,23 @@ const Home = () => {
   const [showEmployeeModal, setShowEmployeeModal] = useState(false);
   const { isAdmin } = useAuth();
 
-  // SmartWorld project banner images
-  const bannerImages = [
+  // SmartWorld project banner images - loaded from API
+  const [bannerImages, setBannerImages] = useState([
     "/images/smart-world-orchard.webp",
     "/images/smart-world-one-dxp.webp", 
     "/images/smart-world-gems.webp",
     "/images/smart-world-the-edition.webp",
     "/images/smart-world-sky-arc.webp"
-  ];
+  ]);
 
-  // Company gallery images for photo slideshow
-  const galleryImages = [
+  // Company gallery images for photo slideshow - loaded from API
+  const [galleryImages, setGalleryImages] = useState([
     "/images/gallery-1.jpg",
     "/images/gallery-2.jpg",
     "/images/gallery-3.jpeg",
     "/images/gallery-4.jpg",
     "/images/gallery-5.jpg"
-  ];
+  ]);
 
   // Project links data
   const projectLinks = [
