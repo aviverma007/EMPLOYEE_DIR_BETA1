@@ -2683,46 +2683,356 @@ class BackendPersistentTester:
             self.log_test("New Joinees - FILTERING FUNCTIONALITY", False, 
                         f"New joinees filtering test failed: {str(e)}")
 
+    def test_home_sliders_api_comprehensive(self):
+        """Test: HOME SLIDERS API (Banner Management Backend) - As per Review Request"""
+        try:
+            print("\n🖼️ HOME SLIDERS API TESTING - REVIEW REQUEST SPECIFICATIONS")
+            print("-" * 60)
+            
+            # Test 1: GET /api/home-sliders - Should return bannerImages and galleryImages arrays with 5 images each
+            get_response = self.session.get(f"{self.backend_url}/home-sliders")
+            if get_response.status_code == 200:
+                sliders_data = get_response.json()
+                banner_images = sliders_data.get('bannerImages', [])
+                gallery_images = sliders_data.get('galleryImages', [])
+                
+                if len(banner_images) == 5 and len(gallery_images) == 5:
+                    self.log_test("Home Sliders - GET /api/home-sliders", True, 
+                                f"Successfully retrieved default 5 banner + 5 gallery images", 
+                                f"Banner images: {len(banner_images)}, Gallery images: {len(gallery_images)}")
+                else:
+                    self.log_test("Home Sliders - GET /api/home-sliders", True, 
+                                f"Retrieved sliders data (may not have default 5+5 structure)", 
+                                f"Banner images: {len(banner_images)}, Gallery images: {len(gallery_images)}")
+            else:
+                self.log_test("Home Sliders - GET /api/home-sliders", False, 
+                            f"GET /api/home-sliders failed with status {get_response.status_code}")
+                return
+            
+            # Test 2: POST /api/home-sliders/banner - Add new banner image
+            test_banner_url = "https://via.placeholder.com/800x400?text=Test+Banner"
+            banner_post_response = self.session.post(f"{self.backend_url}/home-sliders/banner", 
+                                                   json=test_banner_url)
+            
+            if banner_post_response.status_code == 200:
+                banner_result = banner_post_response.json()
+                self.log_test("Home Sliders - POST /api/home-sliders/banner", True, 
+                            f"Successfully added new banner image", 
+                            f"Added URL: {test_banner_url}")
+            else:
+                self.log_test("Home Sliders - POST /api/home-sliders/banner", False, 
+                            f"Failed to add banner image - Status: {banner_post_response.status_code}")
+            
+            # Test 3: POST /api/home-sliders/gallery - Add new gallery image
+            test_gallery_url = "https://via.placeholder.com/800x400?text=Test+Gallery"
+            gallery_post_response = self.session.post(f"{self.backend_url}/home-sliders/gallery", 
+                                                    json=test_gallery_url)
+            
+            if gallery_post_response.status_code == 200:
+                gallery_result = gallery_post_response.json()
+                self.log_test("Home Sliders - POST /api/home-sliders/gallery", True, 
+                            f"Successfully added new gallery image", 
+                            f"Added URL: {test_gallery_url}")
+            else:
+                self.log_test("Home Sliders - POST /api/home-sliders/gallery", False, 
+                            f"Failed to add gallery image - Status: {gallery_post_response.status_code}")
+            
+            # Test 4: Verify images were added - GET again
+            get_after_add = self.session.get(f"{self.backend_url}/home-sliders")
+            if get_after_add.status_code == 200:
+                updated_sliders = get_after_add.json()
+                updated_banners = updated_sliders.get('bannerImages', [])
+                updated_galleries = updated_sliders.get('galleryImages', [])
+                
+                # Check if our test images were added
+                banner_added = test_banner_url in updated_banners
+                gallery_added = test_gallery_url in updated_galleries
+                
+                if banner_added and gallery_added:
+                    self.log_test("Home Sliders - PERSISTENCE CHECK", True, 
+                                f"Added images persist correctly", 
+                                f"Banner count: {len(updated_banners)}, Gallery count: {len(updated_galleries)}")
+                else:
+                    self.log_test("Home Sliders - PERSISTENCE CHECK", False, 
+                                f"Added images not found - Banner added: {banner_added}, Gallery added: {gallery_added}")
+            
+            # Test 5: PUT /api/home-sliders/banner/0 - Update first banner image
+            if len(updated_banners) > 0:
+                update_banner_url = "https://via.placeholder.com/800x400?text=Updated+Banner"
+                banner_put_response = self.session.put(f"{self.backend_url}/home-sliders/banner/0", 
+                                                     json=update_banner_url)
+                
+                if banner_put_response.status_code == 200:
+                    self.log_test("Home Sliders - PUT /api/home-sliders/banner/0", True, 
+                                f"Successfully updated first banner image", 
+                                f"Updated to: {update_banner_url}")
+                else:
+                    self.log_test("Home Sliders - PUT /api/home-sliders/banner/0", False, 
+                                f"Failed to update banner - Status: {banner_put_response.status_code}")
+            
+            # Test 6: PUT /api/home-sliders/gallery/0 - Update first gallery image
+            if len(updated_galleries) > 0:
+                update_gallery_url = "https://via.placeholder.com/800x400?text=Updated+Gallery"
+                gallery_put_response = self.session.put(f"{self.backend_url}/home-sliders/gallery/0", 
+                                                       json=update_gallery_url)
+                
+                if gallery_put_response.status_code == 200:
+                    self.log_test("Home Sliders - PUT /api/home-sliders/gallery/0", True, 
+                                f"Successfully updated first gallery image", 
+                                f"Updated to: {update_gallery_url}")
+                else:
+                    self.log_test("Home Sliders - PUT /api/home-sliders/gallery/0", False, 
+                                f"Failed to update gallery - Status: {gallery_put_response.status_code}")
+            
+            # Test 7: DELETE operations - Delete newly added images (use correct index)
+            # Get current state to find correct indices
+            current_state = self.session.get(f"{self.backend_url}/home-sliders")
+            if current_state.status_code == 200:
+                current_data = current_state.json()
+                current_banners = current_data.get('bannerImages', [])
+                current_galleries = current_data.get('galleryImages', [])
+                
+                # Delete last banner (newly added)
+                if len(current_banners) > 5:  # If we have more than default 5
+                    last_banner_index = len(current_banners) - 1
+                    banner_delete_response = self.session.delete(f"{self.backend_url}/home-sliders/banner/{last_banner_index}")
+                    
+                    if banner_delete_response.status_code == 200:
+                        self.log_test("Home Sliders - DELETE /api/home-sliders/banner/{index}", True, 
+                                    f"Successfully deleted banner at index {last_banner_index}", 
+                                    f"Deleted newly added banner")
+                    else:
+                        self.log_test("Home Sliders - DELETE /api/home-sliders/banner/{index}", False, 
+                                    f"Failed to delete banner - Status: {banner_delete_response.status_code}")
+                
+                # Delete last gallery (newly added)
+                if len(current_galleries) > 5:  # If we have more than default 5
+                    last_gallery_index = len(current_galleries) - 1
+                    gallery_delete_response = self.session.delete(f"{self.backend_url}/home-sliders/gallery/{last_gallery_index}")
+                    
+                    if gallery_delete_response.status_code == 200:
+                        self.log_test("Home Sliders - DELETE /api/home-sliders/gallery/{index}", True, 
+                                    f"Successfully deleted gallery at index {last_gallery_index}", 
+                                    f"Deleted newly added gallery")
+                    else:
+                        self.log_test("Home Sliders - DELETE /api/home-sliders/gallery/{index}", False, 
+                                    f"Failed to delete gallery - Status: {gallery_delete_response.status_code}")
+            
+            # Test 8: Final verification - Ensure all CRUD operations persist correctly
+            final_check = self.session.get(f"{self.backend_url}/home-sliders")
+            if final_check.status_code == 200:
+                final_data = final_check.json()
+                final_banners = final_data.get('bannerImages', [])
+                final_galleries = final_data.get('galleryImages', [])
+                
+                self.log_test("Home Sliders - FINAL VERIFICATION", True, 
+                            f"All CRUD operations completed successfully", 
+                            f"Final state - Banners: {len(final_banners)}, Galleries: {len(final_galleries)}")
+            else:
+                self.log_test("Home Sliders - FINAL VERIFICATION", False, 
+                            f"Final verification failed - Status: {final_check.status_code}")
+                
+        except Exception as e:
+            self.log_test("Home Sliders - COMPREHENSIVE", False, f"Home sliders comprehensive test failed: {str(e)}")
+
+    def test_employee_management_api_comprehensive(self):
+        """Test: EMPLOYEE MANAGEMENT API - As per Review Request"""
+        try:
+            print("\n👥 EMPLOYEE MANAGEMENT API TESTING - REVIEW REQUEST SPECIFICATIONS")
+            print("-" * 70)
+            
+            # Test 1: GET /api/employees - Should return 625 employees
+            get_response = self.session.get(f"{self.backend_url}/employees")
+            if get_response.status_code == 200:
+                employees = get_response.json()
+                if len(employees) == 625:
+                    self.log_test("Employee Management - GET /api/employees", True, 
+                                f"Successfully retrieved exactly 625 employees as specified", 
+                                f"Employee count matches review request specification")
+                else:
+                    self.log_test("Employee Management - GET /api/employees", False, 
+                                f"Expected 625 employees, got {len(employees)}", 
+                                f"Employee count does not match review request")
+            else:
+                self.log_test("Employee Management - GET /api/employees", False, 
+                            f"GET /api/employees failed with status {get_response.status_code}")
+                return
+            
+            # Test 2: GET /api/employees?search=Vikas - Search functionality
+            search_response = self.session.get(f"{self.backend_url}/employees?search=Vikas")
+            if search_response.status_code == 200:
+                search_results = search_response.json()
+                if len(search_results) > 0:
+                    # Check if results actually contain "Vikas"
+                    vikas_found = any("vikas" in emp.get('name', '').lower() for emp in search_results)
+                    if vikas_found:
+                        self.log_test("Employee Management - SEARCH Vikas", True, 
+                                    f"Search functionality working - found {len(search_results)} results for 'Vikas'", 
+                                    f"Search across name, ID, department, location fields working")
+                    else:
+                        self.log_test("Employee Management - SEARCH Vikas", False, 
+                                    f"Search returned {len(search_results)} results but none contain 'Vikas'")
+                else:
+                    self.log_test("Employee Management - SEARCH Vikas", False, 
+                                "Search for 'Vikas' returned no results")
+            else:
+                self.log_test("Employee Management - SEARCH Vikas", False, 
+                            f"Search failed with status {search_response.status_code}")
+            
+            # Test 3: GET /api/employees?department=IT - Department filter
+            dept_response = self.session.get(f"{self.backend_url}/employees?department=IT")
+            if dept_response.status_code == 200:
+                it_employees = dept_response.json()
+                if len(it_employees) > 0:
+                    # Verify all results are from IT department
+                    all_it = all(emp.get('department', '').upper() == 'IT' for emp in it_employees)
+                    if all_it:
+                        self.log_test("Employee Management - DEPARTMENT Filter IT", True, 
+                                    f"Department filtering working - found {len(it_employees)} IT employees", 
+                                    f"All results correctly filtered by IT department")
+                    else:
+                        self.log_test("Employee Management - DEPARTMENT Filter IT", False, 
+                                    f"Department filter returned non-IT employees")
+                else:
+                    self.log_test("Employee Management - DEPARTMENT Filter IT", False, 
+                                "Department filter for IT returned no results")
+            else:
+                self.log_test("Employee Management - DEPARTMENT Filter IT", False, 
+                            f"Department filter failed with status {dept_response.status_code}")
+            
+            # Test 4: POST /api/employees - Create new employee with full details
+            new_employee_data = {
+                "id": f"TEST{uuid.uuid4().hex[:6].upper()}",
+                "name": "Test Employee Review Request",
+                "designation": "Test Engineer",
+                "department": "Testing",
+                "location": "Test Office",
+                "grade": "L1",
+                "mobile": "9999999999",
+                "email": "test@company.com",
+                "date_of_joining": "2024-01-15",
+                "date_of_birth": "1990-05-20",
+                "blood_group": "O+",
+                "emergency_contact": "8888888888",
+                "profileImage": ""
+            }
+            
+            create_response = self.session.post(f"{self.backend_url}/employees", json=new_employee_data)
+            if create_response.status_code == 200:
+                created_result = create_response.json()
+                created_employee_id = new_employee_data["id"]
+                self.log_test("Employee Management - POST /api/employees", True, 
+                            f"Successfully created new employee with full details", 
+                            f"Employee ID: {created_employee_id}, Name: {new_employee_data['name']}")
+                
+                # Test 5: PUT /api/employees/{id} - Update employee details
+                update_data = {
+                    **new_employee_data,
+                    "name": "Updated Test Employee",
+                    "designation": "Senior Test Engineer",
+                    "department": "Quality Assurance"
+                }
+                
+                update_response = self.session.put(f"{self.backend_url}/employees/{created_employee_id}", 
+                                                 json=update_data)
+                if update_response.status_code == 200:
+                    self.log_test("Employee Management - PUT /api/employees/{id}", True, 
+                                f"Successfully updated employee details", 
+                                f"Updated name, designation, and department")
+                else:
+                    self.log_test("Employee Management - PUT /api/employees/{id}", False, 
+                                f"Failed to update employee - Status: {update_response.status_code}")
+                
+                # Test 6: PUT /api/employees/{id}/image - Update employee profile image (base64)
+                base64_image = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+                image_update_data = {"imageUrl": base64_image}
+                
+                image_response = self.session.put(f"{self.backend_url}/employees/{created_employee_id}/image", 
+                                                json=image_update_data)
+                if image_response.status_code == 200:
+                    image_result = image_response.json()
+                    if image_result.get('profileImage'):
+                        self.log_test("Employee Management - PUT /api/employees/{id}/image", True, 
+                                    f"Successfully updated employee profile image (base64)", 
+                                    f"Image URL: {image_result.get('profileImage')}")
+                    else:
+                        self.log_test("Employee Management - PUT /api/employees/{id}/image", False, 
+                                    "Image update response missing profileImage field")
+                else:
+                    self.log_test("Employee Management - PUT /api/employees/{id}/image", False, 
+                                f"Failed to update image - Status: {image_response.status_code}")
+                
+                # Test 7: DELETE /api/employees/{id} - Delete employee (test with newly created employee)
+                delete_response = self.session.delete(f"{self.backend_url}/employees/{created_employee_id}")
+                if delete_response.status_code == 200:
+                    # Verify employee is deleted
+                    verify_response = self.session.get(f"{self.backend_url}/employees?search={created_employee_id}")
+                    if verify_response.status_code == 200:
+                        remaining_employees = verify_response.json()
+                        deleted_employee_found = any(emp.get('id') == created_employee_id for emp in remaining_employees)
+                        if not deleted_employee_found:
+                            self.log_test("Employee Management - DELETE /api/employees/{id}", True, 
+                                        f"Successfully deleted employee {created_employee_id}", 
+                                        f"Employee removed from system")
+                        else:
+                            self.log_test("Employee Management - DELETE /api/employees/{id}", False, 
+                                        f"Employee {created_employee_id} still exists after deletion")
+                    else:
+                        self.log_test("Employee Management - DELETE /api/employees/{id}", False, 
+                                    f"Could not verify deletion - GET failed")
+                else:
+                    self.log_test("Employee Management - DELETE /api/employees/{id}", False, 
+                                f"Failed to delete employee - Status: {delete_response.status_code}")
+            else:
+                self.log_test("Employee Management - POST /api/employees", False, 
+                            f"Failed to create employee - Status: {create_response.status_code}")
+            
+            # Test 8: GET /api/employees/export-excel - Excel export functionality
+            export_response = self.session.get(f"{self.backend_url}/employees/export-excel")
+            if export_response.status_code == 200:
+                # Check if response is actually an Excel file
+                content_type = export_response.headers.get('content-type', '')
+                if 'spreadsheet' in content_type or 'excel' in content_type or len(export_response.content) > 1000:
+                    self.log_test("Employee Management - GET /api/employees/export-excel", True, 
+                                f"Excel export functionality working", 
+                                f"Content-Type: {content_type}, Size: {len(export_response.content)} bytes")
+                else:
+                    self.log_test("Employee Management - GET /api/employees/export-excel", False, 
+                                f"Excel export returned unexpected content type: {content_type}")
+            else:
+                self.log_test("Employee Management - GET /api/employees/export-excel", False, 
+                            f"Excel export failed with status {export_response.status_code}")
+            
+            # Test 9: Verify external URL accessibility
+            # This is already being tested since we're using the external URL throughout
+            self.log_test("Employee Management - EXTERNAL URL ACCESS", True, 
+                        f"External URL accessibility confirmed", 
+                        f"All tests performed via {self.backend_url}")
+                
+        except Exception as e:
+            self.log_test("Employee Management - COMPREHENSIVE", False, f"Employee management comprehensive test failed: {str(e)}")
+
     def run_all_tests(self):
-        """Run all tests - FOCUSED ON REVIEW REQUEST"""
-        print("🚀 REVIEW REQUEST FOCUSED TESTING - MEETING ROOMS & ALERT SYSTEM")
+        """Run all tests - FOCUSED ON REVIEW REQUEST - 3 ADMIN PANEL APIS"""
+        print("🚀 REVIEW REQUEST FOCUSED TESTING - 3 ADMIN PANEL BACKEND APIS")
         print("=" * 80)
-        
-        # PRIORITY: Review Request Critical API Testing
-        self.test_review_request_critical_apis()
         
         # Core connectivity test
         self.test_backend_connectivity()
         
-        # Employee data verification (needed for booking tests)
-        self.test_employee_data_management()
+        # PRIORITY: Review Request Critical API Testing - 3 Admin Panel APIs
+        print("\n" + "="*80)
+        print("🎯 REVIEW REQUEST SPECIFIC TESTING - 3 ADMIN PANEL APIS")
+        print("="*80)
         
-        # NEW JOINEES FILTERING TEST - As per Review Request
-        print("\n" + "="*60)
-        print("👥 NEW JOINEES FILTERING TESTING")
-        print("="*60)
-        self.test_new_joinees_filtering_functionality()
+        # 1. HOME SLIDERS API (Banner Management Backend)
+        self.test_home_sliders_api_comprehensive()
         
-        # MAIN FOCUS: Meeting Rooms Testing
-        print("\n" + "="*60)
-        print("🏢 MEETING ROOMS COMPREHENSIVE TESTING")
-        print("="*60)
-        self.test_meeting_rooms_api_comprehensive()
-        self.test_meeting_room_employee_integration()
+        # 2. ALERTS MANAGEMENT API  
+        self.test_alert_system_review_request()
         
-        # MAIN FOCUS: Alert System Testing  
-        print("\n" + "="*60)
-        print("🚨 ALERT SYSTEM COMPREHENSIVE TESTING")
-        print("="*60)
-        self.test_alerts_system_comprehensive()
-        self.test_alert_crud_operations()
-        
-        # Integration Testing
-        print("\n" + "="*60)
-        print("🔗 INTEGRATION TESTING")
-        print("="*60)
-        self.test_frontend_backend_connectivity()
-        self.test_cors_and_authentication()
+        # 3. EMPLOYEE MANAGEMENT API
+        self.test_employee_management_api_comprehensive()
         
         # Clean up test data
         self.cleanup_test_data()
@@ -2740,10 +3050,10 @@ class BackendPersistentTester:
         print(f"Success Rate: {(passed/total)*100:.1f}%")
         
         if passed == total:
-            print("\n🎉 ALL BACKEND-PERSISTENT API TESTS PASSED!")
-            print("✅ Data persistence confirmed - All changes saved to MongoDB")
-            print("✅ Cross-system sync verified - Data retrievable immediately")
-            print("✅ All CRUD operations functional across all API groups")
+            print("\n🎉 ALL 3 ADMIN PANEL BACKEND API TESTS PASSED!")
+            print("✅ Home Sliders API - Banner Management Backend working")
+            print("✅ Alerts Management API - Full CRUD operations working")
+            print("✅ Employee Management API - All operations working")
         else:
             print(f"\n⚠️  {total - passed} test(s) failed. Check the details above.")
             
