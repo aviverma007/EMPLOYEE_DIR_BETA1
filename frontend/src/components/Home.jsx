@@ -323,6 +323,30 @@ const Home = () => {
     fetchEmployees();
   }, []);
 
+  // Fetch slider images from API
+  useEffect(() => {
+    const fetchSliders = async () => {
+      try {
+        const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+        const response = await fetch(`${backendUrl}/api/home-sliders`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.bannerImages && data.bannerImages.length > 0) {
+            setBannerImages(data.bannerImages);
+          }
+          if (data.galleryImages && data.galleryImages.length > 0) {
+            setGalleryImages(data.galleryImages);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching sliders:', error);
+        // Keep default images if API fails
+      }
+    };
+    
+    fetchSliders();
+  }, []);
+
   // Auto-scroll banner every 5 seconds (increased by 2 seconds)
   useEffect(() => {
     const interval = setInterval(() => {
