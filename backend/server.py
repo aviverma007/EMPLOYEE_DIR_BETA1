@@ -1502,6 +1502,206 @@ async def export_employees_excel():
         raise HTTPException(status_code=500, detail=f"Error exporting employees: {str(e)}")
 
 
+# ============================================================================
+# HOME SLIDERS MANAGEMENT
+# ============================================================================
+
+@app.get("/api/home-sliders")
+async def get_home_sliders():
+    """Get all home slider configurations"""
+    try:
+        sliders = list(home_sliders_collection.find({}, {"_id": 0}))
+        if not sliders:
+            # Return default sliders if none exist
+            return {
+                "bannerImages": [
+                    "/images/smart-world-orchard.webp",
+                    "/images/smart-world-one-dxp.webp",
+                    "/images/smart-world-gems.webp",
+                    "/images/smart-world-the-edition.webp",
+                    "/images/smart-world-sky-arc.webp"
+                ],
+                "galleryImages": [
+                    "/images/gallery-1.jpg",
+                    "/images/gallery-2.jpg",
+                    "/images/gallery-3.jpeg",
+                    "/images/gallery-4.jpg",
+                    "/images/gallery-5.jpg"
+                ]
+            }
+        return sliders[0] if sliders else {}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching sliders: {str(e)}")
+
+
+@app.post("/api/home-sliders/banner")
+async def add_banner_image(image_url: str = Body(..., embed=True)):
+    """Add a new banner image to the slider"""
+    try:
+        sliders = list(home_sliders_collection.find({}))
+        
+        if sliders:
+            # Update existing document
+            slider_data = sliders[0]
+            banner_images = slider_data.get("bannerImages", [])
+            banner_images.append(image_url)
+            
+            home_sliders_collection.update_one(
+                {"_id": slider_data["_id"]},
+                {"$set": {"bannerImages": banner_images}}
+            )
+        else:
+            # Create new document
+            home_sliders_collection.insert_one({
+                "bannerImages": [image_url],
+                "galleryImages": []
+            })
+        
+        return {"message": "Banner image added successfully", "imageUrl": image_url}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error adding banner: {str(e)}")
+
+
+@app.post("/api/home-sliders/gallery")
+async def add_gallery_image(image_url: str = Body(..., embed=True)):
+    """Add a new gallery image to the slider"""
+    try:
+        sliders = list(home_sliders_collection.find({}))
+        
+        if sliders:
+            # Update existing document
+            slider_data = sliders[0]
+            gallery_images = slider_data.get("galleryImages", [])
+            gallery_images.append(image_url)
+            
+            home_sliders_collection.update_one(
+                {"_id": slider_data["_id"]},
+                {"$set": {"galleryImages": gallery_images}}
+            )
+        else:
+            # Create new document
+            home_sliders_collection.insert_one({
+                "bannerImages": [],
+                "galleryImages": [image_url]
+            })
+        
+        return {"message": "Gallery image added successfully", "imageUrl": image_url}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error adding gallery image: {str(e)}")
+
+
+@app.delete("/api/home-sliders/banner/{index}")
+async def delete_banner_image(index: int):
+    """Delete a banner image by index"""
+    try:
+        sliders = list(home_sliders_collection.find({}))
+        if not sliders:
+            raise HTTPException(status_code=404, detail="No sliders found")
+        
+        slider_data = sliders[0]
+        banner_images = slider_data.get("bannerImages", [])
+        
+        if index < 0 or index >= len(banner_images):
+            raise HTTPException(status_code=400, detail="Invalid index")
+        
+        deleted_image = banner_images.pop(index)
+        
+        home_sliders_collection.update_one(
+            {"_id": slider_data["_id"]},
+            {"$set": {"bannerImages": banner_images}}
+        )
+        
+        return {"message": "Banner image deleted successfully", "deletedImage": deleted_image}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting banner: {str(e)}")
+
+
+@app.delete("/api/home-sliders/gallery/{index}")
+async def delete_gallery_image(index: int):
+    """Delete a gallery image by index"""
+    try:
+        sliders = list(home_sliders_collection.find({}))
+        if not sliders:
+            raise HTTPException(status_code=404, detail="No sliders found")
+        
+        slider_data = sliders[0]
+        gallery_images = slider_data.get("galleryImages", [])
+        
+        if index < 0 or index >= len(gallery_images):
+            raise HTTPException(status_code=400, detail="Invalid index")
+        
+        deleted_image = gallery_images.pop(index)
+        
+        home_sliders_collection.update_one(
+            {"_id": slider_data["_id"]},
+            {"$set": {"galleryImages": gallery_images}}
+        )
+        
+        return {"message": "Gallery image deleted successfully", "deletedImage": deleted_image}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting gallery image: {str(e)}")
+
+
+@app.put("/api/home-sliders/banner/{index}")
+async def update_banner_image(index: int, image_url: str = Body(..., embed=True)):
+    """Update a banner image by index"""
+    try:
+        sliders = list(home_sliders_collection.find({}))
+        if not sliders:
+            raise HTTPException(status_code=404, detail="No sliders found")
+        
+        slider_data = sliders[0]
+        banner_images = slider_data.get("bannerImages", [])
+        
+        if index < 0 or index >= len(banner_images):
+            raise HTTPException(status_code=400, detail="Invalid index")
+        
+        banner_images[index] = image_url
+        
+        home_sliders_collection.update_one(
+            {"_id": slider_data["_id"]},
+            {"$set": {"bannerImages": banner_images}}
+        )
+        
+        return {"message": "Banner image updated successfully", "imageUrl": image_url}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating banner: {str(e)}")
+
+
+@app.put("/api/home-sliders/gallery/{index}")
+async def update_gallery_image(index: int, image_url: str = Body(..., embed=True)):
+    """Update a gallery image by index"""
+    try:
+        sliders = list(home_sliders_collection.find({}))
+        if not sliders:
+            raise HTTPException(status_code=404, detail="No sliders found")
+        
+        slider_data = sliders[0]
+        gallery_images = slider_data.get("galleryImages", [])
+        
+        if index < 0 or index >= len(gallery_images):
+            raise HTTPException(status_code=400, detail="Invalid index")
+        
+        gallery_images[index] = image_url
+        
+        home_sliders_collection.update_one(
+            {"_id": slider_data["_id"]},
+            {"$set": {"galleryImages": gallery_images}}
+        )
+        
+        return {"message": "Gallery image updated successfully", "imageUrl": image_url}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating gallery image: {str(e)}")
+
+
 
 # ============================================================================
 # STATIC FILE SERVING
