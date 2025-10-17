@@ -1368,24 +1368,42 @@ initialize_data()
 
 @app.post("/api/upload-banner")
 async def upload_banner(image: UploadFile = File(...), bannerType: str = ""):
-    """Upload and store banner images"""
+    """Upload and store banner images - supports up to 100MB"""
     try:
         # Create banners directory
         banners_dir = os.path.join(uploads_path, "banners")
         os.makedirs(banners_dir, exist_ok=True)
         
-        # Generate filename
+        # Read file content to check size
+        contents = await image.read()
+        file_size = len(contents)
+        
+        # Validate file size (100 MB limit)
+        if file_size > MAX_FILE_SIZE:
+            raise HTTPException(
+                status_code=413, 
+                detail=f"File too large. Maximum size is 100 MB. Your file is {file_size / (1024*1024):.2f} MB"
+            )
+        
+        # Generate unique filename to preserve old photos
         file_extension = image.filename.split(".")[-1]
-        filename = f"{bannerType}_{uuid.uuid4()}.{file_extension}"
+        timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        filename = f"{bannerType}_{timestamp}_{uuid.uuid4()}.{file_extension}"
         file_path = os.path.join(banners_dir, filename)
         
-        # Save file
+        # Save file (old banners are preserved)
         with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(image.file, buffer)
+            buffer.write(contents)
         
         # Return URL
         image_url = f"/api/uploads/banners/{filename}"
-        return {"imageUrl": image_url, "message": "Banner uploaded successfully"}
+        return {
+            "imageUrl": image_url, 
+            "message": "Banner uploaded successfully",
+            "fileSize": f"{file_size / (1024*1024):.2f} MB"
+        }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error uploading banner: {str(e)}")
 
