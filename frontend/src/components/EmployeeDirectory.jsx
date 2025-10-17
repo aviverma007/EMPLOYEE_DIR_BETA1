@@ -408,11 +408,25 @@ const EmployeeDirectory = () => {
         </Card>
       )}
 
-      {/* Employee Detail Modal - Updated to include reporting manager and remove joining date */}
+      {/* Employee Detail Modal - With Edit Functionality */}
       <Dialog open={showDetailModal} onOpenChange={closeDetailModal}>
-        <DialogContent className="sm:max-w-2xl border-blue-200">
+        <DialogContent className="sm:max-w-2xl border-blue-200 max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl text-blue-900">Employee Details</DialogTitle>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-xl text-blue-900">
+                {isEditMode ? 'Edit Employee Details' : 'Employee Details'}
+              </DialogTitle>
+              {isAdmin() && !isEditMode && (
+                <Button
+                  onClick={startEdit}
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <Edit2 className="h-4 w-4 mr-2" />
+                  Edit
+                </Button>
+              )}
+            </div>
           </DialogHeader>
           
           {selectedEmployee && (
@@ -473,13 +487,27 @@ const EmployeeDirectory = () => {
                     </div>
                   </div>
 
+                  {/* Extension - Editable */}
                   <div className="flex items-center space-x-3">
                     <div className="w-5 h-5 bg-blue-100 rounded flex items-center justify-center">
                       <span className="text-xs text-blue-600">E</span>
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <p className="text-sm text-blue-500">Extension</p>
-                      <p className="font-medium text-blue-900">{selectedEmployee.extension !== "0" ? selectedEmployee.extension : "Not Available"}</p>
+                      {isEditMode ? (
+                        <Input
+                          value={editFormData.extension}
+                          onChange={(e) => setEditFormData({...editFormData, extension: e.target.value})}
+                          placeholder="Enter extension number"
+                          className="mt-1 h-9 border-blue-200 focus:border-blue-400"
+                        />
+                      ) : (
+                        <p className="font-medium text-blue-900">
+                          {selectedEmployee.extension && selectedEmployee.extension !== "0" && selectedEmployee.extension !== "" 
+                            ? selectedEmployee.extension 
+                            : "Not Available"}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -495,19 +523,50 @@ const EmployeeDirectory = () => {
                     </div>
                   </div>
                   
+                  {/* Reporting Manager - Editable */}
                   <div className="flex items-center space-x-3">
                     <div className="w-5 h-5 bg-blue-100 rounded flex items-center justify-center">
                       <span className="text-xs text-blue-600">👤</span>
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <p className="text-sm text-blue-500">Reporting Manager</p>
-                      <p className="font-medium text-blue-900">
-                        {selectedEmployee.reportingManager || 'Not Assigned'}
-                      </p>
+                      {isEditMode ? (
+                        <Input
+                          value={editFormData.reporting_manager}
+                          onChange={(e) => setEditFormData({...editFormData, reporting_manager: e.target.value})}
+                          placeholder="Enter reporting manager name"
+                          className="mt-1 h-9 border-blue-200 focus:border-blue-400"
+                        />
+                      ) : (
+                        <p className="font-medium text-blue-900">
+                          {selectedEmployee.reporting_manager || 'Not Assigned'}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
               </div>
+
+              {/* Edit Action Buttons */}
+              {isEditMode && (
+                <div className="flex justify-end space-x-3 pt-4 border-t border-blue-200">
+                  <Button
+                    onClick={cancelEdit}
+                    variant="outline"
+                    className="border-blue-200 text-blue-700 hover:bg-blue-50"
+                  >
+                    <XCircle className="h-4 w-4 mr-2" />
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={saveEdit}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Changes
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </DialogContent>
