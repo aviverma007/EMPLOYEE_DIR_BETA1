@@ -71,6 +71,26 @@ export const employeeAPI = {
       console.error('Error uploading employee image:', error);
       throw error;
     }
+  },
+
+  // Update employee details
+  updateDetails: async (employeeId, employeeData) => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/employees/${employeeId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(employeeData)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating employee details:', error);
+      throw error;
+    }
   }
 };
 
