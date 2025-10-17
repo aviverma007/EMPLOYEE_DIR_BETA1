@@ -457,11 +457,11 @@ const EmployeeManagement = () => {
                   </div>
                   <div>
                     <Label htmlFor="reporting_manager">Reporting Manager</Label>
-                    <Input
-                      id="reporting_manager"
+                    <EmployeeSelect
+                      employees={employees}
                       value={formData.reporting_manager}
-                      onChange={(e) => handleInputChange('reporting_manager', e.target.value)}
-                      placeholder="Manager's name"
+                      onChange={(value) => handleInputChange('reporting_manager', value)}
+                      placeholder="Select reporting manager"
                     />
                   </div>
                 </div>
