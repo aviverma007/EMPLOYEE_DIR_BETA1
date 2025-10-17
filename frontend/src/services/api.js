@@ -2,6 +2,9 @@
 import dataService from './dataService';
 import imageStorage from './imageStorage';
 
+// Backend URL configuration
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+
 // Employee API endpoints - Frontend-only using dataService
 export const employeeAPI = {
   // Get all employees with optional search and filters
