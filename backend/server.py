@@ -330,6 +330,46 @@ async def upload_employee_image(employee_id: str, file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.put("/api/employees/{employee_id}")
+def update_employee_details(employee_id: str, employee_data: dict):
+    """Update employee details including extension and reporting manager"""
+    try:
+        # Extract fields that can be updated
+        update_fields = {}
+        allowed_fields = [
+            'name', 'designation', 'department', 'location', 'grade',
+            'mobile', 'email', 'extension', 'reporting_manager',
+            'date_of_joining', 'date_of_birth', 'blood_group', 'emergency_contact'
+        ]
+        
+        for field in allowed_fields:
+            if field in employee_data:
+                update_fields[field] = employee_data[field]
+        
+        if not update_fields:
+            raise HTTPException(status_code=400, detail="No valid fields to update")
+        
+        # Add update timestamp
+        update_fields['updated_at'] = datetime.utcnow().isoformat()
+        
+        # Update in MongoDB
+        result = employees_collection.update_one(
+            {"id": employee_id},
+            {"$set": update_fields}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Employee not found")
+        
+        # Return updated employee
+        employee = employees_collection.find_one({"id": employee_id})
+        employee["_id"] = str(employee["_id"])
+        return {"message": "Employee updated successfully", "employee": employee}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/api/refresh-excel")
 def refresh_excel_data():
     """Refresh employee data from Excel file"""
