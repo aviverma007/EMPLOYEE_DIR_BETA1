@@ -283,21 +283,34 @@ def update_employee_image(employee_id: str, image_data: dict):
 
 @app.post("/api/employees/{employee_id}/upload-image")
 async def upload_employee_image(employee_id: str, file: UploadFile = File(...)):
-    """Upload employee profile image file"""
+    """Upload employee profile image file - supports up to 100MB"""
     try:
         # Create uploads directory if it doesn't exist
         uploads_dir = os.path.join(os.path.dirname(__file__), "uploads", "images")
         os.makedirs(uploads_dir, exist_ok=True)
         
-        # Save file
+        # Read file content to check size
+        contents = await file.read()
+        file_size = len(contents)
+        
+        # Validate file size (100 MB limit)
+        if file_size > MAX_FILE_SIZE:
+            raise HTTPException(
+                status_code=413, 
+                detail=f"File too large. Maximum size is 100 MB. Your file is {file_size / (1024*1024):.2f} MB"
+            )
+        
+        # Generate unique filename to preserve old photos
         file_extension = file.filename.split(".")[-1] if "." in file.filename else "jpg"
-        filename = f"{employee_id}.{file_extension}"
+        timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        filename = f"{employee_id}_{timestamp}.{file_extension}"
         file_path = os.path.join(uploads_dir, filename)
         
+        # Save file (old photos are preserved)
         with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+            buffer.write(contents)
         
-        # Update employee record with image URL
+        # Update employee record with new image URL
         image_url = f"/api/uploads/images/{filename}"
         result = employees_collection.update_one(
             {"id": employee_id},
@@ -307,7 +320,13 @@ async def upload_employee_image(employee_id: str, file: UploadFile = File(...)):
         if result.matched_count == 0:
             raise HTTPException(status_code=404, detail="Employee not found")
         
-        return {"message": "Image uploaded successfully", "imageUrl": image_url}
+        return {
+            "message": "Image uploaded successfully", 
+            "imageUrl": image_url,
+            "fileSize": f"{file_size / (1024*1024):.2f} MB"
+        }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
