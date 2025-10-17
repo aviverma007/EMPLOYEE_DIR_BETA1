@@ -3820,9 +3820,14 @@ if __name__ == "__main__":
     import sys
     tester = BackendPersistentTester()
     
-    # Check if we should run review request tests specifically
-    if len(sys.argv) > 1 and sys.argv[1] == "--review-request":
-        success = tester.run_review_request_tests()
+    # Check if we should run specific tests
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "--extension-rm":
+            success = tester.run_extension_reporting_manager_tests()
+        elif sys.argv[1] == "--review-request":
+            success = tester.run_review_request_tests()
+        else:
+            success = tester.run_all_tests()
     else:
         success = tester.run_all_tests()
     
