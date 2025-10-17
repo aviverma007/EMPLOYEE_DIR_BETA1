@@ -171,6 +171,10 @@ const AppContent = () => {
                           <Home />
                         </TabsContent>
                         
+                        <TabsContent value="dashboard" className="mt-0 h-full">
+                          <Dashboard />
+                        </TabsContent>
+                        
                         <TabsContent value="directory" className="mt-0 h-full">
                           <EmployeeDirectory />
                         </TabsContent>
