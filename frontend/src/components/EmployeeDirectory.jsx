@@ -509,11 +509,12 @@ const EmployeeDirectory = () => {
                   <div className="bg-blue-50 p-3 rounded-lg">
                     <p className="text-xs text-blue-500 font-medium mb-1">Reporting Manager</p>
                     {isEditMode ? (
-                      <Input
+                      <EmployeeSelect
+                        employees={employees}
                         value={editFormData.reporting_manager}
-                        onChange={(e) => setEditFormData({...editFormData, reporting_manager: e.target.value})}
-                        placeholder="Enter reporting manager name"
-                        className="mt-1 h-9 bg-white border-blue-200 focus:border-blue-400"
+                        onChange={(value) => setEditFormData({...editFormData, reporting_manager: value})}
+                        placeholder="Select reporting manager"
+                        className="mt-1"
                       />
                     ) : (
                       <p className="font-medium text-blue-900">
