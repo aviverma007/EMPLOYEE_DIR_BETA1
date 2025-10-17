@@ -1496,11 +1496,72 @@ async def update_employee(employee_id: str, employee: EmployeeCreate):
             {"$set": employee_data}
         )
         
+        # Auto-sync to master Excel file after update
+        try:
+            await sync_to_master_excel()
+        except Exception as e:
+            print(f"Warning: Could not sync to Excel: {e}")
+        
         return {"message": "Employee updated successfully", "id": employee_id}
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error updating employee: {str(e)}")
+
+async def sync_to_master_excel():
+    """Helper function to sync database to master Excel file"""
+    try:
+        import openpyxl
+        from openpyxl import Workbook
+        
+        # Get all employees from database
+        employees = list(employees_collection.find({}, {"_id": 0}))
+        
+        # Create new workbook
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Employees"
+        
+        # Headers (matching original Excel structure)
+        headers = ["ID", "Name", "Designation", "Department", "Location", "Grade", 
+                   "Mobile", "Email", "Date of Joining", "Date of Birth", "Blood Group", 
+                   "Emergency Contact", "Profile Image"]
+        ws.append(headers)
+        
+        # Add employee data
+        for emp in employees:
+            row = [
+                emp.get('id', ''),
+                emp.get('name', ''),
+                emp.get('designation', ''),
+                emp.get('department', ''),
+                emp.get('location', ''),
+                emp.get('grade', ''),
+                emp.get('mobile', ''),
+                emp.get('email', ''),
+                emp.get('date_of_joining', ''),
+                emp.get('date_of_birth', ''),
+                emp.get('blood_group', ''),
+                emp.get('emergency_contact', ''),
+                emp.get('profileImage', '')
+            ]
+            ws.append(row)
+        
+        # Save to master Excel file locations
+        excel_paths = [
+            "/app/frontend/public/employee_directory.xlsx",
+            "/app/employee_directory.xlsx"
+        ]
+        
+        for excel_path in excel_paths:
+            try:
+                wb.save(excel_path)
+                print(f"Auto-synced {len(employees)} employees to: {excel_path}")
+            except Exception as e:
+                print(f"Could not auto-sync to {excel_path}: {e}")
+                
+    except Exception as e:
+        print(f"Error in auto-sync: {e}")
 
 @app.delete("/api/employees/{employee_id}")
 async def delete_employee(employee_id: str):
