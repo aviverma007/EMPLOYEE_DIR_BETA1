@@ -10,6 +10,7 @@ import { employeeAPI, utilityAPI } from "../services/api";
 import EmployeeCard from "./EmployeeCard";
 import EmployeeList from "./EmployeeList";
 import { toast } from "sonner";
+import EmployeeSelect from "./ui/employee-select";
 
 const EmployeeDirectory = () => {
   const [nameSearch, setNameSearch] = useState("");
