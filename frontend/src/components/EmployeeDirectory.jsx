@@ -410,9 +410,9 @@ const EmployeeDirectory = () => {
 
       {/* Employee Detail Modal - With Edit Functionality */}
       <Dialog open={showDetailModal} onOpenChange={closeDetailModal}>
-        <DialogContent className="sm:max-w-2xl border-blue-200 max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-3xl border-blue-200 max-h-[95vh] overflow-y-auto">
           <DialogHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between pr-6">
               <DialogTitle className="text-xl text-blue-900">
                 {isEditMode ? 'Edit Employee Details' : 'Employee Details'}
               </DialogTitle>
@@ -430,10 +430,10 @@ const EmployeeDirectory = () => {
           </DialogHeader>
           
           {selectedEmployee && (
-            <div className="space-y-6">
+            <div className="space-y-6 pb-4">
               {/* Profile Section */}
               <div className="flex items-center space-x-6">
-                <div className="w-24 h-24 rounded-full overflow-hidden bg-gradient-to-br from-blue-200 to-blue-300 flex items-center justify-center">
+                <div className="w-24 h-24 rounded-full overflow-hidden bg-gradient-to-br from-blue-200 to-blue-300 flex items-center justify-center flex-shrink-0">
                   {selectedEmployee.profileImage && selectedEmployee.profileImage !== "/api/placeholder/150/150" ? (
                     <img 
                       src={selectedEmployee.profileImage} 
@@ -447,102 +447,78 @@ const EmployeeDirectory = () => {
                   ) : null}
                   <User className="h-12 w-12 text-blue-500" style={{display: selectedEmployee.profileImage && selectedEmployee.profileImage !== "/api/placeholder/150/150" ? 'none' : 'block'}} />
                 </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-blue-900">{selectedEmployee.name}</h2>
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-2xl font-bold text-blue-900 truncate">{selectedEmployee.name}</h2>
                   <Badge variant="secondary" className="mt-1 bg-blue-100 text-blue-700">{selectedEmployee.id}</Badge>
                   <p className="text-lg text-blue-600 mt-2">{selectedEmployee.grade}</p>
                 </div>
               </div>
 
-              {/* Details Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-5 h-5 bg-blue-100 rounded flex items-center justify-center">
-                      <span className="text-xs text-blue-600">D</span>
-                    </div>
-                    <div>
-                      <p className="text-sm text-blue-500">Department</p>
-                      <p className="font-medium text-blue-900">{selectedEmployee.department}</p>
-                    </div>
+              {/* Details Grid - Made more compact */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Left Column */}
+                <div className="space-y-3">
+                  {/* Department */}
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <p className="text-xs text-blue-500 font-medium mb-1">Department</p>
+                    <p className="font-medium text-blue-900">{selectedEmployee.department}</p>
                   </div>
                   
-                  <div className="flex items-center space-x-3">
-                    <div className="w-5 h-5 bg-blue-100 rounded flex items-center justify-center">
-                      <span className="text-xs text-blue-600">L</span>
-                    </div>
-                    <div>
-                      <p className="text-sm text-blue-500">Location</p>
-                      <p className="font-medium text-blue-900">{selectedEmployee.location}</p>
-                    </div>
+                  {/* Location */}
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <p className="text-xs text-blue-500 font-medium mb-1">Location</p>
+                    <p className="font-medium text-blue-900">{selectedEmployee.location}</p>
                   </div>
                   
-                  <div className="flex items-center space-x-3">
-                    <div className="w-5 h-5 bg-blue-100 rounded flex items-center justify-center">
-                      <span className="text-xs text-blue-600">P</span>
-                    </div>
-                    <div>
-                      <p className="text-sm text-blue-500">Mobile</p>
-                      <p className="font-medium text-blue-900">{selectedEmployee.mobile}</p>
-                    </div>
-                  </div>
-
-                  {/* Extension - Editable */}
-                  <div className="flex items-center space-x-3">
-                    <div className="w-5 h-5 bg-blue-100 rounded flex items-center justify-center">
-                      <span className="text-xs text-blue-600">E</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-blue-500">Extension</p>
-                      {isEditMode ? (
-                        <Input
-                          value={editFormData.extension}
-                          onChange={(e) => setEditFormData({...editFormData, extension: e.target.value})}
-                          placeholder="Enter extension number"
-                          className="mt-1 h-9 border-blue-200 focus:border-blue-400"
-                        />
-                      ) : (
-                        <p className="font-medium text-blue-900">
-                          {selectedEmployee.extension && selectedEmployee.extension !== "0" && selectedEmployee.extension !== "" 
-                            ? selectedEmployee.extension 
-                            : "Not Available"}
-                        </p>
-                      )}
-                    </div>
+                  {/* Mobile */}
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <p className="text-xs text-blue-500 font-medium mb-1">Mobile</p>
+                    <p className="font-medium text-blue-900">{selectedEmployee.mobile}</p>
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-5 h-5 bg-blue-100 rounded flex items-center justify-center">
-                      <span className="text-xs text-blue-600">@</span>
-                    </div>
-                    <div>
-                      <p className="text-sm text-blue-500">Email</p>
-                      <p className="font-medium text-blue-900 text-sm">{selectedEmployee.email}</p>
-                    </div>
+                {/* Right Column */}
+                <div className="space-y-3">
+                  {/* Email */}
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <p className="text-xs text-blue-500 font-medium mb-1">Email</p>
+                    <p className="font-medium text-blue-900 text-sm break-all">{selectedEmployee.email}</p>
+                  </div>
+                  
+                  {/* Extension - Editable */}
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <p className="text-xs text-blue-500 font-medium mb-1">Extension Number</p>
+                    {isEditMode ? (
+                      <Input
+                        value={editFormData.extension}
+                        onChange={(e) => setEditFormData({...editFormData, extension: e.target.value})}
+                        placeholder="Enter extension number"
+                        className="mt-1 h-9 bg-white border-blue-200 focus:border-blue-400"
+                      />
+                    ) : (
+                      <p className="font-medium text-blue-900">
+                        {selectedEmployee.extension && selectedEmployee.extension !== "0" && selectedEmployee.extension !== "" 
+                          ? selectedEmployee.extension 
+                          : "Not Available"}
+                      </p>
+                    )}
                   </div>
                   
                   {/* Reporting Manager - Editable */}
-                  <div className="flex items-center space-x-3">
-                    <div className="w-5 h-5 bg-blue-100 rounded flex items-center justify-center">
-                      <span className="text-xs text-blue-600">👤</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-blue-500">Reporting Manager</p>
-                      {isEditMode ? (
-                        <Input
-                          value={editFormData.reporting_manager}
-                          onChange={(e) => setEditFormData({...editFormData, reporting_manager: e.target.value})}
-                          placeholder="Enter reporting manager name"
-                          className="mt-1 h-9 border-blue-200 focus:border-blue-400"
-                        />
-                      ) : (
-                        <p className="font-medium text-blue-900">
-                          {selectedEmployee.reporting_manager || 'Not Assigned'}
-                        </p>
-                      )}
-                    </div>
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <p className="text-xs text-blue-500 font-medium mb-1">Reporting Manager</p>
+                    {isEditMode ? (
+                      <Input
+                        value={editFormData.reporting_manager}
+                        onChange={(e) => setEditFormData({...editFormData, reporting_manager: e.target.value})}
+                        placeholder="Enter reporting manager name"
+                        className="mt-1 h-9 bg-white border-blue-200 focus:border-blue-400"
+                      />
+                    ) : (
+                      <p className="font-medium text-blue-900">
+                        {selectedEmployee.reporting_manager || 'Not Assigned'}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
