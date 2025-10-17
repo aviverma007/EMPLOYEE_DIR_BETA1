@@ -1391,7 +1391,13 @@ def load_excel_data():
                 for emp in employees:
                     existing = employees_collection.find_one({"id": emp.get('id')})
                     if existing:
-                        # Update existing employee (preserve any additional fields added through admin)
+                        # Preserve manually added fields (extension, reporting_manager) if not in Excel
+                        preserved_fields = ['extension', 'reporting_manager', 'updated_at', 'profileImage']
+                        for field in preserved_fields:
+                            if field in existing and field not in emp:
+                                emp[field] = existing[field]
+                        
+                        # Update existing employee
                         employees_collection.update_one(
                             {"id": emp.get('id')},
                             {"$set": emp}
