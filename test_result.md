@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "run the application and on the landing page under admin button create new button for user but keep all the things inside user just as same as admin"
+user_problem_statement: "run the application and on the landing page under admin button create new button for user but keep all the things inside user just as same as admin. In employee directory the reporting manager and extension number is not shown in the application make it show and if it is changed in employee management if i change it it should also get updated in master data"
 
 backend:
   - task: "Employee Management API"
