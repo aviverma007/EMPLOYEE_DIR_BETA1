@@ -5,14 +5,29 @@ import imageStorage from './imageStorage';
 // Backend URL configuration
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
-// Employee API endpoints - Frontend-only using dataService
+// Employee API endpoints - Using Backend API
 export const employeeAPI = {
   // Get all employees with optional search and filters
   getAll: async (searchParams = {}) => {
     try {
-      return await dataService.getEmployees(searchParams);
+      // Build query string
+      const params = new URLSearchParams();
+      if (searchParams.search) params.append('search', searchParams.search);
+      if (searchParams.department) params.append('department', searchParams.department);
+      if (searchParams.location) params.append('location', searchParams.location);
+      
+      const url = `${BACKEND_URL}/api/employees${params.toString() ? '?' + params.toString() : ''}`;
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log(`Loaded ${data.length} employees from backend API`);
+      return data;
     } catch (error) {
-      console.error('Error fetching employees:', error);
+      console.error('Error fetching employees from backend:', error);
       throw error;
     }
   },
@@ -20,9 +35,17 @@ export const employeeAPI = {
   // Update employee profile image
   updateImage: async (employeeId, imageData) => {
     try {
-      // Store image locally using imageStorage service
-      const processedImage = await imageStorage.processAndStore(imageData, employeeId);
-      return await dataService.updateEmployeeImage(employeeId, processedImage);
+      const response = await fetch(`${BACKEND_URL}/api/employees/${employeeId}/image`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageData })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
     } catch (error) {
       console.error('Error updating employee image:', error);
       throw error;
@@ -32,9 +55,19 @@ export const employeeAPI = {
   // Upload employee profile image file
   uploadImage: async (employeeId, imageFile) => {
     try {
-      // Convert file to base64 and store locally
-      const imageData = await imageStorage.fileToDataURL(imageFile);
-      return await this.updateImage(employeeId, imageData);
+      const formData = new FormData();
+      formData.append('image', imageFile);
+      
+      const response = await fetch(`${BACKEND_URL}/api/employees/${employeeId}/upload-image`, {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
     } catch (error) {
       console.error('Error uploading employee image:', error);
       throw error;
