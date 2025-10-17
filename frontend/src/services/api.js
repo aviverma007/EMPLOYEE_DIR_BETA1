@@ -74,14 +74,20 @@ export const employeeAPI = {
   }
 };
 
-// Hierarchy API endpoints - Frontend-only using dataService
+// Hierarchy API endpoints - Using Backend API
 export const hierarchyAPI = {
   // Get all hierarchy relationships
   getAll: async () => {
     try {
-      return await dataService.getHierarchy();
+      const response = await fetch(`${BACKEND_URL}/api/hierarchy`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
     } catch (error) {
-      console.error('Error fetching hierarchy:', error);
+      console.error('Error fetching hierarchy from backend:', error);
       throw error;
     }
   },
@@ -89,7 +95,17 @@ export const hierarchyAPI = {
   // Add new hierarchy relationship
   create: async (relationshipData) => {
     try {
-      return await dataService.createHierarchy(relationshipData);
+      const response = await fetch(`${BACKEND_URL}/api/hierarchy`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(relationshipData)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
     } catch (error) {
       console.error('Error creating hierarchy:', error);
       throw error;
@@ -99,7 +115,15 @@ export const hierarchyAPI = {
   // Remove hierarchy relationship
   remove: async (employeeId) => {
     try {
-      return await dataService.deleteHierarchy(employeeId);
+      const response = await fetch(`${BACKEND_URL}/api/hierarchy/${employeeId}`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
     } catch (error) {
       console.error('Error deleting hierarchy:', error);
       throw error;
@@ -109,7 +133,15 @@ export const hierarchyAPI = {
   // Clear all hierarchy relationships
   clearAll: async () => {
     try {
-      return await dataService.clearAllHierarchy();
+      const response = await fetch(`${BACKEND_URL}/api/hierarchy/clear`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
     } catch (error) {
       console.error('Error clearing hierarchy:', error);
       throw error;
