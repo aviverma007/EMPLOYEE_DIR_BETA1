@@ -262,6 +262,30 @@ const EmployeeManagement = () => {
     }
   };
 
+  const handleSyncToMasterExcel = async () => {
+    if (!window.confirm('This will sync all current employee data from database to master Excel file. Continue?')) return;
+    
+    setLoading(true);
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/employees/sync-to-excel`, {
+        method: 'POST'
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        toast.success(`✅ Synced ${result.employee_count} employees to master Excel file!`);
+      } else {
+        const error = await response.json();
+        throw new Error(error.detail || 'Sync failed');
+      }
+    } catch (error) {
+      console.error('Error syncing:', error);
+      toast.error(`Failed to sync to Excel: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
