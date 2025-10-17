@@ -5,6 +5,7 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { toast } from 'sonner';
 import { UserPlus, Search, Trash2, Edit2, Download, Upload as UploadIcon, Image as ImageIcon } from 'lucide-react';
+import EmployeeSelect from '../ui/employee-select';
 import {
   Dialog,
   DialogContent,
