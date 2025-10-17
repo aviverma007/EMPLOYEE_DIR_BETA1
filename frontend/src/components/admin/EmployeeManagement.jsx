@@ -211,6 +211,8 @@ const EmployeeManagement = () => {
       grade: employee.grade || '',
       mobile: employee.mobile || '',
       email: employee.email || '',
+      extension: employee.extension || '',
+      reporting_manager: employee.reporting_manager || '',
       date_of_joining: employee.date_of_joining ? employee.date_of_joining.split('T')[0] : '',
       date_of_birth: employee.date_of_birth ? employee.date_of_birth.split('T')[0] : '',
       blood_group: employee.blood_group || '',
