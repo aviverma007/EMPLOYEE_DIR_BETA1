@@ -294,6 +294,10 @@ const EmployeeManagement = () => {
           <p className="text-gray-600 mt-2">Add, edit, and manage employee records</p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={handleSyncToMasterExcel} disabled={loading}>
+            <UploadIcon className="h-4 w-4 mr-2" />
+            Sync to Master Excel
+          </Button>
           <Button variant="outline" onClick={handleExportToExcel}>
             <Download className="h-4 w-4 mr-2" />
             Export Excel
