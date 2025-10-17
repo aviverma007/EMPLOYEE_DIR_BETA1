@@ -137,6 +137,27 @@ const EmployeeDirectory = () => {
     }
   };
 
+  const handleEmployeeUpdate = async (employeeId, updatedData) => {
+    try {
+      const response = await employeeAPI.updateDetails(employeeId, updatedData);
+      
+      // Update local state with the updated employee
+      setEmployees(prev => prev.map(emp => 
+        emp.id === employeeId ? response.employee : emp
+      ));
+      
+      // Update selected employee if it's being viewed
+      if (selectedEmployee && selectedEmployee.id === employeeId) {
+        setSelectedEmployee(response.employee);
+      }
+      
+      return response;
+    } catch (error) {
+      console.error("Error updating employee:", error);
+      throw error;
+    }
+  };
+
   const handleEmployeeClick = (employee) => {
     setSelectedEmployee(employee);
     setShowDetailModal(true);
