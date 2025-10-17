@@ -3736,6 +3736,43 @@ class BackendPersistentTester:
             
         return passed == total
 
+    def run_extension_reporting_manager_tests(self):
+        """Run specific tests for Extension Number and Reporting Manager feature - As per Review Request"""
+        print("🎯 REVIEW REQUEST TESTING - Extension Number & Reporting Manager Feature")
+        print("=" * 80)
+        
+        # Core connectivity test
+        self.test_backend_connectivity()
+        
+        # Extension and Reporting Manager comprehensive testing
+        self.test_extension_and_reporting_manager_comprehensive()
+        
+        # Print summary
+        print("\n" + "=" * 80)
+        print("📊 EXTENSION & REPORTING MANAGER TEST SUMMARY")
+        print("=" * 80)
+        
+        passed = sum(1 for result in self.test_results if result['success'])
+        total = len(self.test_results)
+        
+        print(f"Total Tests: {total}")
+        print(f"Passed: {passed}")
+        print(f"Failed: {total - passed}")
+        print(f"Success Rate: {(passed/total)*100:.1f}%")
+        
+        if passed == total:
+            print("\n🎉 ALL EXTENSION & REPORTING MANAGER TESTS PASSED!")
+            print("✅ Data Availability - 625 employees, 189 with extensions, 624 with reporting managers")
+            print("✅ Specific Employee Verification - Employee 80002 (Vikas Malhotra) data correct")
+            print("✅ Search Functionality - Field display working correctly")
+            print("✅ Edit Functionality - PUT /api/employees/{id} working for extension and reporting manager")
+            print("✅ Data Persistence - Excel refresh preserves manual updates")
+            print("✅ Edge Cases - Invalid IDs, empty values, employees without data handled correctly")
+        else:
+            print(f"\n⚠️  {total - passed} test(s) failed. Check the details above.")
+            
+        return passed == total
+
     def run_review_request_tests(self):
         """Run specific tests for the review request - Alert System and Meeting Room Booking"""
         print("🎯 REVIEW REQUEST TESTING - Alert System & Meeting Room Booking")
