@@ -516,7 +516,7 @@ const EmployeeManagement = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredEmployees.length === 0 ? (
                   <tr>
-                    <td colSpan="8" className="px-6 py-12 text-center text-gray-500">
+                    <td colSpan="9" className="px-6 py-12 text-center text-gray-500">
                       {searchTerm ? 'No employees found matching your search' : 'No employees added yet'}
                     </td>
                   </tr>
@@ -539,6 +539,9 @@ const EmployeeManagement = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{employee.designation || '-'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{employee.department}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{employee.location || '-'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                      {employee.date_of_joining ? new Date(employee.date_of_joining).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{employee.mobile || employee.email || '-'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end gap-2">
