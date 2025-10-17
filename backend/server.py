@@ -17,6 +17,9 @@ from pathlib import Path
 # Load environment variables
 load_dotenv()
 
+# Configure max file upload size (100 MB)
+MAX_FILE_SIZE = 100 * 1024 * 1024  # 100 MB in bytes
+
 app = FastAPI()
 
 # Add CORS middleware
