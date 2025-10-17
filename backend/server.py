@@ -1361,6 +1361,10 @@ def load_excel_data():
                         field_name = 'email'
                     elif field_name in ['profile_image', 'image', 'photo']:
                         field_name = 'profileImage'
+                    elif field_name in ['ext', 'ext_no', 'extension_no', 'extension_number']:
+                        field_name = 'extension'
+                    elif field_name in ['manager', 'reporting_manager', 'reports_to', 'manager_name']:
+                        field_name = 'reporting_manager'
                     elif field_name == 'grade':
                         # Keep as grade and also set as designation
                         employee['grade'] = str(value) if value is not None else ""
