@@ -3012,33 +3012,236 @@ class BackendPersistentTester:
         except Exception as e:
             self.log_test("Employee Management - COMPREHENSIVE", False, f"Employee management comprehensive test failed: {str(e)}")
 
+    def test_alerts_system_comprehensive_review_request(self):
+        """Test: Comprehensive Alert System Testing as per Review Request"""
+        try:
+            print("\n🚨 COMPREHENSIVE ALERT SYSTEM TESTING - REVIEW REQUEST")
+            print("=" * 70)
+            
+            # Test 1: GET /api/alerts - Check current alerts in database
+            print("\n1. Testing GET /api/alerts - Current Database State")
+            get_response = self.session.get(f"{self.backend_url}/api/alerts")
+            if get_response.status_code != 200:
+                self.log_test("Alert System - GET /api/alerts", False, 
+                            f"GET /api/alerts failed with status {get_response.status_code}")
+                return
+            
+            current_alerts = get_response.json()
+            if not isinstance(current_alerts, list):
+                self.log_test("Alert System - GET /api/alerts", False, 
+                            "GET /api/alerts did not return a list")
+                return
+            
+            # Log current alert count and details
+            print(f"   📊 Current alerts in database: {len(current_alerts)}")
+            if current_alerts:
+                print("   📋 Existing alerts:")
+                for i, alert in enumerate(current_alerts, 1):
+                    title = alert.get('title', 'No Title')
+                    target_audience = alert.get('target_audience', 'Unknown')
+                    priority = alert.get('priority', 'Unknown')
+                    alert_type = alert.get('type', 'Unknown')
+                    print(f"      {i}. Title: '{title}' | Target: {target_audience} | Priority: {priority} | Type: {alert_type}")
+            else:
+                print("   📋 No existing alerts found in database")
+            
+            self.log_test("Alert System - GET /api/alerts", True, 
+                        f"Successfully retrieved {len(current_alerts)} alerts from database", 
+                        f"Current alerts count: {len(current_alerts)}")
+            
+            # Test 2: Verify alert structure - each alert should have required fields
+            print("\n2. Verifying Alert Data Structure")
+            required_fields = ['id', 'title', 'message', 'priority', 'type', 'target_audience', 'created_at']
+            structure_valid = True
+            
+            for i, alert in enumerate(current_alerts):
+                missing_fields = [field for field in required_fields if field not in alert or alert[field] is None]
+                if missing_fields:
+                    structure_valid = False
+                    print(f"   ❌ Alert {i+1} missing fields: {missing_fields}")
+                else:
+                    print(f"   ✅ Alert {i+1} has all required fields")
+            
+            if structure_valid and current_alerts:
+                self.log_test("Alert System - DATA STRUCTURE", True, 
+                            "All existing alerts have required fields", 
+                            f"Verified fields: {', '.join(required_fields)}")
+            elif not current_alerts:
+                self.log_test("Alert System - DATA STRUCTURE", True, 
+                            "No alerts to verify structure (empty database)", 
+                            "Database is empty - structure will be verified after creation")
+            else:
+                self.log_test("Alert System - DATA STRUCTURE", False, 
+                            "Some alerts missing required fields")
+            
+            # Test 3: POST /api/alerts - Create new test alert
+            print("\n3. Testing POST /api/alerts - Creating New Test Alert")
+            test_alert = {
+                "title": "Review Request Test Alert",
+                "message": "This is a comprehensive test alert created during review request testing to verify the alert system functionality.",
+                "priority": "high",
+                "type": "system",
+                "target_audience": "all",
+                "created_by": "Testing Agent",
+                "expires_at": (datetime.now() + timedelta(hours=24)).isoformat()
+            }
+            
+            post_response = self.session.post(f"{self.backend_url}/api/alerts", json=test_alert)
+            if post_response.status_code == 200:
+                created_alert_response = post_response.json()
+                created_alert = created_alert_response.get('alert', {})
+                alert_id = created_alert.get('id')
+                
+                if alert_id:
+                    self.created_items['alerts'].append(alert_id)
+                    print(f"   ✅ Successfully created test alert with ID: {alert_id}")
+                    print(f"   📝 Alert details: Title='{created_alert.get('title')}', Priority={created_alert.get('priority')}, Type={created_alert.get('type')}")
+                    
+                    self.log_test("Alert System - POST /api/alerts", True, 
+                                f"Successfully created new test alert", 
+                                f"Alert ID: {alert_id}, Title: '{test_alert['title']}'")
+                    
+                    # Test 4: Verify the new alert is saved and returned correctly
+                    print("\n4. Verifying New Alert Persistence")
+                    verify_response = self.session.get(f"{self.backend_url}/api/alerts")
+                    if verify_response.status_code == 200:
+                        updated_alerts = verify_response.json()
+                        new_alert_found = any(alert.get('id') == alert_id for alert in updated_alerts)
+                        
+                        if new_alert_found:
+                            new_alert_count = len(updated_alerts)
+                            print(f"   ✅ New alert found in database")
+                            print(f"   📊 Total alerts now: {new_alert_count} (was {len(current_alerts)})")
+                            
+                            # Find and verify the created alert
+                            created_alert_in_db = next((alert for alert in updated_alerts if alert.get('id') == alert_id), None)
+                            if created_alert_in_db:
+                                # Verify all fields are correctly saved
+                                fields_correct = True
+                                for key, expected_value in test_alert.items():
+                                    if key != 'expires_at':  # Skip datetime comparison for simplicity
+                                        actual_value = created_alert_in_db.get(key)
+                                        if actual_value != expected_value:
+                                            fields_correct = False
+                                            print(f"   ❌ Field mismatch - {key}: expected '{expected_value}', got '{actual_value}'")
+                                
+                                if fields_correct:
+                                    self.log_test("Alert System - PERSISTENCE VERIFICATION", True, 
+                                                "New alert correctly saved and returned with all fields", 
+                                                f"Alert persisted correctly in database")
+                                else:
+                                    self.log_test("Alert System - PERSISTENCE VERIFICATION", False, 
+                                                "New alert saved but some fields incorrect")
+                            else:
+                                self.log_test("Alert System - PERSISTENCE VERIFICATION", False, 
+                                            "Could not find created alert in database response")
+                        else:
+                            self.log_test("Alert System - PERSISTENCE VERIFICATION", False, 
+                                        "New alert not found in database after creation")
+                    else:
+                        self.log_test("Alert System - PERSISTENCE VERIFICATION", False, 
+                                    f"Could not verify persistence - GET failed with status {verify_response.status_code}")
+                else:
+                    self.log_test("Alert System - POST /api/alerts", False, 
+                                "Alert created but no ID returned in response")
+            else:
+                try:
+                    error_detail = post_response.json().get('detail', 'Unknown error')
+                except:
+                    error_detail = post_response.text
+                self.log_test("Alert System - POST /api/alerts", False, 
+                            f"Failed to create alert - Status: {post_response.status_code}", 
+                            f"Error: {error_detail}")
+            
+            # Test 5: Frontend API Connection Test
+            print("\n5. Testing Frontend API Connection")
+            try:
+                # Test if frontend can access the external URL
+                frontend_response = self.session.get(f"{self.backend_url}/api/alerts", 
+                                                   headers={'Accept': 'application/json'})
+                
+                if frontend_response.status_code == 200:
+                    try:
+                        json_data = frontend_response.json()
+                        if isinstance(json_data, list):
+                            response_time = frontend_response.elapsed.total_seconds()
+                            self.log_test("Alert System - FRONTEND CONNECTION", True, 
+                                        f"Frontend can successfully access alerts API", 
+                                        f"Response time: {response_time:.2f}s, JSON format confirmed")
+                        else:
+                            self.log_test("Alert System - FRONTEND CONNECTION", False, 
+                                        "API accessible but response is not JSON array")
+                    except json.JSONDecodeError:
+                        self.log_test("Alert System - FRONTEND CONNECTION", False, 
+                                    "API accessible but response is not valid JSON")
+                else:
+                    self.log_test("Alert System - FRONTEND CONNECTION", False, 
+                                f"Frontend cannot access alerts API - Status: {frontend_response.status_code}")
+                
+                # Test CORS headers
+                cors_headers = {
+                    'Access-Control-Allow-Origin': frontend_response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': frontend_response.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': frontend_response.headers.get('Access-Control-Allow-Headers')
+                }
+                
+                if any(cors_headers.values()):
+                    self.log_test("Alert System - CORS HEADERS", True, 
+                                "CORS headers present in response", 
+                                f"CORS configured for cross-origin requests")
+                else:
+                    self.log_test("Alert System - CORS HEADERS", False, 
+                                "No CORS headers found - may cause frontend issues")
+                    
+            except Exception as e:
+                self.log_test("Alert System - FRONTEND CONNECTION", False, 
+                            f"Frontend connection test failed: {str(e)}")
+            
+            # Test 6: Final Database State Summary
+            print("\n6. Final Database State Summary")
+            final_response = self.session.get(f"{self.backend_url}/api/alerts")
+            if final_response.status_code == 200:
+                final_alerts = final_response.json()
+                print(f"   📊 Final alert count in database: {len(final_alerts)}")
+                
+                if final_alerts:
+                    print("   📋 All alerts in database:")
+                    for i, alert in enumerate(final_alerts, 1):
+                        title = alert.get('title', 'No Title')
+                        target_audience = alert.get('target_audience', 'Unknown')
+                        priority = alert.get('priority', 'Unknown')
+                        created_by = alert.get('created_by', 'Unknown')
+                        print(f"      {i}. '{title}' | Target: {target_audience} | Priority: {priority} | By: {created_by}")
+                
+                self.log_test("Alert System - FINAL STATE", True, 
+                            f"Alert system testing completed - {len(final_alerts)} total alerts", 
+                            f"Database contains {len(final_alerts)} alerts after testing")
+            
+        except Exception as e:
+            self.log_test("Alert System - COMPREHENSIVE TEST", False, 
+                        f"Comprehensive alert system test failed: {str(e)}")
+
     def run_all_tests(self):
-        """Run all tests - FOCUSED ON REVIEW REQUEST - 3 ADMIN PANEL APIS"""
-        print("🚀 REVIEW REQUEST FOCUSED TESTING - 3 ADMIN PANEL BACKEND APIS")
+        """Run all tests - FOCUSED ON ALERT SYSTEM REVIEW REQUEST"""
+        print("🚀 ALERT SYSTEM COMPREHENSIVE TESTING - REVIEW REQUEST")
         print("=" * 80)
         
         # Core connectivity test
         self.test_backend_connectivity()
         
-        # PRIORITY: Review Request Critical API Testing - 3 Admin Panel APIs
+        # PRIORITY: Alert System Comprehensive Testing as per Review Request
         print("\n" + "="*80)
-        print("🎯 REVIEW REQUEST SPECIFIC TESTING - 3 ADMIN PANEL APIS")
+        print("🎯 ALERT SYSTEM COMPREHENSIVE TESTING - REVIEW REQUEST")
         print("="*80)
         
-        # 1. HOME SLIDERS API (Banner Management Backend)
-        self.test_home_sliders_api_comprehensive()
-        
-        # 2. ALERTS MANAGEMENT API  
-        self.test_alert_system_review_request()
-        
-        # 3. EMPLOYEE MANAGEMENT API
-        self.test_employee_management_api_comprehensive()
+        # Alert System Comprehensive Testing
+        self.test_alerts_system_comprehensive_review_request()
         
         # Clean up test data
         self.cleanup_test_data()
         
         print("\n" + "=" * 80)
-        print("📊 REVIEW REQUEST TEST SUMMARY")
+        print("📊 ALERT SYSTEM TEST SUMMARY")
         print("=" * 80)
         
         passed = sum(1 for result in self.test_results if result['success'])
