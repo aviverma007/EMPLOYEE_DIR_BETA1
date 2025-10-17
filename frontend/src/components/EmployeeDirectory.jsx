@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { Search, Grid3X3, List, User, X } from "lucide-react";
+import { Search, Grid3X3, List, User, X, Edit2, Save, XCircle } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader } from "./ui/card";
@@ -9,6 +9,7 @@ import { useAuth } from "../context/AuthContext";
 import { employeeAPI, utilityAPI } from "../services/api";
 import EmployeeCard from "./EmployeeCard";
 import EmployeeList from "./EmployeeList";
+import { toast } from "sonner";
 
 const EmployeeDirectory = () => {
   const [nameSearch, setNameSearch] = useState("");
