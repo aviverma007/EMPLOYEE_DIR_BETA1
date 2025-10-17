@@ -118,14 +118,20 @@ export const hierarchyAPI = {
   }
 };
 
-// Utility API endpoints - Frontend-only using dataService
+// Utility API endpoints - Using Backend API
 export const utilityAPI = {
   // Refresh Excel data
   refreshExcel: async () => {
     try {
-      // Reload all data from Excel files
-      const result = await dataService.loadAllData();
-      return { message: 'Excel data refreshed successfully', ...result };
+      const response = await fetch(`${BACKEND_URL}/api/refresh-excel`, {
+        method: 'POST'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
     } catch (error) {
       console.error('Error refreshing Excel data:', error);
       throw error;
@@ -135,9 +141,17 @@ export const utilityAPI = {
   // Get departments
   getDepartments: async () => {
     try {
-      return await dataService.getDepartments();
+      const response = await fetch(`${BACKEND_URL}/api/departments`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log(`Loaded ${data.length} departments from backend API`);
+      return data;
     } catch (error) {
-      console.error('Error fetching departments:', error);
+      console.error('Error fetching departments from backend:', error);
       throw error;
     }
   },
@@ -145,9 +159,17 @@ export const utilityAPI = {
   // Get locations  
   getLocations: async () => {
     try {
-      return await dataService.getLocations();
+      const response = await fetch(`${BACKEND_URL}/api/locations`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log(`Loaded ${data.length} locations from backend API`);
+      return data;
     } catch (error) {
-      console.error('Error fetching locations:', error);
+      console.error('Error fetching locations from backend:', error);
       throw error;
     }
   },
