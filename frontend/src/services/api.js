@@ -1,6 +1,5 @@
-// Frontend-only API using dataService
-import dataService from './dataService';
-import imageStorage from './imageStorage';
+// Backend API Service
+// This service connects the frontend to the backend API
 
 // Backend URL configuration
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
