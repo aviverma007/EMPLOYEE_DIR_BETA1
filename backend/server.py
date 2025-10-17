@@ -1492,6 +1492,8 @@ class EmployeeCreate(BaseModel):
     grade: Optional[str] = ""
     mobile: Optional[str] = ""
     email: Optional[str] = ""
+    extension: Optional[str] = ""
+    reporting_manager: Optional[str] = ""
     date_of_joining: Optional[str] = ""
     date_of_birth: Optional[str] = ""
     blood_group: Optional[str] = ""
