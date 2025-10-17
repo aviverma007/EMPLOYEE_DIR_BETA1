@@ -366,14 +366,16 @@ export const meetingRoomAPI = {
 export const alertAPI = {
   getAll: async (targetAudience = 'all') => {
     try {
-      const allAlerts = dataService.getAlerts();
-      // Filter by target audience if specified
-      if (targetAudience && targetAudience !== 'all') {
-        return allAlerts.filter(alert => 
-          alert.target_audience === 'all' || alert.target_audience === targetAudience
-        );
+      const url = targetAudience && targetAudience !== 'all' 
+        ? `${BACKEND_URL}/api/alerts?target_audience=${targetAudience}`
+        : `${BACKEND_URL}/api/alerts`;
+      
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return allAlerts;
+      const data = await response.json();
+      return data;
     } catch (error) {
       console.error('Error fetching alerts:', error);
       throw error;
@@ -382,7 +384,20 @@ export const alertAPI = {
 
   create: async (alertData) => {
     try {
-      return dataService.createAlert(alertData);
+      const response = await fetch(`${BACKEND_URL}/api/alerts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(alertData),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      return result.alert;
     } catch (error) {
       console.error('Error creating alert:', error);
       throw error;
@@ -391,7 +406,20 @@ export const alertAPI = {
 
   update: async (alertId, alertData) => {
     try {
-      return dataService.updateAlert(alertId, alertData);
+      const response = await fetch(`${BACKEND_URL}/api/alerts/${alertId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(alertData),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      return result.alert;
     } catch (error) {
       console.error('Error updating alert:', error);
       throw error;
@@ -400,7 +428,15 @@ export const alertAPI = {
 
   delete: async (alertId) => {
     try {
-      return dataService.deleteAlert(alertId);
+      const response = await fetch(`${BACKEND_URL}/api/alerts/${alertId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
     } catch (error) {
       console.error('Error deleting alert:', error);
       throw error;
