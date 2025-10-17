@@ -129,6 +129,8 @@ const EmployeeManagement = () => {
       grade: '',
       mobile: '',
       email: '',
+      extension: '',
+      reporting_manager: '',
       date_of_joining: '',
       date_of_birth: '',
       blood_group: '',
