@@ -439,6 +439,28 @@ const EmployeeManagement = () => {
                   </div>
                 </div>
 
+                {/* Extension and Reporting Manager */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="extension">Extension Number</Label>
+                    <Input
+                      id="extension"
+                      value={formData.extension}
+                      onChange={(e) => handleInputChange('extension', e.target.value)}
+                      placeholder="e.g., 1234"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="reporting_manager">Reporting Manager</Label>
+                    <Input
+                      id="reporting_manager"
+                      value={formData.reporting_manager}
+                      onChange={(e) => handleInputChange('reporting_manager', e.target.value)}
+                      placeholder="Manager's name"
+                    />
+                  </div>
+                </div>
+
                 {/* Additional Information */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
