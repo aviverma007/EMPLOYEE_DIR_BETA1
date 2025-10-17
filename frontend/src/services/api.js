@@ -177,7 +177,15 @@ export const utilityAPI = {
   // Get system statistics
   getStats: async () => {
     try {
-      return await dataService.getStats();
+      const response = await fetch(`${BACKEND_URL}/api/stats`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching stats from backend:', error);
     } catch (error) {
       console.error('Error fetching stats:', error);
       throw error;
