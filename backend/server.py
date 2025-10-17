@@ -1333,10 +1333,31 @@ def load_excel_data():
                 employees.append(employee)
         
         if employees:
-            # Clear existing employees and insert new ones
-            employees_collection.delete_many({})
-            employees_collection.insert_many(employees)
-            print(f"Successfully loaded {len(employees)} employees from Excel")
+            # Smart sync: Only insert new employees, update existing ones
+            existing_count = employees_collection.count_documents({})
+            
+            if existing_count == 0:
+                # First time load: insert all
+                employees_collection.insert_many(employees)
+                print(f"Initial load: Successfully loaded {len(employees)} employees from Excel")
+            else:
+                # Sync mode: Update existing, add new
+                updated = 0
+                inserted = 0
+                for emp in employees:
+                    existing = employees_collection.find_one({"id": emp.get('id')})
+                    if existing:
+                        # Update existing employee (preserve any additional fields added through admin)
+                        employees_collection.update_one(
+                            {"id": emp.get('id')},
+                            {"$set": emp}
+                        )
+                        updated += 1
+                    else:
+                        # Insert new employee
+                        employees_collection.insert_one(emp)
+                        inserted += 1
+                print(f"Sync complete: Updated {updated}, Inserted {inserted} employees")
         else:
             print("WARNING: No valid employee data found in Excel file")
             
