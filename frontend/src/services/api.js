@@ -217,8 +217,6 @@ export const utilityAPI = {
       return await response.json();
     } catch (error) {
       console.error('Error fetching stats from backend:', error);
-    } catch (error) {
-      console.error('Error fetching stats:', error);
       throw error;
     }
   }
