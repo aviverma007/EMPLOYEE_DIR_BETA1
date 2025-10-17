@@ -1567,6 +1567,83 @@ async def export_employees_excel():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error exporting employees: {str(e)}")
 
+@app.post("/api/employees/sync-to-excel")
+async def sync_employees_to_excel():
+    """Sync current database state back to master Excel file"""
+    if employees_collection is None:
+        raise HTTPException(status_code=500, detail="Database not connected")
+    
+    try:
+        import openpyxl
+        from openpyxl import Workbook
+        
+        # Get all employees from database
+        employees = list(employees_collection.find({}, {"_id": 0}))
+        
+        # Create new workbook
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Employees"
+        
+        # Headers (matching original Excel structure)
+        headers = ["ID", "Name", "Designation", "Department", "Location", "Grade", 
+                   "Mobile", "Email", "Date of Joining", "Date of Birth", "Blood Group", 
+                   "Emergency Contact", "Profile Image"]
+        ws.append(headers)
+        
+        # Add employee data
+        for emp in employees:
+            row = [
+                emp.get('id', ''),
+                emp.get('name', ''),
+                emp.get('designation', ''),
+                emp.get('department', ''),
+                emp.get('location', ''),
+                emp.get('grade', ''),
+                emp.get('mobile', ''),
+                emp.get('email', ''),
+                emp.get('date_of_joining', ''),
+                emp.get('date_of_birth', ''),
+                emp.get('blood_group', ''),
+                emp.get('emergency_contact', ''),
+                emp.get('profileImage', '')
+            ]
+            ws.append(row)
+        
+        # Save to master Excel file locations
+        excel_paths = [
+            "/app/frontend/public/employee_directory.xlsx",
+            "/app/employee_directory.xlsx"
+        ]
+        
+        saved_count = 0
+        for excel_path in excel_paths:
+            try:
+                # Create backup of existing file
+                if os.path.exists(excel_path):
+                    backup_path = excel_path.replace('.xlsx', f'_backup_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx')
+                    os.rename(excel_path, backup_path)
+                    print(f"Backed up existing Excel to: {backup_path}")
+                
+                # Save new Excel file
+                wb.save(excel_path)
+                saved_count += 1
+                print(f"Synced {len(employees)} employees to: {excel_path}")
+            except Exception as e:
+                print(f"Could not save to {excel_path}: {e}")
+        
+        if saved_count > 0:
+            return {
+                "message": f"Successfully synced {len(employees)} employees to {saved_count} Excel file(s)",
+                "employee_count": len(employees),
+                "files_updated": saved_count
+            }
+        else:
+            raise HTTPException(status_code=500, detail="Could not save to any Excel file")
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error syncing to Excel: {str(e)}")
+
 
 # ============================================================================
 # HOME SLIDERS MANAGEMENT
