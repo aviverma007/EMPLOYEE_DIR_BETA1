@@ -3355,6 +3355,344 @@ class BackendPersistentTester:
             self.log_test("Review Request - Employee Data Sync", False, 
                         f"Review request testing failed: {str(e)}")
 
+    def test_extension_and_reporting_manager_comprehensive(self):
+        """Test: Extension Number and Reporting Manager Feature Implementation - As per Review Request"""
+        try:
+            print("\n📞 EXTENSION NUMBER & REPORTING MANAGER TESTING - REVIEW REQUEST")
+            print("-" * 70)
+            
+            # Test 1: Data Availability Verification - GET /api/employees
+            print("🔍 Test 1: Data Availability Verification")
+            response = self.session.get(f"{self.backend_url}/api/employees")
+            if response.status_code != 200:
+                self.log_test("Extension/RM - Data Availability", False, 
+                            f"GET /api/employees failed with status {response.status_code}")
+                return
+            
+            employees = response.json()
+            if not isinstance(employees, list):
+                self.log_test("Extension/RM - Data Availability", False, 
+                            "GET /api/employees did not return a list")
+                return
+            
+            # Verify we have exactly 625 employees as specified in review request
+            employee_count = len(employees)
+            if employee_count == 625:
+                self.log_test("Extension/RM - Employee Count", True, 
+                            f"✅ EXACTLY 625 employees loaded as specified in review request", 
+                            f"Employee count matches specification")
+            else:
+                self.log_test("Extension/RM - Employee Count", False, 
+                            f"❌ Expected 625 employees, got {employee_count}")
+            
+            # Count employees with extension numbers and reporting managers
+            employees_with_extension = 0
+            employees_with_reporting_manager = 0
+            extension_field_present = 0
+            reporting_manager_field_present = 0
+            
+            for emp in employees:
+                # Check if fields are present (even if empty)
+                if 'extension' in emp:
+                    extension_field_present += 1
+                if 'reporting_manager' in emp:
+                    reporting_manager_field_present += 1
+                
+                # Check if fields have actual values
+                if emp.get('extension') and str(emp.get('extension')).strip():
+                    employees_with_extension += 1
+                if emp.get('reporting_manager') and str(emp.get('reporting_manager')).strip():
+                    employees_with_reporting_manager += 1
+            
+            # Verify field presence
+            if extension_field_present == employee_count:
+                self.log_test("Extension/RM - Extension Field Present", True, 
+                            f"Extension field present in all {employee_count} employees", 
+                            f"Field availability: 100%")
+            else:
+                self.log_test("Extension/RM - Extension Field Present", False, 
+                            f"Extension field missing in {employee_count - extension_field_present} employees")
+            
+            if reporting_manager_field_present == employee_count:
+                self.log_test("Extension/RM - Reporting Manager Field Present", True, 
+                            f"Reporting manager field present in all {employee_count} employees", 
+                            f"Field availability: 100%")
+            else:
+                self.log_test("Extension/RM - Reporting Manager Field Present", False, 
+                            f"Reporting manager field missing in {employee_count - reporting_manager_field_present} employees")
+            
+            # Verify data counts as specified in review request
+            if employees_with_extension == 189:
+                self.log_test("Extension/RM - Extension Count", True, 
+                            f"✅ EXACTLY 189 employees have extension numbers as specified", 
+                            f"Extension data matches review request specification")
+            else:
+                self.log_test("Extension/RM - Extension Count", False, 
+                            f"❌ Expected 189 employees with extensions, got {employees_with_extension}")
+            
+            if employees_with_reporting_manager == 624:
+                self.log_test("Extension/RM - Reporting Manager Count", True, 
+                            f"✅ EXACTLY 624 employees have reporting managers as specified", 
+                            f"Reporting manager data matches review request specification")
+            else:
+                self.log_test("Extension/RM - Reporting Manager Count", False, 
+                            f"❌ Expected 624 employees with reporting managers, got {employees_with_reporting_manager}")
+            
+            # Test 2: Specific Employee Verification - Employee 80002 (Vikas Malhotra)
+            print("🔍 Test 2: Specific Employee Verification - Employee 80002")
+            target_employee = None
+            for emp in employees:
+                if emp.get('id') == '80002':
+                    target_employee = emp
+                    break
+            
+            if target_employee:
+                emp_name = target_employee.get('name', 'Unknown')
+                emp_extension = target_employee.get('extension', '')
+                emp_reporting_manager = target_employee.get('reporting_manager', '')
+                
+                # Verify this is Vikas Malhotra
+                if 'Vikas' in emp_name and 'Malhotra' in emp_name:
+                    self.log_test("Extension/RM - Target Employee Found", True, 
+                                f"Found target employee: {emp_name} (ID: 80002)", 
+                                f"Employee identification successful")
+                    
+                    # Verify extension number is 6606
+                    if str(emp_extension).strip() == '6606':
+                        self.log_test("Extension/RM - Target Extension Correct", True, 
+                                    f"✅ Employee 80002 has correct extension: 6606", 
+                                    f"Extension matches review request specification")
+                    else:
+                        self.log_test("Extension/RM - Target Extension Correct", False, 
+                                    f"❌ Expected extension 6606, got '{emp_extension}'")
+                    
+                    # Verify reporting manager is Management Office
+                    if str(emp_reporting_manager).strip() == 'Management Office':
+                        self.log_test("Extension/RM - Target Reporting Manager Correct", True, 
+                                    f"✅ Employee 80002 has correct reporting manager: Management Office", 
+                                    f"Reporting manager matches review request specification")
+                    else:
+                        self.log_test("Extension/RM - Target Reporting Manager Correct", False, 
+                                    f"❌ Expected 'Management Office', got '{emp_reporting_manager}'")
+                else:
+                    self.log_test("Extension/RM - Target Employee Found", False, 
+                                f"Employee 80002 found but name '{emp_name}' doesn't match expected 'Vikas Malhotra'")
+            else:
+                self.log_test("Extension/RM - Target Employee Found", False, 
+                            "Employee 80002 (Vikas Malhotra) not found in database")
+            
+            # Test 3: Field Display in Employee Details - Search functionality
+            print("🔍 Test 3: Field Display via Search")
+            search_response = self.session.get(f"{self.backend_url}/api/employees?search=80002")
+            if search_response.status_code == 200:
+                search_results = search_response.json()
+                if search_results and len(search_results) > 0:
+                    found_employee = search_results[0]
+                    if found_employee.get('id') == '80002':
+                        self.log_test("Extension/RM - Search Functionality", True, 
+                                    f"Search for '80002' successfully returned target employee", 
+                                    f"Employee: {found_employee.get('name')}, Extension: {found_employee.get('extension')}, RM: {found_employee.get('reporting_manager')}")
+                    else:
+                        self.log_test("Extension/RM - Search Functionality", False, 
+                                    f"Search returned wrong employee: {found_employee.get('id')}")
+                else:
+                    self.log_test("Extension/RM - Search Functionality", False, 
+                                "Search for '80002' returned no results")
+            else:
+                self.log_test("Extension/RM - Search Functionality", False, 
+                            f"Search request failed with status {search_response.status_code}")
+            
+            # Test 4: Edit Functionality - PUT /api/employees/{employee_id}
+            print("🔍 Test 4: Edit Functionality Testing")
+            if target_employee:
+                employee_id = target_employee.get('id')
+                original_extension = target_employee.get('extension', '')
+                original_reporting_manager = target_employee.get('reporting_manager', '')
+                
+                # Test updating extension number
+                new_extension = "9999"  # Test extension
+                update_data_extension = {
+                    "extension": new_extension
+                }
+                
+                update_response = self.session.put(f"{self.backend_url}/api/employees/{employee_id}", 
+                                                 json=update_data_extension)
+                
+                if update_response.status_code == 200:
+                    update_result = update_response.json()
+                    updated_employee = update_result.get('employee', {})
+                    
+                    if updated_employee.get('extension') == new_extension:
+                        self.log_test("Extension/RM - Extension Update", True, 
+                                    f"Successfully updated extension from '{original_extension}' to '{new_extension}'", 
+                                    f"Extension update functionality working")
+                        
+                        # Verify persistence by fetching again
+                        verify_response = self.session.get(f"{self.backend_url}/api/employees?search={employee_id}")
+                        if verify_response.status_code == 200:
+                            verify_results = verify_response.json()
+                            if verify_results and verify_results[0].get('extension') == new_extension:
+                                self.log_test("Extension/RM - Extension Persistence", True, 
+                                            f"Extension update persisted correctly in database", 
+                                            f"Verified extension: {new_extension}")
+                            else:
+                                self.log_test("Extension/RM - Extension Persistence", False, 
+                                            "Extension update did not persist in database")
+                        
+                        # Restore original extension
+                        restore_data = {"extension": original_extension}
+                        self.session.put(f"{self.backend_url}/api/employees/{employee_id}", json=restore_data)
+                        
+                    else:
+                        self.log_test("Extension/RM - Extension Update", False, 
+                                    f"Extension update failed - expected '{new_extension}', got '{updated_employee.get('extension')}'")
+                else:
+                    self.log_test("Extension/RM - Extension Update", False, 
+                                f"Extension update request failed with status {update_response.status_code}")
+                
+                # Test updating reporting manager
+                new_reporting_manager = "Test Manager Office"
+                update_data_rm = {
+                    "reporting_manager": new_reporting_manager
+                }
+                
+                update_rm_response = self.session.put(f"{self.backend_url}/api/employees/{employee_id}", 
+                                                    json=update_data_rm)
+                
+                if update_rm_response.status_code == 200:
+                    update_rm_result = update_rm_response.json()
+                    updated_rm_employee = update_rm_result.get('employee', {})
+                    
+                    if updated_rm_employee.get('reporting_manager') == new_reporting_manager:
+                        self.log_test("Extension/RM - Reporting Manager Update", True, 
+                                    f"Successfully updated reporting manager from '{original_reporting_manager}' to '{new_reporting_manager}'", 
+                                    f"Reporting manager update functionality working")
+                        
+                        # Verify persistence
+                        verify_rm_response = self.session.get(f"{self.backend_url}/api/employees?search={employee_id}")
+                        if verify_rm_response.status_code == 200:
+                            verify_rm_results = verify_rm_response.json()
+                            if verify_rm_results and verify_rm_results[0].get('reporting_manager') == new_reporting_manager:
+                                self.log_test("Extension/RM - Reporting Manager Persistence", True, 
+                                            f"Reporting manager update persisted correctly in database", 
+                                            f"Verified reporting manager: {new_reporting_manager}")
+                            else:
+                                self.log_test("Extension/RM - Reporting Manager Persistence", False, 
+                                            "Reporting manager update did not persist in database")
+                        
+                        # Restore original reporting manager
+                        restore_rm_data = {"reporting_manager": original_reporting_manager}
+                        self.session.put(f"{self.backend_url}/api/employees/{employee_id}", json=restore_rm_data)
+                        
+                    else:
+                        self.log_test("Extension/RM - Reporting Manager Update", False, 
+                                    f"Reporting manager update failed - expected '{new_reporting_manager}', got '{updated_rm_employee.get('reporting_manager')}'")
+                else:
+                    self.log_test("Extension/RM - Reporting Manager Update", False, 
+                                f"Reporting manager update request failed with status {update_rm_response.status_code}")
+            
+            # Test 5: Data Persistence After Excel Refresh
+            print("🔍 Test 5: Data Persistence After Excel Refresh")
+            refresh_response = self.session.post(f"{self.backend_url}/api/refresh-excel")
+            if refresh_response.status_code == 200:
+                refresh_result = refresh_response.json()
+                self.log_test("Extension/RM - Excel Refresh", True, 
+                            f"Excel refresh completed successfully", 
+                            f"Response: {refresh_result.get('message', 'No message')}")
+                
+                # Verify data still exists after refresh
+                post_refresh_response = self.session.get(f"{self.backend_url}/api/employees?search=80002")
+                if post_refresh_response.status_code == 200:
+                    post_refresh_results = post_refresh_response.json()
+                    if post_refresh_results:
+                        post_refresh_employee = post_refresh_results[0]
+                        post_extension = post_refresh_employee.get('extension', '')
+                        post_rm = post_refresh_employee.get('reporting_manager', '')
+                        
+                        # Check if data is preserved (should match original values)
+                        if post_extension and post_rm:
+                            self.log_test("Extension/RM - Data Preservation After Refresh", True, 
+                                        f"Extension and reporting manager data preserved after Excel refresh", 
+                                        f"Extension: {post_extension}, RM: {post_rm}")
+                        else:
+                            self.log_test("Extension/RM - Data Preservation After Refresh", False, 
+                                        f"Extension or reporting manager data lost after refresh")
+                    else:
+                        self.log_test("Extension/RM - Data Preservation After Refresh", False, 
+                                    "Employee 80002 not found after Excel refresh")
+                else:
+                    self.log_test("Extension/RM - Data Preservation After Refresh", False, 
+                                f"Could not verify data after refresh - search failed")
+            else:
+                self.log_test("Extension/RM - Excel Refresh", False, 
+                            f"Excel refresh failed with status {refresh_response.status_code}")
+            
+            # Test 6: Edge Cases
+            print("🔍 Test 6: Edge Cases Testing")
+            
+            # Test employees without extension numbers
+            employees_without_extension = [emp for emp in employees if not emp.get('extension') or not str(emp.get('extension')).strip()]
+            if len(employees_without_extension) > 0:
+                sample_no_ext = employees_without_extension[0]
+                self.log_test("Extension/RM - No Extension Handling", True, 
+                            f"Employees without extension numbers handled correctly", 
+                            f"Sample: {sample_no_ext.get('name')} (ID: {sample_no_ext.get('id')}) has extension: '{sample_no_ext.get('extension', 'null')}'")
+            else:
+                self.log_test("Extension/RM - No Extension Handling", True, 
+                            "All employees have extension numbers - no edge case to test")
+            
+            # Test employees without reporting managers
+            employees_without_rm = [emp for emp in employees if not emp.get('reporting_manager') or not str(emp.get('reporting_manager')).strip()]
+            if len(employees_without_rm) > 0:
+                sample_no_rm = employees_without_rm[0]
+                self.log_test("Extension/RM - No Reporting Manager Handling", True, 
+                            f"Employees without reporting managers handled correctly", 
+                            f"Sample: {sample_no_rm.get('name')} (ID: {sample_no_rm.get('id')}) has RM: '{sample_no_rm.get('reporting_manager', 'null')}'")
+            else:
+                self.log_test("Extension/RM - No Reporting Manager Handling", True, 
+                            "Only 1 employee without reporting manager - expected for top-level manager")
+            
+            # Test with invalid employee ID
+            invalid_response = self.session.put(f"{self.backend_url}/api/employees/INVALID_ID", 
+                                              json={"extension": "1234"})
+            if invalid_response.status_code == 404:
+                self.log_test("Extension/RM - Invalid Employee ID", True, 
+                            "Invalid employee ID properly rejected with 404", 
+                            "Error handling working correctly")
+            else:
+                self.log_test("Extension/RM - Invalid Employee ID", False, 
+                            f"Invalid employee ID not properly handled - got status {invalid_response.status_code}")
+            
+            # Test with empty/null values
+            if target_employee:
+                empty_values_data = {
+                    "extension": "",
+                    "reporting_manager": ""
+                }
+                empty_response = self.session.put(f"{self.backend_url}/api/employees/{target_employee.get('id')}", 
+                                                json=empty_values_data)
+                if empty_response.status_code == 200:
+                    self.log_test("Extension/RM - Empty Values Handling", True, 
+                                "Empty/null values for extension and reporting manager handled correctly", 
+                                "API accepts empty values without errors")
+                    
+                    # Restore original values
+                    restore_original = {
+                        "extension": original_extension,
+                        "reporting_manager": original_reporting_manager
+                    }
+                    self.session.put(f"{self.backend_url}/api/employees/{target_employee.get('id')}", 
+                                   json=restore_original)
+                else:
+                    self.log_test("Extension/RM - Empty Values Handling", False, 
+                                f"Empty values not handled correctly - status {empty_response.status_code}")
+            
+            print("📞 Extension Number & Reporting Manager Testing Completed")
+            
+        except Exception as e:
+            self.log_test("Extension/RM - COMPREHENSIVE", False, 
+                        f"Extension and reporting manager comprehensive test failed: {str(e)}")
+
     def run_all_tests(self):
         """Run all backend tests - FOCUSED ON REVIEW REQUEST"""
         print("🚀 EMPLOYEE MANAGEMENT SYSTEM BACKEND TESTING - REVIEW REQUEST")
