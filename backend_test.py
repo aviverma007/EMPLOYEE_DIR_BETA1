@@ -3221,6 +3221,140 @@ class BackendPersistentTester:
             self.log_test("Alert System - COMPREHENSIVE TEST", False, 
                         f"Comprehensive alert system test failed: {str(e)}")
 
+    def test_review_request_employee_data_sync(self):
+        """🎯 REVIEW REQUEST: Test employee data synchronization - 625 employees, search for Anirudh, verify email"""
+        try:
+            print("\n🎯 REVIEW REQUEST TESTING: Employee Data Synchronization")
+            print("-" * 60)
+            
+            # Test 1: Verify backend API returns exactly 625 employees
+            response = self.session.get(f"{self.backend_url}/api/employees")
+            if response.status_code != 200:
+                self.log_test("Review Request - Employee Count", False, 
+                            f"GET /api/employees failed with status {response.status_code}")
+                return
+            
+            employees = response.json()
+            if not isinstance(employees, list):
+                self.log_test("Review Request - Employee Count", False, 
+                            "GET /api/employees did not return a list")
+                return
+            
+            employee_count = len(employees)
+            if employee_count == 625:
+                self.log_test("Review Request - Employee Count", True, 
+                            f"✅ EXACTLY 625 employees returned as specified", 
+                            f"Employee count matches review request specification")
+            else:
+                self.log_test("Review Request - Employee Count", False, 
+                            f"❌ Expected exactly 625 employees, got {employee_count}", 
+                            f"Review request specifies exactly 625 employees")
+            
+            # Test 2: Search for "Anirudh" and verify employee ID 81096
+            search_response = self.session.get(f"{self.backend_url}/api/employees?search=Anirudh")
+            if search_response.status_code == 200:
+                search_results = search_response.json()
+                if isinstance(search_results, list):
+                    # Look for employee with ID 81096
+                    anirudh_employee = None
+                    for emp in search_results:
+                        if emp.get('id') == '81096' or emp.get('id') == 81096:
+                            anirudh_employee = emp
+                            break
+                    
+                    if anirudh_employee:
+                        self.log_test("Review Request - Anirudh Search", True, 
+                                    f"✅ Found Anirudh with employee ID 81096", 
+                                    f"Employee name: {anirudh_employee.get('name', 'N/A')}")
+                        
+                        # Test 3: Verify email field for Anirudh Verma
+                        expected_email = "avi1997verma@gmail.com"
+                        actual_email = anirudh_employee.get('email', '')
+                        
+                        if actual_email == expected_email:
+                            self.log_test("Review Request - Anirudh Email", True, 
+                                        f"✅ Anirudh Verma email verified: {actual_email}", 
+                                        f"Email matches review request specification")
+                        else:
+                            self.log_test("Review Request - Anirudh Email", False, 
+                                        f"❌ Email mismatch - Expected: {expected_email}, Got: {actual_email}", 
+                                        f"Email does not match review request specification")
+                    else:
+                        self.log_test("Review Request - Anirudh Search", False, 
+                                    f"❌ Employee with ID 81096 not found in search results", 
+                                    f"Search returned {len(search_results)} results for 'Anirudh'")
+                else:
+                    self.log_test("Review Request - Anirudh Search", False, 
+                                "Search did not return a list")
+            else:
+                self.log_test("Review Request - Anirudh Search", False, 
+                            f"Search for 'Anirudh' failed with status {search_response.status_code}")
+            
+            # Test 4: Test GET /api/departments endpoint
+            dept_response = self.session.get(f"{self.backend_url}/api/departments")
+            if dept_response.status_code == 200:
+                departments = dept_response.json()
+                if isinstance(departments, list) and len(departments) > 0:
+                    self.log_test("Review Request - Departments API", True, 
+                                f"✅ GET /api/departments working - {len(departments)} departments", 
+                                f"Sample departments: {departments[:3] if len(departments) >= 3 else departments}")
+                else:
+                    self.log_test("Review Request - Departments API", False, 
+                                f"Departments endpoint returned invalid data: {departments}")
+            else:
+                self.log_test("Review Request - Departments API", False, 
+                            f"GET /api/departments failed with status {dept_response.status_code}")
+            
+            # Test 5: Test GET /api/locations endpoint
+            loc_response = self.session.get(f"{self.backend_url}/api/locations")
+            if loc_response.status_code == 200:
+                locations = loc_response.json()
+                if isinstance(locations, list) and len(locations) > 0:
+                    self.log_test("Review Request - Locations API", True, 
+                                f"✅ GET /api/locations working - {len(locations)} locations", 
+                                f"Sample locations: {locations[:3] if len(locations) >= 3 else locations}")
+                else:
+                    self.log_test("Review Request - Locations API", False, 
+                                f"Locations endpoint returned invalid data: {locations}")
+            else:
+                self.log_test("Review Request - Locations API", False, 
+                            f"GET /api/locations failed with status {loc_response.status_code}")
+            
+            # Test 6: Verify data is coming from MongoDB database (check data persistence)
+            # Test search functionality to ensure it's using "starts with" pattern as implemented
+            starts_with_test = self.session.get(f"{self.backend_url}/api/employees?search=An")
+            if starts_with_test.status_code == 200:
+                starts_results = starts_with_test.json()
+                if isinstance(starts_results, list):
+                    # Verify all results start with "An"
+                    valid_starts_with = all(
+                        emp.get('name', '').lower().startswith('an') or 
+                        str(emp.get('id', '')).startswith('An') or
+                        emp.get('department', '').lower().startswith('an') or
+                        emp.get('location', '').lower().startswith('an') or
+                        emp.get('grade', '').lower().startswith('an') or
+                        emp.get('mobile', '').startswith('An')
+                        for emp in starts_results
+                    )
+                    
+                    if valid_starts_with and len(starts_results) > 0:
+                        self.log_test("Review Request - Search Pattern", True, 
+                                    f"✅ Search using 'starts with' pattern working correctly", 
+                                    f"Search 'An' returned {len(starts_results)} valid results")
+                    else:
+                        self.log_test("Review Request - Search Pattern", False, 
+                                    f"Search pattern not working correctly - got {len(starts_results)} results")
+                else:
+                    self.log_test("Review Request - Search Pattern", False, 
+                                "Search pattern test returned invalid data")
+            else:
+                self.log_test("Review Request - Search Pattern", False, 
+                            f"Search pattern test failed with status {starts_with_test.status_code}")
+                
+        except Exception as e:
+            self.log_test("Review Request - Employee Data Sync", False, 
+                        f"Review request testing failed: {str(e)}")
+
     def run_all_tests(self):
         """Run all tests - FOCUSED ON ALERT SYSTEM REVIEW REQUEST"""
         print("🚀 ALERT SYSTEM COMPREHENSIVE TESTING - REVIEW REQUEST")
