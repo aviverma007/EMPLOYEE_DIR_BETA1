@@ -411,7 +411,7 @@ backend:
     file: "/app/backend/server.py, /app/frontend/src/components/EmployeeDirectory.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         -working: true
         -agent: "main"
@@ -422,6 +422,9 @@ backend:
         -working: true
         -agent: "testing"
         -comment: "🎯 COMPREHENSIVE EXTENSION & REPORTING MANAGER TESTING COMPLETED: Successfully tested all specific requirements from the review request. RESULTS: ✅ Data Availability Verification: EXACTLY 625 employees loaded, 189 employees have extension numbers, 624 employees have reporting managers as specified in review request. ✅ Specific Employee Verification: Employee 80002 (Vikas Malhotra) has correct extension '6606' and reporting manager 'Management Office' exactly as specified. ✅ Field Display via Search: GET /api/employees?search=80002 successfully returns target employee with correct extension and reporting manager fields. ✅ Edit Functionality: PUT /api/employees/{employee_id} working perfectly - successfully updated extension from '6606' to '9999' and reporting manager from 'Management Office' to 'Test Manager Office', both updates persisted correctly in MongoDB database. ✅ Data Persistence After Excel Refresh: POST /api/refresh-excel preserves manual updates while refreshing other data - extension and reporting manager data maintained correctly after refresh. ✅ Edge Cases: Invalid employee IDs properly rejected with 404, empty/null values handled correctly, employees without extension/reporting manager data handled appropriately. Minor: Extension field only present in employees who have extensions (189/625), reporting manager field present in 624/625 employees - this is expected behavior. TOTAL: 18/20 tests passed (90% success rate). All critical functionality working perfectly - extension and reporting manager feature implementation is fully operational and meets all review request specifications."
+        -working: true
+        -agent: "main"
+        -comment: "✅ SEARCHABLE DROPDOWN ENHANCEMENT COMPLETED: Implemented searchable dropdown for reporting manager selection in both Employee Directory and Employee Management. Created new EmployeeSelect component (/app/frontend/src/components/ui/employee-select.jsx) with features: (1) Dropdown with search functionality to filter employees by name, ID, or department, (2) Auto-formats selection as 'NAME(EMPLOYEE_ID)' format as requested, (3) Clear button to remove selection, (4) Real-time filtering of all 625 employees, (5) Displays employee name, ID, department, and location for easy identification. Updated EmployeeDirectory.jsx and EmployeeManagement.jsx to use the new component. Frontend restarted successfully. Ready for testing to verify dropdown functionality works correctly."
 
 frontend:
   - task: "Employee Directory Interface"
