@@ -164,11 +164,40 @@ const EmployeeDirectory = () => {
   const handleEmployeeClick = (employee) => {
     setSelectedEmployee(employee);
     setShowDetailModal(true);
+    setIsEditMode(false);
+    setEditFormData({});
   };
 
   const closeDetailModal = () => {
     setShowDetailModal(false);
     setSelectedEmployee(null);
+    setIsEditMode(false);
+    setEditFormData({});
+  };
+
+  const startEdit = () => {
+    setIsEditMode(true);
+    setEditFormData({
+      extension: selectedEmployee.extension || '',
+      reporting_manager: selectedEmployee.reporting_manager || ''
+    });
+  };
+
+  const cancelEdit = () => {
+    setIsEditMode(false);
+    setEditFormData({});
+  };
+
+  const saveEdit = async () => {
+    try {
+      await handleEmployeeUpdate(selectedEmployee.id, editFormData);
+      toast.success("Employee details updated successfully!");
+      setIsEditMode(false);
+      setEditFormData({});
+    } catch (error) {
+      console.error("Error saving employee details:", error);
+      toast.error("Failed to update employee details. Please try again.");
+    }
   };
 
   const clearAllSearches = () => {
