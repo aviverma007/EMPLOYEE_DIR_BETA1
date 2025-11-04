@@ -9,15 +9,15 @@ import {
   DropdownMenuItem 
 } from "./components/ui/dropdown-menu";
 import { AuthProvider, useAuth } from "./context/AuthContext.jsx";
-import LoginForm from "./components/LoginForm";
+import LoadingScreen from "./components/LoadingScreen";
 import EmployeeDirectory from "./components/EmployeeDirectory";
 import Header from "./components/Header";
 import { Toaster } from "./components/ui/sonner";
 import { ChevronDown } from "lucide-react";
 import { Button } from "./components/ui/button";
 import HierarchyBuilder from "./components/HierarchyBuilder";
+import Chatbot from "./components/Chatbot";
 
-// Import required components for complete feature set
 import Home from "./components/Home";
 import Help from "./components/Help";
 import Work from "./components/Work";
@@ -31,9 +31,7 @@ import AlertManagement from "./components/AlertManagement";
 import UserAlerts from "./components/UserAlerts";
 import Dashboard from "./components/Dashboard";
 
-// Admin-only components
 import BannerManagement from "./components/admin/BannerManagement";
-import AlertsManagement from "./components/admin/AlertsManagement";
 import EmployeeManagement from "./components/admin/EmployeeManagement";
 
 const AppContent = () => {
