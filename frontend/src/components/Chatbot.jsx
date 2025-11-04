@@ -88,17 +88,31 @@ const Chatbot = () => {
   return (
     <>
       {!isOpen && (
-        <Button
+        <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 h-16 w-16 rounded-full bg-white hover:bg-gray-50 shadow-lg hover:shadow-xl transition-all duration-200 z-50 p-2"
-          size="icon"
+          className="fixed bottom-6 right-6 h-20 w-20 rounded-full transition-all duration-200 z-50 p-0 border-0 bg-transparent cursor-pointer group"
+          style={{
+            animation: 'breathe 3s ease-in-out infinite'
+          }}
         >
+          <style>{`
+            @keyframes breathe {
+              0%, 100% {
+                filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6)) drop-shadow(0 0 16px rgba(59, 130, 246, 0.4));
+                transform: scale(1);
+              }
+              50% {
+                filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.8)) drop-shadow(0 0 30px rgba(59, 130, 246, 0.6));
+                transform: scale(1.05);
+              }
+            }
+          `}</style>
           <img 
             src="/images/smartian-logo.png" 
             alt="Smartian"
-            className="h-full w-full object-contain"
+            className="h-full w-full object-contain transition-transform duration-200 group-hover:scale-110"
           />
-        </Button>
+        </button>
       )}
 
       {isOpen && (
