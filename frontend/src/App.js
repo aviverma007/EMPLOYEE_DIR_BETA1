@@ -116,7 +116,7 @@ const AppContent = () => {
                 <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full h-full flex flex-col">
                   {/* Navigation Tabs - Role-based access */}
                   <div className="flex justify-start mb-4 overflow-x-auto">
-                    <TabsList className="flex w-auto h-10 shadow-md border rounded-lg p-1 min-w-max bg-white border-blue-200">
+                    <TabsList className="flex w-auto h-10 shadow-md border rounded-lg p-1 min-w-max bg-white dark:bg-gray-800 border-blue-200 dark:border-gray-700">
                       <TabsTrigger 
                         value="home" 
                         className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
