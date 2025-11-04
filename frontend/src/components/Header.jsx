@@ -55,7 +55,10 @@ const Header = () => {
         <div className="flex justify-between items-center">
           {/* Left side - Logo and System Name */}
           <div className={`flex items-center ${isAdmin() ? 'space-x-4' : 'space-x-3'}`}>
-            <div className={`flex items-center ${isAdmin() ? 'space-x-4' : 'space-x-3'}`}>
+            <div 
+              className={`flex items-center ${isAdmin() ? 'space-x-4' : 'space-x-3'} cursor-pointer hover:opacity-80 transition-opacity`}
+              onClick={() => window.location.reload()}
+            >
               <img 
                 src="/images/header-logo.png"
                 alt="Company Logo"
