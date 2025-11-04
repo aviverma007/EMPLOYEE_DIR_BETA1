@@ -3973,17 +3973,29 @@ class BackendPersistentTester:
 
     def run_all_tests(self):
         """Run all backend tests - FOCUSED ON REVIEW REQUEST"""
-        print("🚀 EMPLOYEE MANAGEMENT SYSTEM BACKEND TESTING - REVIEW REQUEST")
+        print("🚀 COMPREHENSIVE BACKEND API TESTING - REVIEW REQUEST")
         print("=" * 80)
         
         # Core connectivity test
         self.test_backend_connectivity()
         self.test_health_check()
         
-        # 🎯 PRIORITY: Review Request Specific Testing
-        self.test_review_request_employee_data_sync()
+        # 🎯 PRIORITY: Review Request Specific API Testing
+        print("\n" + "="*80)
+        print("🎯 REVIEW REQUEST SPECIFIC API TESTING")
+        print("="*80)
         
-        # Additional Employee management tests
+        self.test_chatbot_api_review_request()
+        self.test_meeting_rooms_api_review_request()
+        self.test_alerts_api_review_request()
+        self.test_employees_api_review_request()
+        
+        # Additional comprehensive tests
+        print("\n" + "="*80)
+        print("🔧 ADDITIONAL COMPREHENSIVE TESTING")
+        print("="*80)
+        
+        # Employee management tests
         self.test_employee_data_management()
         self.test_employee_search_functionality()
         self.test_departments_and_locations()
@@ -3992,7 +4004,7 @@ class BackendPersistentTester:
         self.cleanup_test_data()
         
         print("\n" + "=" * 80)
-        print("📊 REVIEW REQUEST TEST SUMMARY")
+        print("📊 COMPREHENSIVE TEST SUMMARY")
         print("=" * 80)
         
         passed = sum(1 for result in self.test_results if result['success'])
@@ -4004,11 +4016,11 @@ class BackendPersistentTester:
         print(f"Success Rate: {(passed/total)*100:.1f}%")
         
         if passed == total:
-            print("\n🎉 ALL EMPLOYEE MANAGEMENT BACKEND API TESTS PASSED!")
-            print("✅ Employee Data API - 625 employees loaded correctly")
-            print("✅ Search Functionality - 'Starts with' pattern working")
-            print("✅ Departments & Locations API - All endpoints working")
-            print("✅ Data Synchronization - MongoDB database integration working")
+            print("\n🎉 ALL BACKEND API TESTS PASSED!")
+            print("✅ Chatbot API - Message handling and session continuity working")
+            print("✅ Meeting Rooms API - 15 rooms, structure, filtering, booking working")
+            print("✅ Alerts API - User target audience filtering working")
+            print("✅ Employees API - 625 employees with correct structure")
         else:
             print(f"\n⚠️  {total - passed} test(s) failed. Check the details above.")
             
