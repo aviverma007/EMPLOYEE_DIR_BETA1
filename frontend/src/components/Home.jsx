@@ -555,7 +555,7 @@ const Home = () => {
       icon: <Users className="h-6 w-6" />,
       description: "",
       color: "bg-white border-2 border-blue-200",
-      textColor: "text-white",
+      textColor: "text-blue-900",
       interactive: true
     },
     {
@@ -570,7 +570,7 @@ const Home = () => {
       icon: <CheckSquare className="h-6 w-6" />,
       description: "Your personal task manager",
       color: "bg-white border-2 border-blue-200",
-      textColor: "text-white",
+      textColor: "text-blue-900",
       interactive: true
     },
     {
@@ -585,7 +585,7 @@ const Home = () => {
       icon: <Newspaper className="h-6 w-6" />,
       description: "Latest updates and announcements",
       color: "bg-white border-2 border-blue-200",
-      textColor: "text-white"
+      textColor: "text-blue-900"
     }
   ];
 
@@ -603,7 +603,7 @@ const Home = () => {
       icon: <Users className="h-6 w-6" />,
       description: "",
       color: "bg-white border-2 border-blue-200",
-      textColor: "text-white",
+      textColor: "text-blue-900",
       interactive: true
     },
     {
@@ -611,7 +611,7 @@ const Home = () => {
       icon: <CheckSquare className="h-6 w-6" />,
       description: "Your personal task manager",
       color: "bg-white border-2 border-blue-200",
-      textColor: "text-white",
+      textColor: "text-blue-900",
       interactive: true
     }
   ];
