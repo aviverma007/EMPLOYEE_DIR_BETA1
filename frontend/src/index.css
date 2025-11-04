@@ -219,67 +219,67 @@ code {
     }
 }
 
-/* Enhanced Dark Mode Styles */
+/* Enhanced Dark Mode Styles - Light Grey Theme */
 .dark {
-  /* Main background - pure black */
-  background-color: #000000;
+  /* Main background - light grey */
+  background-color: #d9d9d9;
 }
 
 .dark body {
-  background-color: #000000;
-  color: #ffffff;
+  background-color: #d9d9d9;
+  color: #1a1a1a;
 }
 
-/* Cards and Containers - grey with better contrast */
+/* Cards and Containers - white/light grey with better contrast */
 .dark .bg-white {
-  background-color: #262626 !important;
+  background-color: #e8e8e8 !important;
 }
 
 .dark .bg-gray-50 {
-  background-color: #1a1a1a !important;
+  background-color: #f0f0f0 !important;
 }
 
 .dark .bg-gray-100 {
-  background-color: #262626 !important;
+  background-color: #e8e8e8 !important;
 }
 
 .dark .bg-blue-50 {
-  background-color: #1a1a1a !important;
+  background-color: #e8e8e8 !important;
 }
 
-/* Text colors */
+/* Text colors - dark text on light grey */
 .dark .text-gray-900 {
-  color: #ffffff !important;
+  color: #1a1a1a !important;
 }
 
 .dark .text-gray-800 {
-  color: #e5e5e5 !important;
+  color: #2d2d2d !important;
 }
 
 .dark .text-gray-700 {
-  color: #d4d4d4 !important;
+  color: #404040 !important;
 }
 
 .dark .text-gray-600 {
-  color: #a3a3a3 !important;
+  color: #525252 !important;
 }
 
 /* Borders */
 .dark .border-gray-200 {
-  border-color: #404040 !important;
+  border-color: #b8b8b8 !important;
 }
 
 .dark .border-gray-300 {
-  border-color: #525252 !important;
+  border-color: #a3a3a3 !important;
 }
 
 /* Input fields and forms */
 .dark input,
 .dark textarea,
 .dark select {
-  background-color: #262626 !important;
-  color: #ffffff !important;
-  border-color: #404040 !important;
+  background-color: #e8e8e8 !important;
+  color: #1a1a1a !important;
+  border-color: #b8b8b8 !important;
 }
 
 .dark input::placeholder,
@@ -289,18 +289,18 @@ code {
 
 /* Hover states */
 .dark .hover\:bg-gray-50:hover {
-  background-color: #1a1a1a !important;
+  background-color: #d9d9d9 !important;
 }
 
 .dark .hover\:bg-blue-50:hover {
-  background-color: #1a1a1a !important;
+  background-color: #d9d9d9 !important;
 }
 
 /* Modals and dialogs */
 .dark [role="dialog"],
 .dark [role="alertdialog"] {
-  background-color: #262626 !important;
-  border-color: #404040 !important;
+  background-color: #e8e8e8 !important;
+  border-color: #b8b8b8 !important;
 }
 
 /* Scrollbar styling for dark mode */
@@ -310,14 +310,14 @@ code {
 }
 
 .dark ::-webkit-scrollbar-track {
-  background: #1a1a1a;
+  background: #d9d9d9;
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: #404040;
+  background: #a3a3a3;
   border-radius: 4px;
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: #525252;
+  background: #8c8c8c;
 }
