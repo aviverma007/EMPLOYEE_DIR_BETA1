@@ -119,49 +119,49 @@ const AppContent = () => {
                     <TabsList className="flex w-auto h-10 shadow-md border rounded-lg p-1 min-w-max bg-white dark:bg-gray-800 border-blue-200 dark:border-gray-700">
                       <TabsTrigger 
                         value="home" 
-                        className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
+                        className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700 dark:data-[state=inactive]:text-blue-400"
                       >
                         Home
                       </TabsTrigger>
                       
                       <TabsTrigger 
                         value="directory" 
-                        className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
+                        className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700 dark:data-[state=inactive]:text-blue-400"
                       >
                         Employee Directory
                       </TabsTrigger>
                       
                       <TabsTrigger 
                         value="policies" 
-                        className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
+                        className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700 dark:data-[state=inactive]:text-blue-400"
                       >
                         Policies
                       </TabsTrigger>
                       
                       <TabsTrigger 
                         value="meeting-rooms" 
-                        className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
+                        className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700 dark:data-[state=inactive]:text-blue-400"
                       >
                         Meeting Rooms
                       </TabsTrigger>
                       
                       <TabsTrigger 
                         value="holiday-calendar" 
-                        className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
+                        className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700 dark:data-[state=inactive]:text-blue-400"
                       >
                         Holiday Calendar
                       </TabsTrigger>
                       
                       <TabsTrigger 
                         value="dashboard" 
-                        className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
+                        className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700 dark:data-[state=inactive]:text-blue-400"
                       >
                         Dashboard
                       </TabsTrigger>
                       
                       <TabsTrigger 
                         value="admin-dashboard" 
-                        className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
+                        className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white data-[state=inactive]:text-blue-700 dark:data-[state=inactive]:text-blue-400"
                       >
                         Admin Dashboard
                       </TabsTrigger>
