@@ -103,6 +103,55 @@ const Home = () => {
       color: "bg-white hover:bg-blue-50 border-2 border-blue-200 hover:border-blue-300"
     },
     {
+      title: "ZOHO",
+      icon: <User className="h-4 w-4" />,
+      description: "MANAGE ENGINE",
+      url: "https://sdpondemand.manageengine.com/app/itdesk/HomePage.do",
+      color: "bg-white hover:bg-blue-50 border-2 border-blue-200 hover:border-blue-300"
+    },
+    {
+      title: "QMS",
+      icon: <User className="h-4 w-4" />,
+      description: "RFQ's & Quote Comparison ",
+      url: "https://smartworlddevelopersonline.com/qms/home/logout",
+      color: "bg-white hover:bg-blue-50 border-2 border-blue-200 hover:border-blue-300"
+    },
+    {
+      title: "4QT",
+      icon: <User className="h-4 w-4" />,
+      description: "4QT",
+      url: "https://crm.smartworlddevelopers.com/4qt/",
+      color: "bg-white hover:bg-blue-50 border-2 border-blue-200 hover:border-blue-300"
+    },
+    {
+      title: "SFDC",
+      icon: <User className="h-4 w-4" />,
+      description: "SALES FORCE DOT COM",
+      url: "https://smartworld.my.salesforce.com/",
+      color: "bg-white hover:bg-blue-50 border-2 border-blue-200 hover:border-blue-300"
+    },
+    // {
+    //   title: "Whastsapp",
+    //   icon: <User className="h-4 w-4" />,
+    //   description: "Whatsapp Web",
+    //   url: "https://web.whatsapp.com/",
+    //   color: "bg-white hover:bg-blue-50 border-2 border-blue-200 hover:border-blue-300"
+    // },
+    {
+      title: "Gift App",
+      icon: <User className="h-4 w-4" />,
+      description: "Vistaoffers",
+      url: "https://vistaoffers.com/#login",
+      color: "bg-white hover:bg-blue-50 border-2 border-blue-200 hover:border-blue-300"
+    },
+    {
+      title: "Vista-ERP",
+      icon: <User className="h-4 w-4" />,
+      description: "Vistaerp",
+      url: "https://vistaerponline.com/#login",
+      color: "bg-white hover:bg-blue-50 border-2 border-blue-200 hover:border-blue-300"
+    },
+    {
       title: "Events",
       icon: <Calendar className="h-4 w-4" />,
       description: "Company events & updates",
