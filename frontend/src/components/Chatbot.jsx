@@ -119,11 +119,23 @@ const Chatbot = () => {
         <Card className="fixed bottom-6 right-6 w-80 h-[450px] shadow-2xl z-50 flex flex-col bg-white border-2 border-blue-200 rounded-xl overflow-hidden">
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-3 flex justify-between items-center">
             <div className="flex items-center space-x-2">
-              <div className="bg-white rounded-full p-1">
+              <div className="rounded-full p-1" style={{
+                animation: 'headerGlow 2s ease-in-out infinite'
+              }}>
+                <style>{`
+                  @keyframes headerGlow {
+                    0%, 100% {
+                      filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
+                    }
+                    50% {
+                      filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+                    }
+                  }
+                `}</style>
                 <img 
                   src="/images/smartian-logo.png" 
                   alt="Smartian"
-                  className="h-8 w-8 object-contain"
+                  className="h-10 w-10 object-contain"
                 />
               </div>
               <div>
