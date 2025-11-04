@@ -62,84 +62,56 @@ const AppContent = () => {
               <div className="flex-1 w-full px-2 sm:px-4 lg:px-6 py-4">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">
                   {/* Navigation Tabs - Role-based access */}
-                  <div className={`flex justify-start mb-4 overflow-x-auto ${isAdmin() ? 'bg-gradient-to-r from-blue-50 to-blue-100 p-2 rounded-lg' : ''}`}>
-                  <TabsList className={`flex w-auto h-10 shadow-md border rounded-lg p-1 min-w-max ${
-                    isAdmin() 
-                      ? 'bg-white border-blue-300' 
-                      : 'bg-white border-blue-200'
-                  }`}>
-                      {/* Admin gets only 3 tabs */}
-                      {isAdmin() && (
-                        <>
-                          <TabsTrigger 
-                            value="banner-management" 
-                            className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white data-[state=inactive]:text-blue-700 data-[state=inactive]:hover:bg-blue-50"
-                          >
-                            Banner Management
-                          </TabsTrigger>
-                          
-                          <TabsTrigger 
-                            value="alerts-management" 
-                            className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white data-[state=inactive]:text-blue-700 data-[state=inactive]:hover:bg-blue-50"
-                          >
-                            Alerts Management
-                          </TabsTrigger>
-                          
-                          <TabsTrigger 
-                            value="employee-management" 
-                            className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap transition-all duration-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white data-[state=inactive]:text-blue-700 data-[state=inactive]:hover:bg-blue-50"
-                          >
-                            Employee Management
-                          </TabsTrigger>
-                        </>
-                      )}
+                  <div className="flex justify-start mb-4 overflow-x-auto">
+                    <TabsList className="flex w-auto h-10 shadow-md border rounded-lg p-1 min-w-max bg-white border-blue-200">
+                      <TabsTrigger 
+                        value="home" 
+                        className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
+                      >
+                        Home
+                      </TabsTrigger>
                       
-                      {/* User gets all original tabs */}
-                      {isUser() && (
-                        <>
-                          <TabsTrigger 
-                            value="home" 
-                            className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
-                          >
-                            Home
-                          </TabsTrigger>
-                          
-                          <TabsTrigger 
-                            value="directory" 
-                            className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
-                          >
-                            Employee Directory
-                          </TabsTrigger>
-                          
-                          <TabsTrigger 
-                            value="policies" 
-                            className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
-                          >
-                            Policies
-                          </TabsTrigger>
-                          
-                          <TabsTrigger 
-                            value="meeting-rooms" 
-                            className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
-                          >
-                            Meeting Rooms
-                          </TabsTrigger>
-                          
-                          <TabsTrigger 
-                            value="holiday-calendar" 
-                            className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
-                          >
-                            Holiday Calendar
-                          </TabsTrigger>
-                          
-                          <TabsTrigger 
-                            value="dashboard" 
-                            className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
-                          >
-                            Dashboard
-                          </TabsTrigger>
-                        </>
-                      )}
+                      <TabsTrigger 
+                        value="directory" 
+                        className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
+                      >
+                        Employee Directory
+                      </TabsTrigger>
+                      
+                      <TabsTrigger 
+                        value="policies" 
+                        className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
+                      >
+                        Policies
+                      </TabsTrigger>
+                      
+                      <TabsTrigger 
+                        value="meeting-rooms" 
+                        className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
+                      >
+                        Meeting Rooms
+                      </TabsTrigger>
+                      
+                      <TabsTrigger 
+                        value="holiday-calendar" 
+                        className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
+                      >
+                        Holiday Calendar
+                      </TabsTrigger>
+                      
+                      <TabsTrigger 
+                        value="dashboard" 
+                        className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
+                      >
+                        Dashboard
+                      </TabsTrigger>
+                      
+                      <TabsTrigger 
+                        value="admin-dashboard" 
+                        className="text-xs sm:text-sm font-medium rounded-md px-2 sm:px-4 py-2 whitespace-nowrap data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white data-[state=inactive]:text-blue-700"
+                      >
+                        Admin Dashboard
+                      </TabsTrigger>
                     </TabsList>
                   </div>
                   
