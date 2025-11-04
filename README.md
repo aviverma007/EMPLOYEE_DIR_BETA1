@@ -63,7 +63,7 @@ MONGO_URL=mongodb://localhost:27017/smartworld
 **Frontend (.env file location: `/app/frontend/.env`)**
 ```
 PORT=3000
-REACT_APP_BACKEND_URL=https://change-runner-1.preview.emergentagent.com/api
+REACT_APP_BACKEND_URL=https://edit-and-run.preview.emergentagent.com/api
 ```
 
 **Note**: Update `REACT_APP_BACKEND_URL` to your actual backend URL if different.
