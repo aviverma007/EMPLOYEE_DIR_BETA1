@@ -90,7 +90,7 @@ const Chatbot = () => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 h-20 w-20 rounded-full transition-all duration-200 z-50 p-0 border-0 bg-transparent cursor-pointer group"
+          className="fixed bottom-6 right-6 h-14 w-14 rounded-full transition-all duration-200 z-50 p-0 border-0 bg-transparent cursor-pointer group"
           style={{
             animation: 'breathe 3s ease-in-out infinite'
           }}
