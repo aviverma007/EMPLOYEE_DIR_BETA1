@@ -36,14 +36,20 @@ import EmployeeManagement from "./components/admin/EmployeeManagement";
 
 const AppContent = () => {
   const { isAuthenticated, initializeAuth, isAdmin, isUser } = useAuth();
-  const [activeTab, setActiveTab] = useState(isAdmin() ? "banner-management" : "home");
+  const [activeTab, setActiveTab] = useState("home");
+  const [showLoading, setShowLoading] = useState(true);
 
   useEffect(() => {
-    initializeAuth();
+    const timer = setTimeout(() => {
+      setShowLoading(false);
+      initializeAuth();
+    }, 3000);
+
+    return () => clearTimeout(timer);
   }, []);
 
-  if (!isAuthenticated) {
-    return <LoginForm />;
+  if (showLoading) {
+    return <LoadingScreen />;
   }
 
   return (
