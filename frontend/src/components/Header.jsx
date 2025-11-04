@@ -47,7 +47,7 @@ const Header = () => {
   };
 
   return (
-    <header className={`bg-white dark:bg-[#262626] shadow-lg border-b border-blue-200 dark:border-gray-600 ${isAdmin() ? 'border-b-2' : ''}`}>
+    <header className={`bg-white dark:bg-[#e8e8e8] shadow-lg border-b border-blue-200 dark:border-gray-400 ${isAdmin() ? 'border-b-2' : ''}`}>
       <div className={`w-full ${isAdmin() ? 'px-6 py-4' : 'px-4 py-2'}`}>
         <div className="flex justify-between items-center">
           {/* Left side - Logo and System Name */}
