@@ -101,6 +101,8 @@ const Header = () => {
 
             {/* Action Buttons */}
             <div className={`flex items-center ${isAdmin() ? 'space-x-2' : 'space-x-1'}`}>
+              {!isAdmin() && <AlertsNotification />}
+              
               {isAdmin() && (
                 <Button 
                   onClick={handleRefresh}
