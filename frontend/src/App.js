@@ -195,14 +195,14 @@ const AppContent = () => {
                     
                     <TabsContent value="admin-dashboard" className="mt-0 h-full">
                       <div className="space-y-4">
-                        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 rounded-lg">
+                        <div className="bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800 text-white p-4 rounded-lg">
                           <h2 className="text-2xl font-bold">Admin Dashboard</h2>
-                          <p className="text-blue-100">Manage application settings and content</p>
+                          <p className="text-blue-100 dark:text-blue-200">Manage application settings and content</p>
                         </div>
                         <Tabs defaultValue="banner" className="w-full">
-                          <TabsList className="grid w-full grid-cols-2">
-                            <TabsTrigger value="banner">Banner Management</TabsTrigger>
-                            <TabsTrigger value="employee">Employee Management</TabsTrigger>
+                          <TabsList className="grid w-full grid-cols-2 dark:bg-gray-800">
+                            <TabsTrigger value="banner" className="dark:data-[state=inactive]:text-gray-400">Banner Management</TabsTrigger>
+                            <TabsTrigger value="employee" className="dark:data-[state=inactive]:text-gray-400">Employee Management</TabsTrigger>
                           </TabsList>
                           <TabsContent value="banner">
                             <BannerManagement />
