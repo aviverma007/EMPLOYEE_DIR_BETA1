@@ -69,7 +69,7 @@ const Home = () => {
     { name: "ORCHARD STREET", url: "https://smartworlddevelopers.com/project/orchardstreet/" },
     { name: "ORCHARD", url: "https://smartworlddevelopers.com/project/orchard/" },
     { name: "GEMS", url: "https://smartworlddevelopers.com/project/gems/" }
-  ];
+  ]);
 
   // External link buttons - removed Contact and updated Company Portal
   const externalButtons = [
@@ -130,13 +130,6 @@ const Home = () => {
       url: "https://smartworld.my.salesforce.com/",
       color: "bg-white hover:bg-blue-50 border-2 border-blue-200 hover:border-blue-300"
     },
-    // {
-    //   title: "Whastsapp",
-    //   icon: <User className="h-4 w-4" />,
-    //   description: "Whatsapp Web",
-    //   url: "https://web.whatsapp.com/",
-    //   color: "bg-white hover:bg-blue-50 border-2 border-blue-200 hover:border-blue-300"
-    // },
     {
       title: "Gift App",
       icon: <User className="h-4 w-4" />,
@@ -199,12 +192,6 @@ const Home = () => {
       url: "https://smartworld.my.salesforce.com/",
       image: "/images/Salesforce-logo.jpg"
     },
-    // {
-    //   title: "Whastsapp",
-    //   description: "Whatsapp Web",
-    //   url: "https://web.whatsapp.com/",
-    //   image: "/images/WhatsApp-Logo.png"
-    // },
     {
       title: "MAFOI",
       description: "HR Suite",
@@ -568,7 +555,7 @@ const Home = () => {
       icon: <Users className="h-6 w-6" />,
       description: "",
       color: "bg-white border-2 border-blue-200",
-      textColor: "text-blue-900",
+      textColor: "text-white",
       interactive: true
     },
     {
@@ -583,7 +570,7 @@ const Home = () => {
       icon: <CheckSquare className="h-6 w-6" />,
       description: "Your personal task manager",
       color: "bg-white border-2 border-blue-200",
-      textColor: "text-blue-900",
+      textColor: "text-white",
       interactive: true
     },
     {
@@ -598,7 +585,7 @@ const Home = () => {
       icon: <Newspaper className="h-6 w-6" />,
       description: "Latest updates and announcements",
       color: "bg-white border-2 border-blue-200",
-      textColor: "text-blue-900"
+      textColor: "text-white"
     }
   ];
 
@@ -616,7 +603,7 @@ const Home = () => {
       icon: <Users className="h-6 w-6" />,
       description: "",
       color: "bg-white border-2 border-blue-200",
-      textColor: "text-blue-900",
+      textColor: "text-white",
       interactive: true
     },
     {
@@ -624,7 +611,7 @@ const Home = () => {
       icon: <CheckSquare className="h-6 w-6" />,
       description: "Your personal task manager",
       color: "bg-white border-2 border-blue-200",
-      textColor: "text-blue-900",
+      textColor: "text-white",
       interactive: true
     }
   ];
@@ -696,7 +683,7 @@ const Home = () => {
         {tiles.map((tile, index) => (
           <Card 
             key={index}
-            className={`${tile.color} ${tile.textColor} shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col ${
+            className={`${tile.color} shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col ${
               tile.title === "PICTURES" ? "overflow-hidden border-0 p-0" : "transform hover:scale-105 border-0"
             } ${
               !isAdmin() ? 'h-56' : 'h-full min-h-48'
@@ -771,8 +758,8 @@ const Home = () => {
                 <CardHeader className="pb-2 flex-shrink-0">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      {tile.icon}
-                      <CardTitle className="text-base font-bold">{tile.title}</CardTitle>
+                      <span className={tile.textColor}>{tile.icon}</span>
+                      <CardTitle className={`text-base font-bold ${tile.textColor}`}>{tile.title}</CardTitle>
                     </div>
                     {tile.title === "NEW JOINEES" && employees.length > 0 && (
                       <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
@@ -784,7 +771,7 @@ const Home = () => {
                 <CardContent className="pt-0 flex-1 flex flex-col">
                   {tile.interactive && tile.title === "NEW JOINEES" ? (
                     <div className="flex-1 flex flex-col">
-                      <p className="text-xs opacity-90 mb-3">
+                      <p className={`text-xs opacity-90 mb-3 ${tile.textColor}`}>
                         {employees.length > 0 
                           ? `${employees.length} employees joined recently`
                           : tile.description
@@ -869,21 +856,21 @@ const Home = () => {
                         <div className="flex-1 flex items-center justify-center text-blue-700 bg-blue-50 rounded-lg border-2 border-dashed border-blue-300">
                           <div className="text-center p-4">
                             <Users className="h-8 w-8 text-blue-400 mx-auto mb-2" />
-                            <p className="text-sm font-medium">Loading new joinees...</p>
-                            <p className="text-xs text-blue-500">From last month</p>
+                            <p className={`text-sm font-medium ${tile.textColor}`}>Loading new joinees...</p>
+                            <p className={`text-xs text-blue-500 ${tile.textColor}`}>From last month</p>
                           </div>
                         </div>
                       )}
                     </div>
               ) : tile.interactive && tile.title === "TO DO LIST" ? (
                 <div className="flex-1 flex flex-col">
-                  <p className="text-xs opacity-90 mb-2">{tile.description}</p>
+                  <p className={`text-xs opacity-90 mb-2 ${tile.textColor}`}>{tile.description}</p>
                   
                   {/* Todo Items Count and Scroll Indicator */}
                   {todoItems.length > 4 && (
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[10px] text-blue-600">{todoItems.length} tasks</span>
-                      <span className="text-[10px] text-blue-500">↕ scroll to see more</span>
+                      <span className={`text-[10px] ${tile.textColor}`}>{todoItems.length} tasks</span>
+                      <span className={`text-[10px] ${tile.textColor}`}>↕ scroll to see more</span>
                     </div>
                   )}
                   
@@ -960,7 +947,7 @@ const Home = () => {
                 </div>
               ) : (
                 <div className="flex-1 flex items-start">
-                  <p className="text-xs opacity-90">{tile.description}</p>
+                  <p className={`text-xs opacity-90 ${tile.textColor}`}>{tile.description}</p>
                 </div>
               )}
                 </CardContent>
@@ -973,7 +960,7 @@ const Home = () => {
       {/* External Links Section - Full Width Stretch for Admin Only */}
       {isAdmin() && (
         <div className="mt-4">
-          <h3 className="text-md font-medium text-blue-900 mb-3 text-center">Quick Links</h3>
+          <h3 className="text-md font-medium text-white mb-3 text-center">Quick Links</h3>
           <div className="w-full flex gap-3 justify-stretch">
             {externalButtons.map((button, index) => (
               <div key={index} className="flex-1 relative">
@@ -1042,11 +1029,11 @@ const Home = () => {
         </div>
       )}
 
-      {/* User Quick Links Section - Image-only design as requested (NO square boundaries) */}
+      {/* User Quick Links Section - Updated with white text and single line layout */}
       {!isAdmin() && (
         <div className="mt-4">
-          <h3 className="text-md font-medium text-blue-900 mb-3 text-center">Quick Access</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <h3 className="text-md font-medium text-white mb-3 text-center">Quick Access</h3>
+          <div className="flex flex-wrap gap-4 justify-center">
             {userQuickAccessButtons.map((button, index) => (
               <div key={index} className="relative flex flex-col items-center">
                 {button.isDropdown ? (
@@ -1062,10 +1049,10 @@ const Home = () => {
                           className="h-12 w-12 object-contain drop-shadow-lg hover:drop-shadow-xl transition-all duration-200"
                         />
                         <div className="flex items-center space-x-1">
-                          <span className="font-medium text-sm text-blue-700">{button.title}</span>
-                          <ChevronDown className={`h-3 w-3 text-blue-500 transition-transform ${showUserProjectsDropdown ? 'rotate-180' : ''}`} />
+                          <span className="font-medium text-sm text-white">{button.title}</span>
+                          <ChevronDown className={`h-3 w-3 text-white transition-transform ${showUserProjectsDropdown ? 'rotate-180' : ''}`} />
                         </div>
-                        <p className="text-xs text-blue-600">{button.description}</p>
+                        <p className="text-xs text-white">{button.description}</p>
                       </div>
                     </button>
                     
@@ -1107,8 +1094,8 @@ const Home = () => {
                         className="h-12 w-12 object-contain drop-shadow-lg hover:drop-shadow-xl transition-all duration-200"
                       />
                       <div>
-                        <h4 className="font-medium text-sm text-blue-700">{button.title}</h4>
-                        <p className="text-xs text-blue-600">{button.description}</p>
+                        <h4 className="font-medium text-sm text-white">{button.title}</h4>
+                        <p className="text-xs text-white">{button.description}</p>
                       </div>
                     </div>
                   </a>

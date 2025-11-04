@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, Send, X, Minimize2 } from 'lucide-react';
+import { MessageCircle, Send, X } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card } from './ui/card';
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001/api';
+const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -49,7 +49,7 @@ const Chatbot = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/chatbot/message`, {
+      const response = await axios.post(`${API_BASE_URL}/api/chatbot/message`, {
         message: inputMessage,
         session_id: sessionId
       });
@@ -98,14 +98,14 @@ const Chatbot = () => {
       )}
 
       {isOpen && (
-        <Card className="fixed bottom-6 right-6 w-96 h-[600px] shadow-2xl z-50 flex flex-col bg-white border-2 border-blue-200 rounded-xl overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 flex justify-between items-center">
-            <div className="flex items-center space-x-3">
-              <div className="bg-white rounded-full p-2">
-                <MessageCircle className="h-5 w-5 text-blue-600" />
+        <Card className="fixed bottom-6 right-6 w-80 h-[450px] shadow-2xl z-50 flex flex-col bg-white border-2 border-blue-200 rounded-xl overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-3 flex justify-between items-center">
+            <div className="flex items-center space-x-2">
+              <div className="bg-white rounded-full p-1.5">
+                <MessageCircle className="h-4 w-4 text-blue-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg">SmartDesk Assistant</h3>
+                <h3 className="font-semibold text-sm">SmartDesk Assistant</h3>
                 <p className="text-xs text-blue-100">Always here to help</p>
               </div>
             </div>
@@ -113,20 +113,20 @@ const Chatbot = () => {
               onClick={() => setIsOpen(false)}
               variant="ghost"
               size="icon"
-              className="text-white hover:bg-blue-500 rounded-full"
+              className="text-white hover:bg-blue-500 rounded-full h-8 w-8"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4" />
             </Button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-blue-50">
+          <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-blue-50">
             {messages.map((message, index) => (
               <div
                 key={index}
                 className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-2 ${
+                  className={`max-w-[80%] rounded-2xl px-3 py-2 ${
                     message.type === 'user'
                       ? 'bg-blue-600 text-white rounded-br-none'
                       : 'bg-white text-gray-800 shadow-sm rounded-bl-none border border-blue-100'
@@ -143,7 +143,7 @@ const Chatbot = () => {
             ))}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-white text-gray-800 shadow-sm rounded-2xl rounded-bl-none px-4 py-3 border border-blue-100">
+                <div className="bg-white text-gray-800 shadow-sm rounded-2xl rounded-bl-none px-3 py-2 border border-blue-100">
                   <div className="flex space-x-2">
                     <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
                     <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
@@ -155,20 +155,20 @@ const Chatbot = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="p-4 bg-white border-t border-blue-200">
+          <div className="p-3 bg-white border-t border-blue-200">
             <div className="flex space-x-2">
               <Input
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Type your message..."
-                className="flex-1 border-blue-200 focus:border-blue-400 focus:ring-blue-400"
+                className="flex-1 border-blue-200 focus:border-blue-400 focus:ring-blue-400 text-sm"
                 disabled={isLoading}
               />
               <Button
                 onClick={handleSendMessage}
                 disabled={isLoading || !inputMessage.trim()}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-blue-600 hover:bg-blue-700 text-white h-9 w-9"
                 size="icon"
               >
                 <Send className="h-4 w-4" />

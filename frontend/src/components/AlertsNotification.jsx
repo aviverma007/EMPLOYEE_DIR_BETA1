@@ -5,7 +5,7 @@ import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001/api';
+const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
 const AlertsNotification = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,7 +20,7 @@ const AlertsNotification = () => {
 
   const fetchAlerts = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/alerts?target_audience=user`);
+      const response = await axios.get(`${API_BASE_URL}/api/alerts?target_audience=user`);
       const activeAlerts = response.data.filter(alert => {
         if (!alert.expires_at) return true;
         return new Date(alert.expires_at) > new Date();
@@ -124,9 +124,9 @@ const AlertsNotification = () => {
           size="icon"
           className="relative hover:bg-blue-50 rounded-full"
         >
-          <Bell className="h-7 w-7 text-blue-600" />
+          <Bell className="h-6 w-6 text-blue-600" />
           {unreadCount > 0 && (
-            <Badge className="absolute -top-1 -right-1 h-6 w-6 flex items-center justify-center p-0 bg-red-500 text-white text-xs rounded-full">
+            <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-white text-xs rounded-full">
               {unreadCount > 9 ? '9+' : unreadCount}
             </Badge>
           )}
@@ -138,11 +138,11 @@ const AlertsNotification = () => {
               className="fixed inset-0 z-40" 
               onClick={() => setIsOpen(false)}
             />
-            <Card className="absolute right-0 top-12 w-96 max-h-[600px] shadow-2xl z-50 bg-white border-2 border-blue-200 rounded-xl overflow-hidden">
-              <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 flex justify-between items-center">
+            <Card className="absolute right-0 top-12 w-80 max-h-[450px] shadow-2xl z-50 bg-white border-2 border-blue-200 rounded-xl overflow-hidden">
+              <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-3 flex justify-between items-center">
                 <div className="flex items-center space-x-2">
-                  <Bell className="h-5 w-5" />
-                  <h3 className="font-semibold text-lg">Notifications</h3>
+                  <Bell className="h-4 w-4" />
+                  <h3 className="font-semibold text-sm">Notifications</h3>
                   {unreadCount > 0 && (
                     <Badge className="bg-white text-blue-600 text-xs">
                       {unreadCount}
@@ -153,13 +153,13 @@ const AlertsNotification = () => {
                   onClick={() => setIsOpen(false)}
                   variant="ghost"
                   size="icon"
-                  className="text-white hover:bg-blue-500 rounded-full"
+                  className="text-white hover:bg-blue-500 rounded-full h-7 w-7"
                 >
                   <X className="h-4 w-4" />
                 </Button>
               </div>
 
-              <div className="overflow-y-auto max-h-[500px]">
+              <div className="overflow-y-auto max-h-[380px]">
                 {alerts.length === 0 ? (
                   <div className="p-8 text-center text-gray-500">
                     <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300" />
@@ -168,17 +168,17 @@ const AlertsNotification = () => {
                 ) : (
                   <div className="divide-y divide-blue-100">
                     {alerts.map((alert) => (
-                      <div key={alert.id} className="p-4 hover:bg-blue-50 transition-colors">
-                        <div className="flex items-start space-x-3">
+                      <div key={alert.id} className="p-3 hover:bg-blue-50 transition-colors">
+                        <div className="flex items-start space-x-2">
                           <div className="flex-shrink-0 mt-1">
-                            <AlertCircle className={`h-5 w-5 ${
+                            <AlertCircle className={`h-4 w-4 ${
                               alert.priority === 'urgent' ? 'text-red-500' :
                               alert.priority === 'high' ? 'text-orange-500' :
                               'text-blue-500'
                             }`} />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center justify-between mb-1">
                               <Badge className={getPriorityColor(alert.priority)} variant="outline">
                                 {alert.priority?.toUpperCase() || 'NORMAL'}
                               </Badge>
@@ -189,7 +189,7 @@ const AlertsNotification = () => {
                             <h4 className="text-sm font-semibold text-gray-900 mb-1">
                               {alert.title}
                             </h4>
-                            <p className="text-sm text-gray-600 mb-2">
+                            <p className="text-sm text-gray-600 mb-1">
                               {alert.message}
                             </p>
                             <p className="text-xs text-gray-400">
