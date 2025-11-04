@@ -195,7 +195,7 @@ const AppContent = () => {
                     
                     <TabsContent value="admin-dashboard" className="mt-0 h-full">
                       <div className="space-y-4">
-                        <div className="bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800 text-white p-4 rounded-lg">
+                        <div className="bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-500 dark:to-blue-600 text-white p-4 rounded-lg">
                           <h2 className="text-2xl font-bold">Admin Dashboard</h2>
                           <p className="text-blue-100 dark:text-blue-200">Manage application settings and content</p>
                         </div>
