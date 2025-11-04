@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { RefreshCw, LogOut, Shield, User } from "lucide-react";
+import { RefreshCw, Shield, User } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { useAuth } from "../context/AuthContext";
@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import AlertsNotification from "./AlertsNotification";
 
 const Header = () => {
-  const { user, logout, isAdmin } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleRefresh = async () => {
@@ -44,11 +44,6 @@ const Header = () => {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    toast.success("Logged out successfully");
-  };
-
   return (
     <header className={`bg-white shadow-lg border-b border-blue-200 ${isAdmin() ? 'border-b-2' : ''}`}>
       <div className={`w-full ${isAdmin() ? 'px-6 py-4' : 'px-4 py-2'}`}>
@@ -72,7 +67,7 @@ const Header = () => {
             </div>
           </div>
           
-          {/* Right side - Beta Badge, Profile, Refresh, Logout */}
+          {/* Right side - Beta Badge, Profile, Refresh */}
           <div className={`flex items-center ${isAdmin() ? 'space-x-3' : 'space-x-2'}`}>
             {/* Beta Version Badge */}
             <Badge 
@@ -114,16 +109,6 @@ const Header = () => {
                   <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
                 </Button>
               )}
-              
-              <Button 
-                onClick={handleLogout}
-                size="sm"
-                variant="outline"
-                className="flex items-center space-x-1 hover:bg-red-50 border-red-200 text-red-600"
-              >
-                <LogOut className="h-4 w-4" />
-                <span>Logout</span>
-              </Button>
             </div>
           </div>
         </div>

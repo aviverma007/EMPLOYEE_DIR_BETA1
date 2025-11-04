@@ -25,10 +25,69 @@ const AlertsNotification = () => {
         if (!alert.expires_at) return true;
         return new Date(alert.expires_at) > new Date();
       });
-      setAlerts(activeAlerts);
-      setUnreadCount(activeAlerts.length);
+      
+      // Add some default notifications if no alerts from backend
+      const defaultNotifications = [
+        {
+          id: 'default-1',
+          title: '📢 Welcome to SmartDesk',
+          message: 'Explore all the features available in your employee portal.',
+          priority: 'medium',
+          type: 'announcement',
+          created_at: new Date().toISOString()
+        },
+        {
+          id: 'default-2',
+          title: '🎉 System Update',
+          message: 'New features have been added to the meeting room booking system.',
+          priority: 'low',
+          type: 'system',
+          created_at: new Date(Date.now() - 3600000).toISOString()
+        },
+        {
+          id: 'default-3',
+          title: '📅 Upcoming Holiday',
+          message: 'Check the holiday calendar for upcoming holidays this month.',
+          priority: 'medium',
+          type: 'announcement',
+          created_at: new Date(Date.now() - 7200000).toISOString()
+        }
+      ];
+      
+      const allAlerts = activeAlerts.length > 0 ? activeAlerts : defaultNotifications;
+      setAlerts(allAlerts);
+      setUnreadCount(allAlerts.length);
     } catch (error) {
       console.error('Error fetching alerts:', error);
+      // Show default notifications on error
+      const defaultNotifications = [
+        {
+          id: 'default-1',
+          title: '📢 Welcome to SmartDesk',
+          message: 'Explore all the features available in your employee portal.',
+          priority: 'medium',
+          type: 'announcement',
+          created_at: new Date().toISOString()
+        },
+        {
+          id: 'default-2',
+          title: '🎉 System Update',
+          message: 'New features have been added to the meeting room booking system.',
+          priority: 'low',
+          type: 'system',
+          created_at: new Date(Date.now() - 3600000).toISOString()
+        },
+        {
+          id: 'default-3',
+          title: '📅 Upcoming Holiday',
+          message: 'Check the holiday calendar for upcoming holidays this month.',
+          priority: 'medium',
+          type: 'announcement',
+          created_at: new Date(Date.now() - 7200000).toISOString()
+        }
+      ];
+      setAlerts(defaultNotifications);
+      setUnreadCount(defaultNotifications.length);
     }
   };
 
@@ -65,9 +124,9 @@ const AlertsNotification = () => {
           size="icon"
           className="relative hover:bg-blue-50 rounded-full"
         >
-          <Bell className="h-5 w-5 text-blue-600" />
+          <Bell className="h-7 w-7 text-blue-600" />
           {unreadCount > 0 && (
-            <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-white text-xs rounded-full">
+            <Badge className="absolute -top-1 -right-1 h-6 w-6 flex items-center justify-center p-0 bg-red-500 text-white text-xs rounded-full">
               {unreadCount > 9 ? '9+' : unreadCount}
             </Badge>
           )}
