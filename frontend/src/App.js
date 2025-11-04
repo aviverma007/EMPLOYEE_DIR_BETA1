@@ -8,12 +8,22 @@ import {
   DropdownMenuContent, 
   DropdownMenuItem 
 } from "./components/ui/dropdown-menu";
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "./components/ui/dialog";
+import { Input } from "./components/ui/input";
+import { Label } from "./components/ui/label";
 import { AuthProvider, useAuth } from "./context/AuthContext.jsx";
 import LoadingScreen from "./components/LoadingScreen";
 import EmployeeDirectory from "./components/EmployeeDirectory";
 import Header from "./components/Header";
 import { Toaster } from "./components/ui/sonner";
-import { ChevronDown } from "lucide-react";
+import { toast } from "sonner";
+import { ChevronDown, Lock, Eye, EyeOff } from "lucide-react";
 import { Button } from "./components/ui/button";
 import HierarchyBuilder from "./components/HierarchyBuilder";
 import Chatbot from "./components/Chatbot";
