@@ -10,6 +10,7 @@ import AlertsNotification from "./AlertsNotification";
 
 const Header = () => {
   const { user, isAdmin } = useAuth();
+  const { isDarkMode, toggleTheme } = useTheme();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleRefresh = async () => {
