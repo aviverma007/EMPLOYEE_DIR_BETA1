@@ -106,7 +106,7 @@ const AppContent = () => {
   }
 
   return (
-    <div className="App min-h-screen bg-blue-50 dark:bg-gray-900">
+    <div className="App min-h-screen bg-blue-50 dark:bg-black">
       <BrowserRouter>
         <Routes>
           <Route path="/" element={
