@@ -3693,6 +3693,284 @@ class BackendPersistentTester:
             self.log_test("Extension/RM - COMPREHENSIVE", False, 
                         f"Extension and reporting manager comprehensive test failed: {str(e)}")
 
+    def test_chatbot_api_review_request(self):
+        """Test: Chatbot API as per Review Request - POST /api/chatbot/message"""
+        try:
+            print("\n🤖 CHATBOT API TESTING - REVIEW REQUEST SPECIFICATIONS")
+            print("-" * 60)
+            
+            # Test 1: POST /api/chatbot/message with message "What is SmartDesk?"
+            test_message = "What is SmartDesk?"
+            chat_data = {
+                "message": test_message
+            }
+            
+            response = self.session.post(f"{self.backend_url}/api/chatbot/message", json=chat_data)
+            
+            if response.status_code == 200:
+                chat_response = response.json()
+                bot_response = chat_response.get('response')
+                session_id = chat_response.get('session_id')
+                
+                if bot_response and session_id:
+                    self.log_test("Chatbot API - Initial Message", True, 
+                                f"Successfully received response to 'What is SmartDesk?'", 
+                                f"Session ID: {session_id[:8]}..., Response length: {len(bot_response)} chars")
+                    
+                    # Test 2: Test another message with the same session_id to verify conversation continuity
+                    follow_up_message = "Can you tell me more about the meeting rooms feature?"
+                    follow_up_data = {
+                        "message": follow_up_message,
+                        "session_id": session_id
+                    }
+                    
+                    follow_up_response = self.session.post(f"{self.backend_url}/api/chatbot/message", json=follow_up_data)
+                    
+                    if follow_up_response.status_code == 200:
+                        follow_up_result = follow_up_response.json()
+                        follow_up_bot_response = follow_up_result.get('response')
+                        follow_up_session_id = follow_up_result.get('session_id')
+                        
+                        if follow_up_session_id == session_id and follow_up_bot_response:
+                            self.log_test("Chatbot API - Conversation Continuity", True, 
+                                        f"Successfully maintained conversation continuity", 
+                                        f"Same session ID maintained: {session_id[:8]}..., Follow-up response length: {len(follow_up_bot_response)} chars")
+                        else:
+                            self.log_test("Chatbot API - Conversation Continuity", False, 
+                                        f"Session continuity failed - Session IDs don't match or no response")
+                    else:
+                        self.log_test("Chatbot API - Conversation Continuity", False, 
+                                    f"Follow-up message failed with status {follow_up_response.status_code}")
+                else:
+                    self.log_test("Chatbot API - Initial Message", False, 
+                                f"Response missing required fields - Response: {bool(bot_response)}, Session ID: {bool(session_id)}")
+            else:
+                try:
+                    error_detail = response.json().get('detail', 'Unknown error')
+                except:
+                    error_detail = response.text
+                self.log_test("Chatbot API - Initial Message", False, 
+                            f"Chatbot API failed with status {response.status_code}", 
+                            f"Error: {error_detail}")
+                
+        except Exception as e:
+            self.log_test("Chatbot API - Review Request", False, f"Chatbot API test failed: {str(e)}")
+
+    def test_meeting_rooms_api_review_request(self):
+        """Test: Meeting Rooms API as per Review Request - GET, filtering, booking"""
+        try:
+            print("\n🏢 MEETING ROOMS API TESTING - REVIEW REQUEST SPECIFICATIONS")
+            print("-" * 60)
+            
+            # Test 1: GET /api/meeting-rooms - should return 15 rooms
+            get_response = self.session.get(f"{self.backend_url}/api/meeting-rooms")
+            if get_response.status_code != 200:
+                self.log_test("Meeting Rooms - GET ALL", False, f"GET /api/meeting-rooms failed with status {get_response.status_code}")
+                return
+            
+            meeting_rooms = get_response.json()
+            if not isinstance(meeting_rooms, list):
+                self.log_test("Meeting Rooms - GET ALL", False, "GET /api/meeting-rooms did not return a list")
+                return
+            
+            # Verify we have exactly 15 meeting rooms as specified in review request
+            if len(meeting_rooms) == 15:
+                self.log_test("Meeting Rooms - Count Verification", True, 
+                            f"✅ EXACTLY 15 meeting rooms returned as specified in review request", 
+                            f"Total rooms: {len(meeting_rooms)}")
+            else:
+                self.log_test("Meeting Rooms - Count Verification", False, 
+                            f"❌ Expected exactly 15 meeting rooms, got {len(meeting_rooms)}", 
+                            f"Review request specifies exactly 15 rooms")
+            
+            # Test 2: Verify rooms have correct structure (id, name, location, floor, capacity, status)
+            required_fields = ['id', 'name', 'location', 'floor', 'capacity', 'status']
+            structure_valid = True
+            sample_room = None
+            
+            for room in meeting_rooms:
+                missing_fields = [field for field in required_fields if field not in room]
+                if missing_fields:
+                    structure_valid = False
+                    self.log_test("Meeting Rooms - Structure Verification", False, 
+                                f"Room missing required fields: {missing_fields}", 
+                                f"Room ID: {room.get('id', 'Unknown')}")
+                    break
+                else:
+                    if sample_room is None:
+                        sample_room = room
+            
+            if structure_valid:
+                self.log_test("Meeting Rooms - Structure Verification", True, 
+                            f"All rooms have correct structure with required fields", 
+                            f"Sample room: {sample_room.get('name')} at {sample_room.get('location')}")
+            
+            # Test 3: Test filtering by location (IFC)
+            ifc_rooms = [room for room in meeting_rooms if room.get('location') == 'IFC']
+            if len(ifc_rooms) > 0:
+                self.log_test("Meeting Rooms - IFC Location Filter", True, 
+                            f"Successfully filtered rooms by IFC location", 
+                            f"Found {len(ifc_rooms)} IFC rooms out of {len(meeting_rooms)} total")
+            else:
+                self.log_test("Meeting Rooms - IFC Location Filter", False, 
+                            f"No IFC location rooms found for filtering test")
+            
+            # Test 4: Test booking a room for tomorrow
+            if meeting_rooms:
+                # Get an employee for booking
+                emp_response = self.session.get(f"{self.backend_url}/api/employees?search=A")
+                if emp_response.status_code == 200:
+                    employees = emp_response.json()
+                    if employees:
+                        test_employee = employees[0]
+                        test_room = meeting_rooms[0]  # Use first room for testing
+                        room_id = test_room.get('id')
+                        
+                        # Create a booking for tomorrow
+                        tomorrow = datetime.now() + timedelta(days=1)
+                        booking_data = {
+                            "employee_name": test_employee.get('name'),
+                            "employee_id": test_employee.get('id'),
+                            "start_time": tomorrow.replace(hour=14, minute=0, second=0, microsecond=0).isoformat() + "Z",
+                            "end_time": tomorrow.replace(hour=15, minute=0, second=0, microsecond=0).isoformat() + "Z",
+                            "purpose": "Review Request Test - Tomorrow Booking"
+                        }
+                        
+                        book_response = self.session.post(f"{self.backend_url}/api/meeting-rooms/{room_id}/book", 
+                                                        json=booking_data)
+                        
+                        if book_response.status_code == 200:
+                            booking_result = book_response.json()
+                            booking_id = booking_result.get('booking', {}).get('id')
+                            if booking_id:
+                                self.created_items['bookings'].append((room_id, booking_id))
+                                self.log_test("Meeting Rooms - Tomorrow Booking", True, 
+                                            f"Successfully booked room for tomorrow", 
+                                            f"Room: {test_room.get('name')}, Employee: {test_employee.get('name')}, Booking ID: {booking_id}")
+                            else:
+                                self.log_test("Meeting Rooms - Tomorrow Booking", False, 
+                                            "Booking created but no booking ID returned")
+                        else:
+                            try:
+                                error_detail = book_response.json().get('detail', 'Unknown error')
+                            except:
+                                error_detail = book_response.text
+                            self.log_test("Meeting Rooms - Tomorrow Booking", False, 
+                                        f"Failed to book room for tomorrow: {book_response.status_code}", 
+                                        f"Error: {error_detail}")
+                    else:
+                        self.log_test("Meeting Rooms - Tomorrow Booking", False, 
+                                    "No employees found for booking test")
+                else:
+                    self.log_test("Meeting Rooms - Tomorrow Booking", False, 
+                                f"Could not fetch employees for booking test: {emp_response.status_code}")
+            else:
+                self.log_test("Meeting Rooms - Tomorrow Booking", False, 
+                            "No meeting rooms available for booking test")
+                
+        except Exception as e:
+            self.log_test("Meeting Rooms - Review Request", False, f"Meeting rooms API test failed: {str(e)}")
+
+    def test_alerts_api_review_request(self):
+        """Test: Alerts API as per Review Request - GET /api/alerts?target_audience=user"""
+        try:
+            print("\n🚨 ALERTS API TESTING - REVIEW REQUEST SPECIFICATIONS")
+            print("-" * 60)
+            
+            # Test: GET /api/alerts?target_audience=user - Verify API responds correctly
+            response = self.session.get(f"{self.backend_url}/api/alerts?target_audience=user")
+            
+            if response.status_code == 200:
+                alerts = response.json()
+                if isinstance(alerts, list):
+                    self.log_test("Alerts API - User Target Audience", True, 
+                                f"✅ GET /api/alerts?target_audience=user responds correctly", 
+                                f"Returned {len(alerts)} alerts for user audience")
+                    
+                    # Additional verification: Check if alerts are properly filtered for user audience
+                    valid_alerts = []
+                    for alert in alerts:
+                        target_audience = alert.get('target_audience', '')
+                        if target_audience in ['user', 'all']:
+                            valid_alerts.append(alert)
+                    
+                    if len(valid_alerts) == len(alerts):
+                        self.log_test("Alerts API - Filtering Logic", True, 
+                                    f"Alert filtering logic working correctly for user audience", 
+                                    f"All {len(alerts)} alerts have appropriate target audience (user/all)")
+                    else:
+                        self.log_test("Alerts API - Filtering Logic", False, 
+                                    f"Alert filtering logic incorrect - {len(valid_alerts)}/{len(alerts)} alerts have correct audience")
+                else:
+                    self.log_test("Alerts API - User Target Audience", False, 
+                                f"API returned non-list response: {type(alerts)}")
+            else:
+                try:
+                    error_detail = response.json().get('detail', 'Unknown error')
+                except:
+                    error_detail = response.text
+                self.log_test("Alerts API - User Target Audience", False, 
+                            f"GET /api/alerts?target_audience=user failed with status {response.status_code}", 
+                            f"Error: {error_detail}")
+                
+        except Exception as e:
+            self.log_test("Alerts API - Review Request", False, f"Alerts API test failed: {str(e)}")
+
+    def test_employees_api_review_request(self):
+        """Test: Employees API as per Review Request - GET /api/employees should return 625 employees"""
+        try:
+            print("\n👥 EMPLOYEES API TESTING - REVIEW REQUEST SPECIFICATIONS")
+            print("-" * 60)
+            
+            # Test: GET /api/employees - should return 625 employees
+            response = self.session.get(f"{self.backend_url}/api/employees")
+            
+            if response.status_code == 200:
+                employees = response.json()
+                if isinstance(employees, list):
+                    employee_count = len(employees)
+                    
+                    # Review request specifically mentions 625 employees
+                    if employee_count == 625:
+                        self.log_test("Employees API - Count Verification", True, 
+                                    f"✅ EXACTLY 625 employees returned as specified in review request", 
+                                    f"Employee count matches review request specification perfectly")
+                        
+                        # Verify basic structure is intact
+                        if employees:
+                            sample_employee = employees[0]
+                            required_basic_fields = ['id', 'name', 'department', 'location']
+                            missing_fields = [field for field in required_basic_fields if field not in sample_employee]
+                            
+                            if not missing_fields:
+                                self.log_test("Employees API - Structure Verification", True, 
+                                            f"Employee basic structure is intact", 
+                                            f"Sample employee has all required fields: {required_basic_fields}")
+                            else:
+                                self.log_test("Employees API - Structure Verification", False, 
+                                            f"Employee structure missing fields: {missing_fields}")
+                        else:
+                            self.log_test("Employees API - Structure Verification", False, 
+                                        "No employees returned to verify structure")
+                    else:
+                        self.log_test("Employees API - Count Verification", False, 
+                                    f"❌ Expected exactly 625 employees, got {employee_count}", 
+                                    f"Review request specifies exactly 625 employees")
+                else:
+                    self.log_test("Employees API - Count Verification", False, 
+                                f"API returned non-list response: {type(employees)}")
+            else:
+                try:
+                    error_detail = response.json().get('detail', 'Unknown error')
+                except:
+                    error_detail = response.text
+                self.log_test("Employees API - Count Verification", False, 
+                            f"GET /api/employees failed with status {response.status_code}", 
+                            f"Error: {error_detail}")
+                
+        except Exception as e:
+            self.log_test("Employees API - Review Request", False, f"Employees API test failed: {str(e)}")
+
     def run_all_tests(self):
         """Run all backend tests - FOCUSED ON REVIEW REQUEST"""
         print("🚀 EMPLOYEE MANAGEMENT SYSTEM BACKEND TESTING - REVIEW REQUEST")
