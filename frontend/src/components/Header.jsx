@@ -138,7 +138,7 @@ const Header = () => {
                     `}
                   >
                     {isDarkMode ? (
-                      <Moon className="h-3 w-3 text-gray-600" />
+                      <Moon className="h-3 w-3 text-gray-700" />
                     ) : (
                       <Sun className="h-3 w-3 text-yellow-500" />
                     )}
