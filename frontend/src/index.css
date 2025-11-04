@@ -218,3 +218,106 @@ code {
     @apply bg-background text-foreground;
     }
 }
+
+/* Enhanced Dark Mode Styles */
+.dark {
+  /* Main background - pure black */
+  background-color: #000000;
+}
+
+.dark body {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+/* Cards and Containers - grey with better contrast */
+.dark .bg-white {
+  background-color: #262626 !important;
+}
+
+.dark .bg-gray-50 {
+  background-color: #1a1a1a !important;
+}
+
+.dark .bg-gray-100 {
+  background-color: #262626 !important;
+}
+
+.dark .bg-blue-50 {
+  background-color: #1a1a1a !important;
+}
+
+/* Text colors */
+.dark .text-gray-900 {
+  color: #ffffff !important;
+}
+
+.dark .text-gray-800 {
+  color: #e5e5e5 !important;
+}
+
+.dark .text-gray-700 {
+  color: #d4d4d4 !important;
+}
+
+.dark .text-gray-600 {
+  color: #a3a3a3 !important;
+}
+
+/* Borders */
+.dark .border-gray-200 {
+  border-color: #404040 !important;
+}
+
+.dark .border-gray-300 {
+  border-color: #525252 !important;
+}
+
+/* Input fields and forms */
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: #262626 !important;
+  color: #ffffff !important;
+  border-color: #404040 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #737373 !important;
+}
+
+/* Hover states */
+.dark .hover\:bg-gray-50:hover {
+  background-color: #1a1a1a !important;
+}
+
+.dark .hover\:bg-blue-50:hover {
+  background-color: #1a1a1a !important;
+}
+
+/* Modals and dialogs */
+.dark [role="dialog"],
+.dark [role="alertdialog"] {
+  background-color: #262626 !important;
+  border-color: #404040 !important;
+}
+
+/* Scrollbar styling for dark mode */
+.dark ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #404040;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #525252;
+}
