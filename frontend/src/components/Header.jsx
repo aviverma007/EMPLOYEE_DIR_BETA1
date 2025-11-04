@@ -62,7 +62,7 @@ const Header = () => {
                 className={`object-contain rounded-lg ${isAdmin() ? 'h-24 w-24 shadow-md' : 'h-12 w-12 shadow-sm'}`}
               />
               <div>
-                <p className={`font-semibold text-blue-600 ${isAdmin() ? 'text-2xl' : 'text-lg'}`}>
+                <p className={`font-semibold text-blue-600 dark:text-blue-400 ${isAdmin() ? 'text-2xl' : 'text-lg'}`}>
                   SMARTDESK
                 </p>
               </div>
