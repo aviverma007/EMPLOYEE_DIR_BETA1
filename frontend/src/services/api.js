@@ -407,11 +407,25 @@ export const helpAPI = {
   }
 };
 
-// Meeting Rooms API endpoints - Frontend-only using dataService
+// Meeting Rooms API endpoints - Using Backend API
 export const meetingRoomAPI = {
   getAll: async (filters = {}) => {
     try {
-      return await dataService.getMeetingRooms(filters);
+      const params = new URLSearchParams();
+      if (filters.location) params.append('location', filters.location);
+      if (filters.floor) params.append('floor', filters.floor);
+      if (filters.status) params.append('status', filters.status);
+      
+      const url = `${BACKEND_URL}/api/meeting-rooms${params.toString() ? '?' + params.toString() : ''}`;
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log(`Loaded ${data.length} meeting rooms from backend API`);
+      return data;
     } catch (error) {
       console.error('Error fetching meeting rooms:', error);
       throw error;
@@ -420,7 +434,7 @@ export const meetingRoomAPI = {
 
   getLocations: async () => {
     try {
-      const rooms = await dataService.getMeetingRooms();
+      const rooms = await meetingRoomAPI.getAll();
       const locations = [...new Set(rooms.map(room => room.location))];
       return locations;
     } catch (error) {
@@ -431,7 +445,7 @@ export const meetingRoomAPI = {
 
   getFloors: async () => {
     try {
-      const rooms = await dataService.getMeetingRooms();
+      const rooms = await meetingRoomAPI.getAll();
       const floors = [...new Set(rooms.map(room => room.floor))];
       return floors;
     } catch (error) {
@@ -442,7 +456,18 @@ export const meetingRoomAPI = {
 
   book: async (roomId, bookingData) => {
     try {
-      return await dataService.bookMeetingRoom(roomId, bookingData);
+      const response = await fetch(`${BACKEND_URL}/api/meeting-rooms/${roomId}/book`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingData)
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || `HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
     } catch (error) {
       console.error('Error booking meeting room:', error);
       throw error;
@@ -451,7 +476,17 @@ export const meetingRoomAPI = {
 
   cancelBooking: async (roomId, bookingId = null) => {
     try {
-      return await dataService.cancelMeetingRoomBooking(roomId, bookingId);
+      const url = bookingId 
+        ? `${BACKEND_URL}/api/meeting-rooms/${roomId}/booking/${bookingId}`
+        : `${BACKEND_URL}/api/meeting-rooms/${roomId}/booking`;
+      
+      const response = await fetch(url, { method: 'DELETE' });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
     } catch (error) {
       console.error('Error cancelling booking:', error);
       throw error;
@@ -460,7 +495,15 @@ export const meetingRoomAPI = {
 
   cancelSpecificBooking: async (roomId, bookingId) => {
     try {
-      return await dataService.cancelMeetingRoomBooking(roomId, bookingId);
+      const response = await fetch(`${BACKEND_URL}/api/meeting-rooms/${roomId}/booking/${bookingId}`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
     } catch (error) {
       console.error('Error cancelling specific booking:', error);
       throw error;
@@ -469,7 +512,15 @@ export const meetingRoomAPI = {
 
   clearAllBookings: async () => {
     try {
-      return await dataService.clearAllMeetingRoomBookings();
+      const response = await fetch(`${BACKEND_URL}/api/meeting-rooms/clear-all-bookings`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
     } catch (error) {
       console.error('Error clearing all bookings:', error);
       throw error;
