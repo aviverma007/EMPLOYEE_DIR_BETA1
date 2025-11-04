@@ -82,9 +82,9 @@ const Header = () => {
             {/* User Info */}
             <div className={`flex items-center ${isAdmin() ? 'space-x-3' : 'space-x-2'}`}>
               <div className="text-right">
-                <p className="text-sm font-medium text-blue-900">{user?.name}</p>
+                <p className="text-sm font-medium text-blue-900 dark:text-gray-200">{user?.name}</p>
                 <div className={`flex items-center justify-end ${isAdmin() ? 'space-x-2' : 'space-x-1'}`}>
-                  <p className="text-xs text-blue-600">ID: {user?.employeeId}</p>
+                  <p className="text-xs text-blue-600 dark:text-blue-400">ID: {user?.employeeId}</p>
                   <Badge 
                     variant={isAdmin() ? "default" : "secondary"} 
                     className={`text-xs ${isAdmin() ? "bg-blue-600" : "bg-blue-100 text-blue-700"}`}
