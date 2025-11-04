@@ -1969,6 +1969,89 @@ uploads_path = os.path.join(os.path.dirname(__file__), "uploads")
 os.makedirs(uploads_path, exist_ok=True)
 app.mount("/api/uploads", StaticFiles(directory=uploads_path), name="uploads")
 
+# ============================================================================
+# CHATBOT API - ChatGPT Integration
+# ============================================================================
+
+class ChatMessage(BaseModel):
+    message: str
+    session_id: Optional[str] = None
+
+class ChatResponse(BaseModel):
+    response: str
+    session_id: str
+
+@app.post("/api/chatbot/message", response_model=ChatResponse)
+async def chat_with_bot(chat_message: ChatMessage):
+    """Send a message to the chatbot and get a response"""
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        
+        # Get API key from environment
+        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not api_key:
+            raise HTTPException(status_code=500, detail="Chatbot API key not configured")
+        
+        # Generate or use existing session ID
+        session_id = chat_message.session_id or str(uuid.uuid4())
+        
+        # System message for the chatbot
+        system_message = """You are a helpful AI assistant for the SmartDesk Employee Directory application. 
+        
+        You help users with questions about:
+        - How to use the application features (Employee Directory, Meeting Rooms, Policies, Holiday Calendar, Dashboard)
+        - General questions about the application
+        - Navigation and feature explanations
+        - Any other questions they might have
+        
+        Be friendly, helpful, and concise in your responses. If you don't know something specific about the application, 
+        be honest and suggest they contact their administrator."""
+        
+        # Initialize chat
+        chat = LlmChat(
+            api_key=api_key,
+            session_id=session_id,
+            system_message=system_message
+        ).with_model("openai", "gpt-4o-mini")
+        
+        # Create user message
+        user_message = UserMessage(text=chat_message.message)
+        
+        # Get response
+        response = await chat.send_message(user_message)
+        
+        # Save to database for history
+        if chat_history_collection is not None:
+            chat_history_collection.insert_one({
+                "session_id": session_id,
+                "user_message": chat_message.message,
+                "bot_response": response,
+                "timestamp": datetime.utcnow().isoformat()
+            })
+        
+        return ChatResponse(response=response, session_id=session_id)
+        
+    except Exception as e:
+        print(f"Chatbot error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Chatbot error: {str(e)}")
+
+@app.get("/api/chatbot/history/{session_id}")
+async def get_chat_history(session_id: str):
+    """Get chat history for a session"""
+    try:
+        if chat_history_collection is None:
+            raise HTTPException(status_code=500, detail="Database not available")
+        
+        history = list(chat_history_collection.find(
+            {"session_id": session_id},
+            {"_id": 0}
+        ).sort("timestamp", 1))
+        
+        return history
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # ---------- React Frontend Serving ----------
 # Path to your React build folder
 frontend_path = os.path.join(os.path.dirname(__file__), "build")
