@@ -106,11 +106,25 @@ const Header = () => {
                   disabled={isRefreshing}
                   size="sm"
                   variant="outline"
-                  className="flex items-center space-x-1 hover:bg-blue-50 border-blue-200"
+                  className="flex items-center space-x-1 hover:bg-blue-50 dark:hover:bg-gray-700 border-blue-200 dark:border-gray-600"
                 >
                   <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
                 </Button>
               )}
+              
+              {/* Dark Mode Toggle */}
+              <Button
+                onClick={toggleTheme}
+                size="sm"
+                variant="outline"
+                className="flex items-center space-x-1 hover:bg-blue-50 dark:hover:bg-gray-700 border-blue-200 dark:border-gray-600"
+              >
+                {isDarkMode ? (
+                  <Sun className="h-4 w-4 text-yellow-500" />
+                ) : (
+                  <Moon className="h-4 w-4 text-blue-600" />
+                )}
+              </Button>
             </div>
           </div>
         </div>
