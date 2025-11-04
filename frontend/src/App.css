@@ -43,8 +43,18 @@
     border-radius: 6px;
 }
 
+.dark .scrollbar-thin::-webkit-scrollbar-track {
+    background: #374151;
+    border-radius: 6px;
+}
+
 .scrollbar-thin::-webkit-scrollbar-thumb {
     background: #60a5fa;
+    border-radius: 6px;
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #3b82f6;
     border-radius: 6px;
 }
 
