@@ -105,12 +105,16 @@ const Chatbot = () => {
         <Card className="fixed bottom-6 right-6 w-80 h-[450px] shadow-2xl z-50 flex flex-col bg-white border-2 border-blue-200 rounded-xl overflow-hidden">
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-3 flex justify-between items-center">
             <div className="flex items-center space-x-2">
-              <div className="bg-white rounded-full p-1.5">
-                <MessageCircle className="h-4 w-4 text-blue-600" />
+              <div className="bg-white rounded-full p-1">
+                <img 
+                  src="/images/smartian-logo.png" 
+                  alt="Smartian"
+                  className="h-8 w-8 object-contain"
+                />
               </div>
               <div>
-                <h3 className="font-semibold text-sm">SmartDesk Assistant</h3>
-                <p className="text-xs text-blue-100">Always here to help</p>
+                <h3 className="font-semibold text-sm">Smartian!</h3>
+                <p className="text-xs text-blue-100">Your intelligent assistant</p>
               </div>
             </div>
             <Button
