@@ -121,7 +121,7 @@ const Header = () => {
                     transition-colors duration-300 ease-in-out
                     focus:outline-none focus:ring-2 focus:ring-offset-2 
                     ${isDarkMode 
-                      ? 'bg-gray-700 focus:ring-gray-500' 
+                      ? 'bg-gray-400 focus:ring-gray-400' 
                       : 'bg-blue-500 focus:ring-blue-400'
                     }
                   `}
@@ -138,7 +138,7 @@ const Header = () => {
                     `}
                   >
                     {isDarkMode ? (
-                      <Moon className="h-3 w-3 text-gray-700" />
+                      <Moon className="h-3 w-3 text-gray-600" />
                     ) : (
                       <Sun className="h-3 w-3 text-yellow-500" />
                     )}
