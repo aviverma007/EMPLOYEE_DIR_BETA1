@@ -29,7 +29,7 @@ const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const ADMIN_PASSWORD = 'Smart@12345';
+  const ADMIN_PASSWORD = 'Sm@rtworld';
 
   const handleRoleSelection = (role) => {
     setSelectedRole(role);
