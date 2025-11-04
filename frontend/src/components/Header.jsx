@@ -112,19 +112,39 @@ const Header = () => {
                 </Button>
               )}
               
-              {/* Dark Mode Toggle */}
-              <Button
-                onClick={toggleTheme}
-                size="sm"
-                variant="outline"
-                className="flex items-center space-x-1 hover:bg-blue-50 dark:hover:bg-gray-700 border-blue-200 dark:border-gray-600"
-              >
-                {isDarkMode ? (
-                  <Sun className="h-4 w-4 text-yellow-500" />
-                ) : (
-                  <Moon className="h-4 w-4 text-blue-600" />
-                )}
-              </Button>
+              {/* Dark Mode Toggle Slider */}
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={toggleTheme}
+                  className={`
+                    relative inline-flex items-center h-6 rounded-full w-11 
+                    transition-colors duration-300 ease-in-out
+                    focus:outline-none focus:ring-2 focus:ring-offset-2 
+                    ${isDarkMode 
+                      ? 'bg-gray-700 focus:ring-gray-500' 
+                      : 'bg-blue-500 focus:ring-blue-400'
+                    }
+                  `}
+                  role="switch"
+                  aria-checked={isDarkMode}
+                >
+                  <span className="sr-only">Toggle dark mode</span>
+                  <span
+                    className={`
+                      inline-block w-4 h-4 transform rounded-full
+                      bg-white shadow-lg transition-transform duration-300 ease-in-out
+                      flex items-center justify-center
+                      ${isDarkMode ? 'translate-x-6' : 'translate-x-1'}
+                    `}
+                  >
+                    {isDarkMode ? (
+                      <Moon className="h-3 w-3 text-gray-700" />
+                    ) : (
+                      <Sun className="h-3 w-3 text-yellow-500" />
+                    )}
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
