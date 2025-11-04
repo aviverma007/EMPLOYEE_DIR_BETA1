@@ -1,0 +1,159 @@
+================================================================================
+                    SMARTDESK APPLICATION - START HERE
+================================================================================
+
+🎯 FIRST TIME SETUP (Do Once)
+================================================================================
+
+STEP 1: Install Requirements (5 minutes)
+-----------------------------------------
+Download and install these 3 programs:
+
+1. Python 3.8+
+   Download: https://python.org/downloads/
+   ✓ Check "Add Python to PATH" during install
+
+2. Node.js 16+
+   Download: https://nodejs.org/
+   Choose: LTS version (recommended)
+
+3. MongoDB
+   Download: https://mongodb.com/try/download/community
+   ✓ Check "Install MongoDB as a Service"
+   ✓ Check "Install MongoDB Compass"
+
+
+STEP 2: Run First-Time Setup (5-10 minutes)
+--------------------------------------------
+Double-click this file:
+   📁 setup_first_time.bat
+
+Wait for it to complete. It will:
+   ✓ Install backend dependencies
+   ✓ Install frontend dependencies
+   ✓ Create configuration files
+
+
+STEP 3: Start MongoDB
+---------------------
+Option A (Easiest):
+   1. Press Windows Key
+   2. Type "PowerShell"
+   3. Right-click "Windows PowerShell"
+   4. Click "Run as administrator"
+   5. Type: net start MongoDB
+   6. Press Enter
+
+Option B (If Option A fails):
+   1. Open "MongoDB Compass" program
+   2. It should start MongoDB automatically
+   3. Keep it open
+
+
+================================================================================
+🚀 DAILY USAGE (Every Time You Want To Use The App)
+================================================================================
+
+1. Make Sure MongoDB is Running
+   - Open MongoDB Compass program
+   - Or run "net start MongoDB" as administrator
+
+2. Start Backend
+   Double-click: start_backend.bat
+   Wait for: "Application startup complete"
+
+3. Start Frontend
+   Double-click: start_frontend.bat
+   Browser opens automatically to: http://localhost:3000
+
+4. Login
+   Click either:
+   - "Administrator Access" (full features)
+   - "User Access" (standard features)
+
+5. Use the Application!
+   ✓ Employee Directory (670 employees)
+   ✓ Meeting Room Booking
+   ✓ Holiday Calendar
+   ✓ And more...
+
+
+================================================================================
+🛑 HOW TO STOP
+================================================================================
+
+1. Close browser
+2. In backend window: Press Ctrl+C
+3. In frontend window: Press Ctrl+C
+
+
+================================================================================
+❗ IF SOMETHING DOESN'T WORK
+================================================================================
+
+Problem: "MongoDB connection failed"
+Solution:
+   - Open PowerShell as Administrator
+   - Run: net start MongoDB
+
+Problem: "Port 8001 already in use"
+Solution:
+   - Run: netstat -ano | findstr :8001
+   - Run: taskkill /PID <number> /F
+   - Replace <number> with the number you see
+
+Problem: "Module not found" errors
+Solution:
+   - Run setup_first_time.bat again
+
+Problem: Can't see employees in the app
+Solution:
+   - Make sure backend shows "Successfully loaded 670 employees"
+   - If not, restart backend
+
+
+================================================================================
+📚 MORE HELP
+================================================================================
+
+For detailed instructions:     Read SETUP_GUIDE.md
+For quick reference:           Read README_LOCAL_SETUP.md
+For troubleshooting:           Read SETUP_GUIDE.md (Troubleshooting section)
+
+
+================================================================================
+✅ SUCCESS CHECKLIST
+================================================================================
+
+You're ready when you see ALL of these:
+
+Backend Terminal Shows:
+   ✓ "Uvicorn running on http://0.0.0.0:8001"
+   ✓ "Application startup complete"
+   ✓ "Successfully loaded 670 employees from Excel"
+   ✓ "Initialized 15 meeting rooms"
+
+Frontend Terminal Shows:
+   ✓ "Compiled successfully!"
+   ✓ "webpack compiled with 0 errors"
+
+Browser Shows:
+   ✓ Landing page with two login buttons
+   ✓ After clicking login: Employee Directory with employees
+
+
+================================================================================
+🎉 THAT'S IT! You're all set to use SmartDesk!
+================================================================================
+
+Questions? Check:
+   - SETUP_GUIDE.md for detailed help
+   - Backend terminal for error messages
+   - Frontend terminal for error messages
+
+Application URLs:
+   Main App:  http://localhost:3000
+   API Docs:  http://localhost:8001/docs
+   Database:  mongodb://localhost:27017 (use MongoDB Compass)
+
+================================================================================
