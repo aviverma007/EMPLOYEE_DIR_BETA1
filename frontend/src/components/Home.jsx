@@ -1029,13 +1029,13 @@ const Home = () => {
         </div>
       )}
 
-      {/* User Quick Links Section - Single line layout with original colors */}
+      {/* User Quick Links Section - Full width layout fitting all buttons */}
       {!isAdmin() && (
         <div className="mt-4">
           <h3 className="text-md font-medium text-white mb-3 text-center">Quick Access</h3>
-          <div className="flex gap-4 overflow-x-auto pb-2">
+          <div className="grid grid-cols-6 lg:grid-cols-12 gap-3">
             {userQuickAccessButtons.map((button, index) => (
-              <div key={index} className="relative flex flex-col items-center flex-shrink-0">
+              <div key={index} className="relative flex flex-col items-center">
                 {button.isDropdown ? (
                   <div className="relative">
                     <button
