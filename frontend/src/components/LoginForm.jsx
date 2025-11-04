@@ -29,8 +29,6 @@ const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const ADMIN_PASSWORD = 'Sm@rtworld';
-
   const handleRoleSelection = (role) => {
     setSelectedRole(role);
     
@@ -38,9 +36,8 @@ const LoginForm = () => {
       // Direct login for user
       handleUserLogin();
     } else if (role === 'admin') {
-      // Show password dialog for admin
-      setShowPasswordDialog(true);
-      setPassword('');
+      // Direct login for admin
+      handleAdminLogin();
     }
   };
 
