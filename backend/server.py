@@ -48,6 +48,7 @@ alerts_collection = db.alerts if db is not None else None
 employees_collection = db.employees if db is not None else None
 news_collection = db.news if db is not None else None
 tasks_collection = db.tasks if db is not None else None
+chat_history_collection = db.chat_history if db is not None else None
 knowledge_collection = db.knowledge if db is not None else None
 help_collection = db.help if db is not None else None
 attendance_collection = db.attendance if db is not None else None
