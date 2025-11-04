@@ -69,7 +69,7 @@ const Home = () => {
     { name: "ORCHARD STREET", url: "https://smartworlddevelopers.com/project/orchardstreet/" },
     { name: "ORCHARD", url: "https://smartworlddevelopers.com/project/orchard/" },
     { name: "GEMS", url: "https://smartworlddevelopers.com/project/gems/" }
-  ]);
+  ];
 
   // External link buttons - removed Contact and updated Company Portal
   const externalButtons = [
