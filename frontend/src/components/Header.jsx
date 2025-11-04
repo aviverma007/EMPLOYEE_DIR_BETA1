@@ -5,6 +5,7 @@ import { Badge } from "./ui/badge";
 import { useAuth } from "../context/AuthContext";
 import { utilityAPI } from "../services/api";
 import { toast } from "sonner";
+import AlertsNotification from "./AlertsNotification";
 
 const Header = () => {
   const { user, logout, isAdmin } = useAuth();
