@@ -116,56 +116,54 @@ const AppContent = () => {
                   </div>
                   
                   <div className="flex-1 overflow-auto">
-                    {/* Admin-only 3 management tabs */}
-                    {isAdmin() && (
-                      <>
-                        <TabsContent value="banner-management" className="mt-0 h-full">
-                          <BannerManagement />
-                        </TabsContent>
-                        
-                        <TabsContent value="alerts-management" className="mt-0 h-full">
-                          <AlertsManagement />
-                        </TabsContent>
-                        
-                        <TabsContent value="employee-management" className="mt-0 h-full">
-                          <EmployeeManagement />
-                        </TabsContent>
-                      </>
-                    )}
+                    <TabsContent value="home" className="mt-0 h-full">
+                      <Home />
+                    </TabsContent>
                     
-                    {/* User tabs - all original functionality */}
-                    {isUser() && (
-                      <>
-                        <TabsContent value="home" className="mt-0 h-full">
-                          <Home />
-                        </TabsContent>
-                        
-                        <TabsContent value="directory" className="mt-0 h-full">
-                          <EmployeeDirectory />
-                        </TabsContent>
-                        
-                        <TabsContent value="policies" className="mt-0 h-full">
-                          <Policies />
-                        </TabsContent>
-                        
-                        <TabsContent value="meeting-rooms" className="mt-0 h-full">
-                          <MeetingRooms />
-                        </TabsContent>
-                        
-                        <TabsContent value="holiday-calendar" className="mt-0 h-full">
-                          <HolidayCalendar />
-                        </TabsContent>
-                        
-                        <TabsContent value="dashboard" className="mt-0 h-full">
-                          <Dashboard />
-                        </TabsContent>
-                      </>
-                    )}
+                    <TabsContent value="directory" className="mt-0 h-full">
+                      <EmployeeDirectory />
+                    </TabsContent>
+                    
+                    <TabsContent value="policies" className="mt-0 h-full">
+                      <Policies />
+                    </TabsContent>
+                    
+                    <TabsContent value="meeting-rooms" className="mt-0 h-full">
+                      <MeetingRooms />
+                    </TabsContent>
+                    
+                    <TabsContent value="holiday-calendar" className="mt-0 h-full">
+                      <HolidayCalendar />
+                    </TabsContent>
+                    
+                    <TabsContent value="dashboard" className="mt-0 h-full">
+                      <Dashboard />
+                    </TabsContent>
+                    
+                    <TabsContent value="admin-dashboard" className="mt-0 h-full">
+                      <div className="space-y-4">
+                        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 rounded-lg">
+                          <h2 className="text-2xl font-bold">Admin Dashboard</h2>
+                          <p className="text-blue-100">Manage application settings and content</p>
+                        </div>
+                        <Tabs defaultValue="banner" className="w-full">
+                          <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="banner">Banner Management</TabsTrigger>
+                            <TabsTrigger value="employee">Employee Management</TabsTrigger>
+                          </TabsList>
+                          <TabsContent value="banner">
+                            <BannerManagement />
+                          </TabsContent>
+                          <TabsContent value="employee">
+                            <EmployeeManagement />
+                          </TabsContent>
+                        </Tabs>
+                      </div>
+                    </TabsContent>
                   </div>
                 </Tabs>
                 
-                {/* User Alerts - Show for both User and Admin roles */}
-                <UserAlerts />
+                <Chatbot />
               </div>
               <Toaster />
             </div>
