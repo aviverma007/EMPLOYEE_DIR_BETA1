@@ -200,9 +200,9 @@ const AppContent = () => {
                           <p className="text-blue-100 dark:text-white">Manage application settings and content</p>
                         </div>
                         <Tabs defaultValue="banner" className="w-full">
-                          <TabsList className="grid w-full grid-cols-2 dark:bg-gray-800">
-                            <TabsTrigger value="banner" className="dark:data-[state=inactive]:text-gray-400">Banner Management</TabsTrigger>
-                            <TabsTrigger value="employee" className="dark:data-[state=inactive]:text-gray-400">Employee Management</TabsTrigger>
+                          <TabsList className="grid w-full grid-cols-2 dark:bg-[#e8e8e8]">
+                            <TabsTrigger value="banner" className="dark:data-[state=inactive]:text-gray-700">Banner Management</TabsTrigger>
+                            <TabsTrigger value="employee" className="dark:data-[state=inactive]:text-gray-700">Employee Management</TabsTrigger>
                           </TabsList>
                           <TabsContent value="banner">
                             <BannerManagement />
