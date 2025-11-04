@@ -18,6 +18,7 @@ import {
 import { Input } from "./components/ui/input";
 import { Label } from "./components/ui/label";
 import { AuthProvider, useAuth } from "./context/AuthContext.jsx";
+import { ThemeProvider } from "./context/ThemeContext.jsx";
 import LoadingScreen from "./components/LoadingScreen";
 import EmployeeDirectory from "./components/EmployeeDirectory";
 import Header from "./components/Header";
