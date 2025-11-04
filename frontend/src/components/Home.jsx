@@ -176,6 +176,36 @@ const Home = () => {
       image: "/images/bimabro-logo.jpg"
     },
     {
+      title: "ZOHO",
+      description: "MANAGE ENGINE",
+      url: "https://sdpondemand.manageengine.com/app/itdesk/HomePage.do",
+      image: "/images/zoho-logo.png"
+    },
+    {
+      title: "QMS",
+      description: "RFQ's & Quote Comparison ",
+      url: "https://smartworlddevelopersonline.com/qms/home/logout",
+      image: "/images/Qms-logo.jpg"
+    },
+    {
+      title: "4QT",
+      description: "4QT",
+      url: "https://crm.smartworlddevelopers.com/4qt/",
+      image: "/images/4QT-logo.png"
+    },
+    {
+      title: "SFDC",
+      description: "SALES FORCE DOT COM",
+      url: "https://smartworld.my.salesforce.com/",
+      image: "/images/Salesforce-logo.jpg"
+    },
+    // {
+    //   title: "Whastsapp",
+    //   description: "Whatsapp Web",
+    //   url: "https://web.whatsapp.com/",
+    //   image: "/images/WhatsApp-Logo.png"
+    // },
+    {
       title: "MAFOI",
       description: "HR Suite",
       url: "https://mafoi.hfactor.app/hrsuite/#/login/smartworld",
@@ -186,6 +216,18 @@ const Home = () => {
       description: "QMS Portal",
       url: "https://smartworlddevelopersonline.com/qms/",
       image: "/images/vendorglobe.png"
+    },
+    {
+      title: "Gift App",
+      description: "Vistaoffers",
+      url: "https://vistaoffers.com/#login",
+      image: "/images/GEMBA.png"
+    },
+    {
+      title: "Vista-ERP",
+      description: "Vistaerp",
+      url: "https://vistaerponline.com/#login",
+      image: "/images/GEMBA.png"
     },
     {
       title: "Company",
