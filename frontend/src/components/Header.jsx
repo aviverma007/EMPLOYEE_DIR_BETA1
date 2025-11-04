@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { RefreshCw, Shield, User } from "lucide-react";
+import { RefreshCw, Shield, User, Moon, Sun } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import { utilityAPI } from "../services/api";
 import { toast } from "sonner";
 import AlertsNotification from "./AlertsNotification";
