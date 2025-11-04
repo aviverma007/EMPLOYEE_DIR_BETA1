@@ -20,7 +20,7 @@ const Chatbot = () => {
       setMessages([
         {
           type: 'bot',
-          text: 'Hello! I\'m your SmartDesk assistant. How can I help you today? Feel free to ask me about the application features, navigation, or any other questions you might have!',
+          text: 'Hello! I\'m Smartian! 🤖 Your intelligent assistant ready to help with any question from around the world. Ask me anything - from application features to general knowledge, I\'m here to assist you!',
           timestamp: new Date()
         }
       ]);
