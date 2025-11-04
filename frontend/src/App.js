@@ -48,6 +48,13 @@ const AppContent = () => {
   const { isAuthenticated, initializeAuth, isAdmin, isUser } = useAuth();
   const [activeTab, setActiveTab] = useState("home");
   const [showLoading, setShowLoading] = useState(true);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isAdminDashboardUnlocked, setIsAdminDashboardUnlocked] = useState(false);
+
+  const ADMIN_PASSWORD = 'Sm@rtworld';
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -57,6 +64,41 @@ const AppContent = () => {
 
     return () => clearTimeout(timer);
   }, []);
+
+  const handleTabChange = (value) => {
+    if (value === 'admin-dashboard' && !isAdminDashboardUnlocked) {
+      setShowPasswordDialog(true);
+    } else {
+      setActiveTab(value);
+    }
+  };
+
+  const handlePasswordSubmit = async () => {
+    if (!password.trim()) {
+      toast.error('Please enter the password');
+      return;
+    }
+
+    setIsLoading(true);
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    if (password === ADMIN_PASSWORD) {
+      setShowPasswordDialog(false);
+      setIsAdminDashboardUnlocked(true);
+      setActiveTab('admin-dashboard');
+      toast.success('Admin Dashboard unlocked successfully! 🔓');
+    } else {
+      toast.error('Incorrect password. Please try again.');
+    }
+    
+    setIsLoading(false);
+    setPassword('');
+  };
+
+  const handleDialogClose = () => {
+    setShowPasswordDialog(false);
+    setPassword('');
+  };
 
   if (showLoading) {
     return <LoadingScreen />;
