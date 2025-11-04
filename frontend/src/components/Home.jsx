@@ -1029,13 +1029,13 @@ const Home = () => {
         </div>
       )}
 
-      {/* User Quick Links Section - Updated with white text and single line layout */}
+      {/* User Quick Links Section - Single line layout with original colors */}
       {!isAdmin() && (
         <div className="mt-4">
           <h3 className="text-md font-medium text-white mb-3 text-center">Quick Access</h3>
-          <div className="flex flex-wrap gap-4 justify-center">
+          <div className="flex gap-4 overflow-x-auto pb-2">
             {userQuickAccessButtons.map((button, index) => (
-              <div key={index} className="relative flex flex-col items-center">
+              <div key={index} className="relative flex flex-col items-center flex-shrink-0">
                 {button.isDropdown ? (
                   <div className="relative">
                     <button
@@ -1049,10 +1049,10 @@ const Home = () => {
                           className="h-12 w-12 object-contain drop-shadow-lg hover:drop-shadow-xl transition-all duration-200"
                         />
                         <div className="flex items-center space-x-1">
-                          <span className="font-medium text-sm text-white">{button.title}</span>
-                          <ChevronDown className={`h-3 w-3 text-white transition-transform ${showUserProjectsDropdown ? 'rotate-180' : ''}`} />
+                          <span className="font-medium text-sm text-blue-700">{button.title}</span>
+                          <ChevronDown className={`h-3 w-3 text-blue-500 transition-transform ${showUserProjectsDropdown ? 'rotate-180' : ''}`} />
                         </div>
-                        <p className="text-xs text-white">{button.description}</p>
+                        <p className="text-xs text-blue-600">{button.description}</p>
                       </div>
                     </button>
                     
@@ -1094,8 +1094,8 @@ const Home = () => {
                         className="h-12 w-12 object-contain drop-shadow-lg hover:drop-shadow-xl transition-all duration-200"
                       />
                       <div>
-                        <h4 className="font-medium text-sm text-white">{button.title}</h4>
-                        <p className="text-xs text-white">{button.description}</p>
+                        <h4 className="font-medium text-sm text-blue-700">{button.title}</h4>
+                        <p className="text-xs text-blue-600">{button.description}</p>
                       </div>
                     </div>
                   </a>
